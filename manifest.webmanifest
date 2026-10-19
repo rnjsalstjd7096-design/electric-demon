@@ -1,0 +1,17 @@
+{
+  "name": "전기로 마왕군 100만 부대 막기",
+  "short_name": "마왕군 막기",
+  "description": "전기기사들로 미로를 짓고 마왕군 100만 부대를 막는 디펜스 게임",
+  "lang": "ko",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c1525",
+  "theme_color": "#101a2b",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
