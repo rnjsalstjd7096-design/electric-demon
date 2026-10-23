@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b1030">
+<title>조선에 전기가 들어온 날 v0.1</title>
+<style>
+  html,body{margin:0;height:100%;background:#0b1030;overflow:hidden;overscroll-behavior:none;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+    font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic","WenQuanYi Zen Hei",sans-serif;color:#fff3d6}
+  #cv{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}
+  .hud{position:fixed;left:0;right:0;top:0;display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));pointer-events:none;z-index:5}
+  .pill{pointer-events:none;display:flex;align-items:center;gap:7px;background:rgba(20,14,6,.72);border:1px solid rgba(255,210,120,.45);border-radius:999px;padding:5px 12px 5px 6px;font-weight:700;font-size:17px;transition:opacity .4s}
+  .coin{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe9a0,#d4a032 60%,#8a6417);position:relative;box-shadow:0 0 0 1px #6b4c10 inset}
+  .coin::after{content:"";position:absolute;left:7px;top:7px;width:6px;height:6px;background:#2a1c06;border-radius:1px}
+  .rate{font-size:12px;font-weight:600;color:#ffd98a;opacity:.85}
+  .sp{flex:1}
+  .ib{pointer-events:auto;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,210,120,.4);background:rgba(20,14,6,.6);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:opacity .4s}
+  .hide{opacity:0!important;pointer-events:none!important}
+  #fact{position:fixed;left:12px;right:12px;top:64px;margin:0 auto;max-width:420px;background:rgba(250,240,215,.95);color:#2b1d0b;border-radius:12px;padding:9px 12px;font-size:14px;line-height:1.4;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.4);border-left:5px solid #d4a032;transform:translateY(-16px);opacity:0;transition:all .35s;z-index:6;pointer-events:none}
+  #fact.on{transform:none;opacity:1}
+  #fact b{color:#9a5a00}
+  .bottom{position:fixed;left:0;right:0;bottom:0;padding:8px 10px;padding-bottom:max(12px,env(safe-area-inset-bottom));z-index:5;pointer-events:none}
+  #hint{text-align:center;font-size:15px;font-weight:700;text-shadow:0 2px 6px #000,0 0 2px #000;margin-bottom:28px;min-height:20px;transition:opacity .3s}
+  #acts{display:flex;gap:8px;justify-content:center;max-width:430px;margin:0 auto}
+  .act{pointer-events:auto;flex:1 1 0;min-width:0;max-width:200px;border:0;border-radius:14px;padding:9px 6px 8px;background:linear-gradient(#f6e2b0,#d9b46a);color:#2b1d0b;font:inherit;font-weight:800;font-size:15px;box-shadow:0 4px 0 #8a6417,0 6px 14px rgba(0,0,0,.4);cursor:pointer;position:relative;line-height:1.15}
+  .act small{display:block;font-size:12px;font-weight:700;opacity:.75;margin-top:2px}
+  .act:active{transform:translateY(3px);box-shadow:0 1px 0 #8a6417}
+  .act.no{filter:grayscale(.8) brightness(.7)}
+  .act.go{animation:pulse 1s infinite}
+  .act.go::before{content:"▼";position:absolute;left:50%;top:-26px;transform:translateX(-50%);color:#ffe08a;font-size:20px;text-shadow:0 0 8px #ffb000;animation:bob .8s infinite alternate}
+  @keyframes pulse{0%,100%{box-shadow:0 4px 0 #8a6417,0 0 0 0 rgba(255,220,120,.8)}50%{box-shadow:0 4px 0 #8a6417,0 0 0 9px rgba(255,220,120,0)}}
+  @keyframes bob{to{transform:translate(-50%,-6px)}}
+  #end{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:8;padding:20px}
+  #end .card{background:#f7ead0;color:#2b1d0b;border-radius:16px;padding:20px 18px;max-width:340px;text-align:center;box-shadow:0 10px 40px #000}
+  #end h2{margin:0 0 8px;font-size:20px}
+  #end p{margin:8px 0;font-size:14px;line-height:1.5}
+  #end button{margin-top:10px;border:0;border-radius:12px;padding:10px 22px;font:inherit;font-weight:800;background:#2b1d0b;color:#ffe9b0;font-size:15px}
+</style>
+<meta name="description" content="조선 마을에 처음 전깃불이 켜진 밤. 손발전기를 돌려 전구를 켜고 물레방아·변압기로 마을을 키우는 게임."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/joseon-generator/"><meta property="og:title" content="조선에 전기가 들어온 날"><meta property="og:description" content="조선 마을에 처음 전깃불이 켜진 밤. 손발전기를 돌려 전구를 켜고 물레방아·변압기로 마을을 키우는 게임."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"></head>
+<body>
+<canvas id="cv"></canvas>
+<div class="hud">
+  <div class="pill hide" id="money"><span class="coin"></span><span id="coins">0</span><span class="rate" id="rate"></span></div>
+  <div class="sp"></div>
+  <button class="ib hide" id="shorts" title="쇼츠 모드: 첫 불 켜는 장면 다시 보기">🎬</button>
+  <button class="ib" id="mute" title="소리">🔊</button>
+</div>
+<div id="fact"></div>
+<div class="bottom" id="bottom"><div id="hint"></div><div id="acts"></div></div>
+<div id="end" style="display:none"><div class="card"><h2 id="endT"></h2><div id="endB"></div><button id="endX">계속 마을 키우기</button></div></div>
+<script>
+'use strict';
+// ───────── 기본 ─────────
+const SAVE_KEY='joseon-generator.save.v1';
+const SW=400,SH=800;                 // 무대 논리 크기 (세로 1:2)
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const light=document.createElement('canvas'),lctx=light.getContext('2d');
+let cw=0,ch=0,dpr=1,sc=1,ox=0,oy=0;
+function resize(){
+  dpr=Math.min(2,window.devicePixelRatio||1);cw=innerWidth;ch=innerHeight;
+  cv.width=light.width=Math.round(cw*dpr);cv.height=light.height=Math.round(ch*dpr);
+  sc=Math.min(cw/SW,ch/SH);ox=(cw-SW*sc)/2;oy=(ch-SH*sc)/2;
+}
+addEventListener('resize',resize);resize();
+const clamp=(v,a,b)=>v<a?a:v>b?b:v,lerp=(a,b,t)=>a+(b-a)*t;
+const sstep=t=>{t=clamp(t,0,1);return t*t*(3-2*t);};
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};
+const $=id=>document.getElementById(id);
+
+// ───────── 소리 (WebAudio 합성) ─────────
+let AC=null,master=null,muted=false,hum=null;
+try{muted=localStorage.getItem(SAVE_KEY+'.mute')==='1';}catch(e){}
+$('mute').textContent=muted?'🔇':'🔊';
+function audio(){
+  if(AC)return AC;
+  try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    master=AC.createGain();master.gain.value=muted?0:0.8;master.connect(AC.destination);
+    const o=AC.createOscillator(),f=AC.createBiquadFilter(),g=AC.createGain();
+    o.type='sawtooth';o.frequency.value=40;f.type='lowpass';f.frequency.value=300;g.gain.value=0;
+    o.connect(f);f.connect(g);g.connect(master);o.start();hum={o,f,g};
+  }catch(e){AC=null;}
+  return AC;
+}
+function noiseBuf(sec){const b=AC.createBuffer(1,AC.sampleRate*sec,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b;}
+function tone(type,f0,f1,dur,vol,delay=0){
+  if(!AC)return;const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();
+  o.type=type;o.frequency.setValueAtTime(f0,t);if(f1!==f0)o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),t+dur);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.05);
+}
+function noise(dur,vol,ftype,freq,delay=0,q=1){
+  if(!AC)return;const t=AC.currentTime+delay,s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
+  s.buffer=noiseBuf(dur+0.05);f.type=ftype;f.frequency.value=freq;f.Q.value=q;
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+dur+0.05);
+}
+function voices(n,f0,f1,dur,vol,delay=0){ // 사람들 외침(포먼트 걸린 톱니파 여러 개)
+  if(!AC)return;
+  for(let i=0;i<n;i++){
+    const t=AC.currentTime+delay+i*0.03,o=AC.createOscillator(),v=AC.createOscillator(),vg=AC.createGain(),f=AC.createBiquadFilter(),g=AC.createGain();
+    const k=0.8+Math.random()*0.5;o.type='sawtooth';o.frequency.setValueAtTime(f0*k,t);o.frequency.exponentialRampToValueAtTime(f1*k,t+dur);
+    v.frequency.value=5+Math.random()*3;vg.gain.value=f0*k*0.04;v.connect(vg);vg.connect(o.frequency);
+    f.type='bandpass';f.frequency.value=900+Math.random()*300;f.Q.value=2;
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol/n*2,t+0.05);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(f);f.connect(g);g.connect(master);o.start(t);v.start(t);o.stop(t+dur+0.1);v.stop(t+dur+0.1);
+  }
+}
+const SFX={
+  click(sp){tone('square',900+sp*300,300,0.03,0.05);noise(0.03,0.08,'highpass',3000);},
+  tap(){tone('triangle',180,90,0.08,0.15);},
+  ignite(){ // 펑 + 쿵 + 징 + 비명
+    noise(0.12,0.6,'highpass',1500);tone('square',1400,120,0.12,0.25);
+    noise(1.4,0.9,'lowpass',220,0.02);tone('sine',90,35,1.2,0.8,0.02);
+    [196,201,392*1.01,588].forEach((f,i)=>tone('sine',f,f*0.985,3.2,[0.35,0.25,0.12,0.06][i],0.05));
+    voices(6,520,260,1.3,0.5,0.15);
+  },
+  coin(d=0){tone('sine',1900,1900,0.12,0.12,d);tone('sine',2500,2500,0.18,0.08,d+0.04);},
+  build(){tone('triangle',140,70,0.15,0.4);noise(0.12,0.3,'lowpass',600);tone('sine',880,880,0.3,0.12,0.12);tone('sine',1320,1320,0.4,0.1,0.2);},
+  cheer(){voices(5,300,420,0.9,0.35);},
+  buzz(){tone('sawtooth',120,110,0.25,0.12);noise(0.2,0.15,'bandpass',2500,0,4);},
+  fix(){tone('sine',660,660,0.1,0.15);tone('sine',990,990,0.2,0.15,0.08);},
+  hmm(){voices(1,180,140,0.6,0.25);},
+};
+function setHum(v){if(!hum)return;const t=AC.currentTime;hum.o.frequency.setTargetAtTime(35+70*v,t,0.05);hum.f.frequency.setTargetAtTime(200+500*v,t,0.05);hum.g.gain.setTargetAtTime(Math.min(0.07,v*0.06),t,0.08);}
+
+// ───────── 무대 배치 ─────────
+const GEN={x:200,y:610};            // 발전기
+const CRANK={x:228,y:596,r:34};     // 손잡이 바퀴(앞면)
+const HOUSE_DEF=[ // kind: cho=초가 giwa=기와 jumak=주막
+  {x:112,y:478,kind:'cho'},{x:292,y:462,kind:'cho'},{x:200,y:398,kind:'giwa'},{x:62,y:566,kind:'cho'},{x:342,y:570,kind:'cho'},
+  {x:74,y:396,kind:'cho'},{x:326,y:386,kind:'cho'},{x:140,y:352,kind:'giwa'},{x:262,y:350,kind:'cho'},
+  {x:338,y:272,kind:'jumak',far:true},
+];
+const RATE={cho:1,giwa:2,jumak:4};
+const WHEEL={x:62,y:300};
+const COST={bulb:k=>Math.round(10*Math.pow(1.4,k)),house:k=>[30,45,65,90][k]||120,wheel:60,far:50,trans:60};
+
+// ───────── 세계 상태 ─────────
+let W=null;
+function newWorld(replay){
+  seed=11;
+  const w={replay:!!replay,t:0,step:0,stepT:0,coins:0,shown:0,earned:0,
+    houses:HOUSE_DEF.map((d,i)=>({i,x:d.x,y:d.y,kind:d.kind,far:!!d.far,s:0.62+0.38*(d.y-260)/320,built:i<5,bulb:i===0,b:0,warm:0,gondal:0})),
+    wheel:false,wheelAng:0,farWire:false,trans:false,
+    gen:{w:0,ang:0,warm:0,V:0,lastClick:0,drag:null,idle:0,heavyShown:false},
+    vill:[],hats:[],fx:[],shake:0,flash:0,amb:0,
+    facts:{},bulbsBought:0,housesBought:0,gondalT:20,ended:false,dimShown:false,awe:-1};
+  const spots=[[96,640,'man'],[150,676,'chief'],[300,672,'woman'],[348,630,'man'],[262,520,'kid'],[52,520,'woman'],[160,540,'man']];
+  spots.forEach(([x,y,type],i)=>w.vill.push(mkVill(x,y,type,i)));
+  return w;
+}
+function mkVill(x,y,type,i){
+  const cols={man:['#ece6d8','#d9d2c0'],chief:['#f4f1ea','#e0dccf'],woman:[['#c84a5a','#5a7ac8','#7aa860','#d08a3a'][i%4],'#f0e6cf'],kid:['#e8c45a','#ece6d8']};
+  return {x,y,hx:x,hy:y,tx:x,ty:y,type,dir:x<GEN.x?1:-1,p:0,pT:0,state:'stand',stT:0,hat:type==='man'||type==='chief',
+    c:cols[type],bub:null,bubT:0,ph:rnd()*6,jump:0,arms:0,walk:0,id:i};
+}
+function say(v,txt,dur=2.2,big=false){v.bub=txt;v.bubT=dur;v.big=big;}
+
+// ───────── 저장 ─────────
+function save(){
+  if(!W||W.replay||W.step<3)return;
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify({v:1,step:W.step,coins:W.coins,earned:W.earned,houses:W.houses.map(h=>[h.built?1:0,h.bulb?1:0]),
+    wheel:W.wheel,farWire:W.farWire,trans:W.trans,facts:W.facts,bulbsBought:W.bulbsBought,housesBought:W.housesBought,ended:W.ended,dimShown:W.dimShown}));}catch(e){}
+}
+function load(){
+  let d=null;try{d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');}catch(e){d=null;}
+  const w=newWorld(false);
+  if(d&&d.v===1&&d.step>=3){
+    Object.assign(w,{step:3,coins:+d.coins||0,earned:+d.earned||0,wheel:!!d.wheel,farWire:!!d.farWire,trans:!!d.trans,facts:d.facts||{},
+      bulbsBought:d.bulbsBought|0,housesBought:d.housesBought|0,ended:!!d.ended,dimShown:!!d.dimShown});
+    w.shown=w.coins;
+    (d.houses||[]).forEach((a,i)=>{if(w.houses[i]){w.houses[i].built=!!a[0];w.houses[i].bulb=!!a[1];}});
+    w.gen.w=w.wheel?0:2.2;w.gen.warm=1;w.amb=1;
+    w.vill.forEach(v=>{v.state='stand';});
+    for(let i=w.vill.length;i<crowdTarget(w);i++)w.vill.push(spawnWalker(w,i));
+  }
+  return w;
+}
+
+// ───────── 전기 모델 ─────────
+// 손발전기: 회전수 w(회전/초) → 전압 V=w/1.5 (1.0=전구 정격). 전구가 많을수록 무겁다(부하 증가).
+// 물레방아 발전기를 세운 뒤에는 V≈1.0 고정. 먼 주막은 긴 전선의 전압강하로 0.48배, 변압기를 달면 0.97배.
+function nBulbs(w){return w.houses.filter(h=>h.bulb&&!h.far).length;}
+function heavy(w){return 1+0.3*Math.max(0,nBulbs(w)-1);}
+function houseV(w,h){const V=w.gen.V;return h.far?V*(w.trans?0.97:0.48):V;}
+function litHouses(w){return w.houses.filter(h=>h.bulb&&h.b>0.62&&!h.gondal);}
+function income(w){return litHouses(w).reduce((a,h)=>a+RATE[h.kind],0);}
+function crowdTarget(w){return Math.min(18,7+2*w.houses.filter(h=>h.bulb).length);}
+
+// ───────── 입력 ─────────
+function toStage(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left-ox)/sc,y:(e.clientY-r.top-oy)/sc};}
+let pdown=null;
+cv.addEventListener('pointerdown',e=>{
+  e.preventDefault();audio();if(AC&&AC.state==='suspended')AC.resume();
+  if(W.replay){exitReplay();return;}
+  const p=toStage(e);cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);
+  pdown={x:p.x,y:p.y,t:performance.now(),moved:0,id:e.pointerId};
+  // 촌장 누르기
+  if(W.step===2){const c=W.vill.find(v=>v.type==='chief');if(c&&Math.hypot(p.x-c.x,p.y-(c.y-25))<65){chiefTapped();pdown=null;return;}}
+  // 건달불 고치기
+  const g=W.houses.find(h=>h.gondal&&Math.hypot(p.x-bulbPos(h).x,p.y-bulbPos(h).y)<45*h.s+10);
+  if(g){fixGondal(g);pdown=null;return;}
+  const dc=Math.hypot(p.x-CRANK.x,p.y-CRANK.y);
+  if(dc<140||W.step===0){W.gen.drag={a:Math.atan2(p.y-CRANK.y,p.x-CRANK.x),t:performance.now(),rate:0,sum:0};}
+});
+cv.addEventListener('pointermove',e=>{
+  if(!pdown||e.pointerId!==pdown.id)return;e.preventDefault();
+  const p=toStage(e);pdown.moved=Math.max(pdown.moved,Math.hypot(p.x-pdown.x,p.y-pdown.y));
+  const d=W.gen.drag;if(!d)return;
+  const a=Math.atan2(p.y-CRANK.y,p.x-CRANK.x),now=performance.now();let da=a-d.a;
+  if(da>Math.PI)da-=2*Math.PI;if(da<-Math.PI)da+=2*Math.PI;
+  if(Math.hypot(p.x-CRANK.x,p.y-CRANK.y)<8)da=0;
+  const dt=Math.max(0.004,(now-d.t)/1000);
+  const inst=Math.abs(da)/(2*Math.PI)/dt;d.rate=lerp(d.rate,Math.min(4,inst),clamp(dt/0.12,0,1));
+  d.a=a;d.t=now;d.sum+=Math.abs(da);W.gen.dir=da>=0?1:-1;
+});
+function pup(e){
+  if(!pdown||e.pointerId!==pdown.id)return;
+  const d=W.gen.drag,quick=performance.now()-pdown.t<350&&pdown.moved<14;
+  if(quick&&(W.step===0||(!W.wheel&&Math.hypot(pdown.x-CRANK.x,pdown.y-CRANK.y)<140))){crankKick();}
+  W.gen.drag=null;pdown=null;
+}
+cv.addEventListener('pointerup',pup);cv.addEventListener('pointercancel',pup);
+function crankKick(){W.gen.w+=0.55/heavy(W);W.gen.idle=0;SFX.tap();}
+
+// ───────── 진행 단계 ─────────
+// 0: 어두운 마을, 손잡이 돌리기 → 1: 전구 확! 엎드림(연출) → 2: 촌장 "…이것이 무엇이오?" 탭 대기 → 3: 마을 키우기
+function setStep(n){W.step=n;W.stepT=0;if(n>=3)save();refreshUI(true);}
+function ignite(){
+  const w=W;setStep(1);w.flash=1;w.shake=0.5;w.flare=1;SFX.ignite();
+  const h0=w.houses[0];h0.b=1;
+  w.vill.forEach((v,i)=>{v.state='shock';v.stT=-i*0.06;v.jump=1;});
+  const talkers=w.vill.filter(v=>v.type!=='chief');
+  say(talkers[0],'으악! 도깨비불이다!',3.2,true);
+  if(talkers[2])say(talkers[2],'에구머니!',2);
+  if(talkers[3])say(talkers[3],'으악!',1.8);
+}
+function chiefTapped(){
+  const c=W.vill.find(v=>v.type==='chief');
+  say(c,'참으로 신통하오! 이 엽전을 받으시오',2.6);
+  for(let i=0;i<10;i++)W.fx.push({k:'coin',x:c.x,y:c.y-30,vx:(rnd()-0.5)*160,vy:-200-rnd()*120,t:-i*0.05,amt:1});
+  SFX.cheer();setStep(3);
+  W.vill.forEach((v,i)=>{if(v.type!=='chief'){v.state='rise';v.stT=-0.5-i*0.35;}else{v.state='rise';v.stT=0;}});
+  showPill();
+}
+let factQ=[],factT=0;
+function fact(key,html){if(W.replay||W.facts[key])return;W.facts[key]=1;factQ.push(html);save();}
+
+// ───────── 행동(버튼) ─────────
+function nextBulbHouse(w){return w.houses.find(h=>h.built&&!h.bulb&&!h.far);}
+function actions(){
+  const w=W,a=[];if(w.step<3||w.replay)return a;
+  const nb=nBulbs(w);
+  if(w.farWire&&!w.trans)a.push({id:'trans',label:'⚡ 변압기 한 쌍',cost:COST.trans,pri:5});
+  if(w.wheel&&nb>=5&&!w.farWire)a.push({id:'far',label:'🔌 주막에 전선',cost:COST.far,pri:4});
+  if(!w.wheel&&nb>=3)a.push({id:'wheel',label:'🌊 물레방아 발전기',cost:COST.wheel,pri:3});
+  if(nextBulbHouse(w))a.push({id:'bulb',label:'💡 전구 달기',cost:COST.bulb(w.bulbsBought),pri:2});
+  else if(nb>=5&&w.houses.some(h=>!h.built&&!h.far))a.push({id:'house',label:'🏠 초가집 짓기',cost:COST.house(w.housesBought),pri:1});
+  return a.slice(0,3);
+}
+function doAct(id){
+  const w=W,act=actions().find(x=>x.id===id);if(!act)return;
+  if(w.coins<act.cost){SFX.buzz();flashHint('엽전이 모자라오 — 불 켜진 집이 엽전을 벌어 오오');return;}
+  w.coins-=act.cost;SFX.build();
+  let at=null;
+  if(id==='bulb'){const h=nextBulbHouse(w);h.bulb=true;h.b=0;w.bulbsBought++;at=h;
+    if(nBulbs(w)===2)setTimeout(()=>fact('heavy','전구가 늘수록 손잡이가 <b>무거워집니다</b> — 전기를 많이 쓰면 발전기를 돌리는 힘도 더 듭니다'),2500);}
+  if(id==='house'){const h=w.houses.find(h=>!h.built&&!h.far);h.built=true;h.pop=1;w.housesBought++;at=h;}
+  if(id==='wheel'){w.wheel=true;at={x:WHEEL.x,y:WHEEL.y+20};
+    fact('wheel','물이 바퀴를 돌리고, 바퀴가 발전기를 돌립니다 — <b>수력발전</b>의 원리. 이제 손을 쉬어도 불이 켜져 있소');}
+  if(id==='far'){w.farWire=true;const h=w.houses[9];h.built=true;h.bulb=true;h.b=0;h.pop=1;at=h;
+    setTimeout(()=>{if(!w.trans){const v=nearestVill(h);say(v,'불이 왜 이리 어둡소?',3);SFX.hmm();
+      fact('drop','전선이 길면 그만큼 <b>전압이 떨어집니다(전압강하)</b> — 먼 주막 전구가 붉고 어두운 까닭');}},1800);}
+  if(id==='trans'){w.trans=true;at=w.houses[9];
+    setTimeout(()=>fact('trans','<b>변압기</b>로 전압을 높여 보내면 전류가 줄어 전선 손실이 줄어듭니다. 쓰는 곳에서 다시 낮춰 씁니다 — 변압기는 <b>교류</b>에서만 됩니다'),900);}
+  if(at){const v=nearestVill(at);if(v&&(v.state==='stand'||v.state==='cheer')){v.state='cheer';v.stT=0;say(v,['오오!','밝다!','얼씨구!','좋구나!'][w.bulbsBought%4],1.6);}}
+  for(let i=w.vill.length;i<crowdTarget(w);i++)w.vill.push(spawnWalker(w,i));
+  save();refreshUI(true);
+}
+function nearestVill(p){let best=null,bd=1e9;W.vill.forEach(v=>{const d=Math.hypot(v.x-p.x,v.y-p.y);if(d<bd){bd=d;best=v;}});return best;}
+function spawnWalker(w,i){
+  const left=rnd()<0.5,types=['man','woman','kid','man','woman'];
+  const v=mkVill(left?-20:420,560+rnd()*120,types[i%5],i);v.state='stand';v.tx=lerp(40,360,rnd());v.ty=lerp(520,690,rnd());return v;
+}
+function fixGondal(h){h.gondal=0;W.gondalT=45+rnd()*30;SFX.fix();W.fx.push({k:'spark',x:bulbPos(h).x,y:bulbPos(h).y,t:0});
+  fact('gondal','1887년 경복궁 건청궁에 켜진 조선 첫 전등은 자주 꺼졌다 켜져 <b>"건달불"</b>이라 불렸다고 전합니다');
+  const v=nearestVill(h);if(v)say(v,'다시 켜졌소!',1.4);
+}
+
+// ───────── UI ─────────
+let uiSig='',hintOverride='',hintOT=0;
+function showPill(){$('money').classList.remove('hide');}
+function flashHint(t){hintOverride=t;hintOT=2.5;refreshUI(true);}
+function hintText(){
+  const w=W;if(w.replay)return '';
+  if(hintOverride)return hintOverride;
+  if(w.step===0)return '';
+  if(w.step===1)return '';
+  if(w.step===2)return '촌장을 눌러 보시오';
+  if(w.houses.some(h=>h.gondal))return '깜빡이다 꺼진 전구를 눌러 고치시오';
+  const nb=nBulbs(w);
+  if(w.farWire&&!w.trans)return '높여 보내고 낮춰 쓰면 먼 집도 밝아지오';
+  if(!w.wheel&&nb>=2&&w.gen.V<0.5)return '손잡이를 계속 돌려야 불이 켜져 있소';
+  if(nb===1)return '불 꺼진 집에 전구를 하나 더 다시오';
+  if(!w.wheel&&nb>=3)return '물레방아를 세우면 손을 쉬어도 되오';
+  if(!w.wheel)return '손잡이를 돌리시오 — 밝은 집마다 엽전이 들어오오';
+  return '';
+}
+function refreshUI(force){
+  const acts=actions(),coins=Math.floor(W.coins);
+  const best=acts.slice().sort((a,b)=>b.pri-a.pri).find(a=>W.coins>=a.cost);
+  const sig=acts.map(a=>a.id+a.cost+(W.coins>=a.cost)+(best===a)).join('|')+hintText();
+  $('coins').textContent=Math.floor(W.shown).toLocaleString('ko-KR');
+  const r=income(W);$('rate').textContent=r?'+'+r+'/초':'';
+  if(!force&&sig===uiSig)return;uiSig=sig;
+  $('hint').textContent=hintText();
+  const box=$('acts');box.innerHTML='';
+  acts.forEach(a=>{const b=document.createElement('button');b.className='act'+(W.coins<a.cost?' no':'')+(best===a?' go':'');b.dataset.id=a.id;
+    b.innerHTML=a.label+'<small>엽전 '+a.cost+'</small>';
+    b.addEventListener('pointerdown',e=>{e.stopPropagation();audio();});
+    b.addEventListener('click',()=>doAct(a.id));box.appendChild(b);});
+  $('shorts').classList.toggle('hide',W.replay||W.step<3);
+  document.querySelector('.hud').classList.toggle('hide',W.replay);
+  $('bottom').classList.toggle('hide',W.replay);
+}
+$('mute').addEventListener('click',()=>{audio();muted=!muted;if(master)master.gain.value=muted?0:0.8;$('mute').textContent=muted?'🔇':'🔊';try{localStorage.setItem(SAVE_KEY+'.mute',muted?'1':'0');}catch(e){}});
+$('shorts').addEventListener('click',()=>{audio();enterReplay();});
+$('endX').addEventListener('click',()=>{$('end').style.display='none';});
+
+// ───────── 쇼츠 모드: 첫 장면만 UI 없이 다시 ─────────
+let mainW=null;
+function enterReplay(){if(W.replay)return;mainW=W;W=newWorld(true);W.auto=0;$('fact').classList.remove('on');refreshUI(true);}
+function exitReplay(){if(!mainW)return;W=mainW;mainW=null;refreshUI(true);}
+
+// ───────── 진행(틱) ─────────
+function tick(dt){
+  const w=W,g=w.gen;w.t+=dt;w.stepT+=dt;
+  // 발전기
+  const hv=heavy(w);
+  if(w.replay){w.auto+=dt;if(w.step===0)g.w=lerp(g.w,2.3,clamp(dt*0.6,0,1));if(w.auto>23)exitReplay();}
+  else if(g.drag){const tgt=g.drag.rate;g.w+=(tgt-g.w)*clamp(dt*7/hv,0,1);if(performance.now()-g.drag.t>120)g.drag.rate*=Math.pow(0.02,dt);g.idle=0;}
+  else{g.w-=g.w*(0.3+0.1*Math.max(0,nBulbs(w)-1))*dt;g.idle+=dt;}
+  if(w.step===1||w.step===2)g.w=Math.max(g.w,1.7);       // 연출 동안은 불이 꺼지지 않게
+  g.w=clamp(g.w,0,4);
+  const crankV=g.w/1.2/(w.wheel?1:1+0.1*Math.max(0,nBulbs(w)-1));
+  g.V=w.wheel?1+0.015*Math.sin(w.t*7):crankV;
+  const spin=w.wheel?Math.max(g.w,0.9):g.w;
+  const prevAng=g.ang;g.ang+=spin*2*Math.PI*dt*(g.dir||1);
+  if(Math.floor(prevAng/(Math.PI/2))!==Math.floor(g.ang/(Math.PI/2))&&spin>0.15&&!w.wheel)SFX.click(spin);
+  if(w.wheel)w.wheelAng+=dt*1.6;
+  if(AC)setHum(w.replay&&w.step===0?crankV*0.7:Math.min(1.2,g.V));
+  // 첫 점등까지 달아오르기 (줄어들지 않음 → 실패 불가)
+  if(w.step===0){
+    g.warm+=Math.pow(clamp(crankV,0,1.2),0.8)/9.5*dt;
+    w.houses[0].b=Math.min(0.5,g.warm*0.5);
+    if(g.warm>=1)ignite();
+  }
+  // 집 밝기
+  w.houses.forEach(h=>{
+    if(!h.bulb){h.b=0;return;}
+    if(w.step===0&&h.i===0)return;
+    let tgt=sstep((houseV(w,h)-0.2)/0.5);
+    if(w.step===1||w.step===2)tgt=1;
+    if(h.gondal===1){tgt*=(Math.sin(w.t*40)>0.2?1:0.1);h.gT=(h.gT||0)+dt;if(h.gT>1.2){h.gondal=2;}}
+    if(h.gondal===2)tgt=0;
+    h.b=lerp(h.b,tgt,clamp(dt*8,0,1));
+    if(h.pop)h.pop=Math.max(0,h.pop-dt*2);
+  });
+  // 엽전
+  if(w.step>=3&&!w.replay){
+    const inc=income(w)*dt;w.coins+=inc;w.earned+=inc;
+    if(!w.facts.induction&&w.stepT>2.5)fact('induction','자석 옆에서 코일을 돌리면 전기가 생깁니다 — <b>전자기 유도</b>(패러데이, 1831)');
+    if(!w.wheel&&nBulbs(w)>=2&&w.facts.heavy&&!w.dimShown&&!g.drag&&g.V<0.3&&w.stepT>8){w.dimShown=true;fact('speed','빨리 돌릴수록 <b>전압이 높아져</b> 전구가 밝아집니다 — 멈추면 불도 꺼지오');}
+    // 건달불 이벤트: 물레방아 이후 가끔 전구 하나가 깜빡이다 꺼짐
+    if(w.wheel&&!w.houses.some(h=>h.gondal)){w.gondalT-=dt;if(w.gondalT<=0){
+      const c=w.houses.filter(h=>h.bulb&&!h.far);const h=c[Math.floor(rnd()*c.length)];
+      if(h){h.gondal=1;h.gT=0;SFX.buzz();const v=nearestVill(h);if(v)say(v,'불이 또 나갔소!',1.8);}
+      w.gondalT=45+rnd()*30;}}
+    // v0.1 마무리: 변압기까지 끝내고 건달불도 한 번 고쳤으면
+    if(!w.ended&&w.trans&&w.facts.gondal&&w.stepT>3){w.ended=true;save();setTimeout(showEnd,2500);}
+  }
+  const diff=w.coins-w.shown;w.shown=Math.abs(diff)<0.5?w.coins:w.shown+diff*clamp(dt*8,0,1);
+  if(w.step>=1)w.amb=clamp(w.amb+dt*2,0,1);
+  w.flash=Math.max(0,w.flash-dt*2.2);w.flare=Math.max(0,(w.flare||0)-dt/5);w.shake=Math.max(0,w.shake-dt);
+  if(w.step===1&&w.stepT>(w.replay?4.5:7)){setStep(2);const c=w.vill.find(v=>v.type==='chief');c.state='lookup';c.stT=0;
+    setTimeout(()=>{if(W===w&&w.step===2)say(c,'…이것이 무엇이오?',99);},700);}
+  if(w.replay&&w.step===2&&w.stepT>3.2){const c=w.vill.find(v=>v.type==='chief');if(!w.cap){w.cap=1;say(c,'참으로 신통하오!',3);w.vill.forEach((v,i)=>{if(v!==c){v.state='rise';v.stT=-0.3-i*0.2;}});}}
+  tickVill(w,dt);tickFx(w,dt);
+  // 사실 한 줄
+  if(factT>0){factT-=dt;if(factT<=0)$('fact').classList.remove('on');}
+  else if(factQ.length&&!w.replay){$('fact').innerHTML=factQ.shift();$('fact').classList.add('on');factT=6.5;}
+  if(hintOT>0){hintOT-=dt;if(hintOT<=0)hintOverride='';}
+}
+function tickVill(w,dt){
+  const lit=w.houses.filter(h=>h.bulb&&h.b>0.5);
+  w.vill.forEach(v=>{
+    v.stT+=dt;v.jump=Math.max(0,v.jump-dt*3);v.ph+=dt;
+    if(v.bubT>0){v.bubT-=dt;if(v.bubT<=0)v.bub=null;}
+    const st=v.state;
+    if(st==='shock'){if(v.stT>0.35){v.state='fall';v.stT=0;if(v.hat){v.hat=false;w.hats.push({x:v.x,y:v.y-36,vx:(rnd()-0.5)*160+(v.dir*-40),vy:-260-rnd()*160,r:0,vr:(rnd()-0.5)*16,gy:v.y+2+rnd()*8,land:false,s:sOf(v)});}}}
+    else if(st==='fall'){v.p=clamp(v.p+dt/0.3,0,1);if(v.p>=1){v.state='down';v.stT=0;}}
+    else if(st==='down'){v.p=1;}
+    else if(st==='lookup'){v.p=lerp(v.p,0.45,clamp(dt*3,0,1));}
+    else if(st==='rise'){if(v.stT>0){v.p=Math.max(0,v.p-dt/0.6);if(v.p<=0){v.state='stand';v.stT=0;}}}
+    else if(st==='cheer'){v.arms=1;v.jump=Math.max(v.jump,Math.abs(Math.sin(v.stT*9))*0.6);if(v.stT>1.6){v.state='stand';v.stT=0;}}
+    if(st==='stand'||st==='cheer')v.p=Math.max(0,v.p-dt/0.6);
+    if(st==='stand'){
+      v.arms=Math.max(0,v.arms-dt*3);
+      // 구경: 불 켜진 집 앞으로 모여듦
+      if(w.step>=3&&v.stT>2+(v.id%5)*0.7&&lit.length){v.stT=0;
+        if(rnd()<0.45){const h=lit[Math.floor(rnd()*lit.length)];v.tx=clamp(h.x+(rnd()-0.5)*70*h.s,20,380);v.ty=clamp(h.y+18+rnd()*24,h.y+14,700);}
+        if(rnd()<0.12&&!v.bub)say(v,['신기하오!','해가 떴나?','도깨비가 아니라 전기라네','밤이 낮 같소','우리 집도 달아 주오'][Math.floor(rnd()*5)],1.8);}
+    }
+    // 걷기
+    if((st==='stand'||st==='cheer')){const dx=v.tx-v.x,dy=v.ty-v.y,d=Math.hypot(dx,dy);
+      if(d>2){const sp=45*dt;v.x+=dx/d*Math.min(sp,d);v.y+=dy/d*Math.min(sp,d);v.walk+=dt*10;v.dir=dx>0?1:-1;}else v.walk=0;}
+  });
+  w.hats.forEach(h=>{if(h.land)return;h.vy+=900*dt;h.x+=h.vx*dt;h.y+=h.vy*dt;h.r+=h.vr*dt;if(h.y>=h.gy&&h.vy>0){h.y=h.gy;h.land=true;h.r=0;}});
+}
+function sOf(v){return (0.75+0.3*clamp((v.y-500)/200,0,1))*1.35;}
+function tickFx(w,dt){
+  w.fx.forEach(f=>{f.t+=dt;if(f.t<0)return;
+    if(f.k==='coin'){if(f.t<0.6){f.vy+=500*dt;f.x+=f.vx*dt;f.y+=f.vy*dt;}else{const tx=(30-ox)/sc,ty=(24-oy)/sc;f.x=lerp(f.x,tx,clamp(dt*7,0,1));f.y=lerp(f.y,ty,clamp(dt*7,0,1));
+      if(Math.hypot(f.x-tx,f.y-ty)<12&&!f.done){f.done=1;w.coins+=f.amt;w.earned+=f.amt;SFX.coin();}}}
+  });
+  w.fx=w.fx.filter(f=>!(f.done||(f.k==='spark'&&f.t>0.6)));
+}
+function showEnd(){
+  if(W.replay)return;
+  $('endT').textContent='한양에서 소문이 왔소';
+  $('endB').innerHTML='<p>"궁궐에도 전깃불이 켜졌다 하오. 연못 물을 끌어다 쓴다 하여 <b>물불</b>이라 부른다지요."</p>'+
+    '<p style="font-size:13px;opacity:.8">1887년 경복궁 건청궁의 첫 전등은 향원정 연못 물을 끌어 발전 설비를 식혔다고 전합니다.</p>'+
+    '<p><b>v0.1은 여기까지</b> — 다음 이야기: 궁궐의 물불 · 증기 발전 · 한성 전차(1899)</p>';
+  $('end').style.display='flex';SFX.cheer();
+}
+
+// ───────── 그리기 ─────────
+function bulbPos(h){const s=h.s;return h.kind==='giwa'?{x:h.x+30*s,y:h.y-36*s}:{x:h.x+30*s,y:h.y-34*s};}
+function draw(){
+  const w=W;ctx.setTransform(dpr,0,0,dpr,0,0);
+  // 배경 (무대 밖까지)
+  const sky=ctx.createLinearGradient(0,0,0,ch);sky.addColorStop(0,'#070a22');sky.addColorStop(0.42,'#1a2350');sky.addColorStop(0.43,'#20263a');sky.addColorStop(1,'#1d1a16');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,cw,ch);
+  let sx=0,sy=0;if(w.shake>0){sx=(Math.random()-0.5)*14*w.shake;sy=(Math.random()-0.5)*14*w.shake;}
+  ctx.setTransform(dpr*sc,0,0,dpr*sc,dpr*(ox+sx*sc),dpr*(oy+sy*sc));
+  drawWorld(w);
+  // 어둠 + 불빛
+  drawLight(w);
+  ctx.setTransform(dpr*sc,0,0,dpr*sc,dpr*(ox+sx*sc),dpr*(oy+sy*sc));
+  drawGlow(w);
+  drawOverlay(w);
+  if(w.flash>0){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle=`rgba(255,245,200,${w.flash*0.85})`;ctx.fillRect(0,0,cw,ch);}
+}
+function drawWorld(w){
+  // 별·달
+  ctx.fillStyle='#fff';for(let i=0;i<50;i++){const x=(i*73.13)%400,y=(i*41.7)%230,tw=0.5+0.5*Math.sin(w.t*2+i);ctx.globalAlpha=0.3+0.5*tw;ctx.fillRect(x,y,1.4,1.4);}
+  ctx.globalAlpha=1;ctx.fillStyle='#f3ecc8';ctx.beginPath();ctx.arc(320,90,18,0,7);ctx.fill();ctx.fillStyle='#0d1230';ctx.beginPath();ctx.arc(328,84,16,0,7);ctx.fill();
+  // 산
+  ctx.fillStyle='#161c38';ctx.beginPath();ctx.moveTo(-200,300);ctx.quadraticCurveTo(-60,150,60,250);ctx.quadraticCurveTo(160,170,250,240);ctx.quadraticCurveTo(330,160,600,290);ctx.lineTo(600,320);ctx.lineTo(-200,320);ctx.fill();
+  ctx.fillStyle='#1c2342';ctx.beginPath();ctx.moveTo(-200,320);ctx.quadraticCurveTo(80,230,200,290);ctx.quadraticCurveTo(320,240,600,310);ctx.lineTo(600,330);ctx.lineTo(-200,330);ctx.fill();
+  // 땅
+  ctx.fillStyle='#2b2a24';ctx.fillRect(-200,318,800,700);
+  // 개울
+  ctx.fillStyle='#1f3550';ctx.beginPath();ctx.moveTo(-200,302);ctx.bezierCurveTo(100,292,250,330,600,300);ctx.lineTo(600,322);ctx.bezierCurveTo(250,350,100,316,-200,326);ctx.fill();
+  ctx.strokeStyle='rgba(150,190,230,.25)';ctx.lineWidth=1;for(let i=0;i<6;i++){const x=((w.t*20+i*70)%460)-30;ctx.beginPath();ctx.moveTo(x,312+Math.sin(x/40)*4);ctx.lineTo(x+18,312+Math.sin(x/40)*4);ctx.stroke();}
+  // 마당
+  ctx.fillStyle='#3a3326';ctx.beginPath();ctx.ellipse(200,610,175,95,0,0,7);ctx.fill();
+  // 돌담 조금
+  ctx.fillStyle='#34302a';for(let i=0;i<14;i++){ctx.beginPath();ctx.ellipse(-10+i*12,720+Math.sin(i)*3,8,6,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(300+i*12,724+Math.cos(i)*3,8,6,0,0,7);ctx.fill();}
+  // 물레방아
+  if(w.wheel)drawWheel(w);
+  // 전선
+  drawWires(w);
+  // 깊이 순서로: 집·사람·발전기
+  const items=[];
+  w.houses.forEach(h=>{if(h.built)items.push({y:h.y,f:()=>drawHouse(w,h)});});
+  w.vill.forEach(v=>items.push({y:v.y,f:()=>drawVill(w,v)}));
+  items.push({y:GEN.y+20,f:()=>drawGen(w)});
+  w.hats.forEach(h=>items.push({y:h.land?h.gy:900,f:()=>drawHat(h.x,h.y,h.s,h.r)}));
+  items.sort((a,b)=>a.y-b.y).forEach(i=>i.f());
+}
+function drawWires(w){
+  ctx.strokeStyle='#15110c';ctx.lineWidth=1.6;
+  const from=w.wheel?{x:WHEEL.x+20,y:WHEEL.y-4}:null;
+  if(from){wire(from.x,from.y,150,318,26);wire(150,318,GEN.x-30,GEN.y-34,20);pole(150,318);}
+  w.houses.forEach(h=>{if(!h.bulb)return;const b=bulbPos(h);
+    if(h.far){pole(250,335);pole(300,318);wire(GEN.x+10,GEN.y-40,250,335-30,16);wire(250,305,300,288,8);wire(300,288,b.x,b.y-6,6);
+      if(w.trans){drawTrans(250,305,1);drawTrans(b.x-14,b.y-4,0.6);}}
+    else wire(GEN.x-(h.x<GEN.x?24:-24)*0.5,GEN.y-40,b.x,b.y-6,Math.min(30,Math.hypot(b.x-GEN.x,b.y-GEN.y)*0.12));
+  });
+}
+function wire(x1,y1,x2,y2,sag){ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo((x1+x2)/2,(y1+y2)/2+sag,x2,y2);ctx.stroke();}
+function pole(x,y){ctx.save();ctx.strokeStyle='#4a3420';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y+10);ctx.lineTo(x,y-32);ctx.stroke();ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-7,y-28);ctx.lineTo(x+7,y-28);ctx.stroke();ctx.restore();}
+function drawTrans(x,y,s){ctx.save();ctx.fillStyle='#5b6470';ctx.strokeStyle='#22262c';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(x-6*s,y-4*s,12*s,14*s,2*s);ctx.fill();ctx.stroke();ctx.fillStyle='#c9b25a';ctx.fillRect(x-4*s,y-7*s,2*s,3*s);ctx.fillRect(x+2*s,y-7*s,2*s,3*s);ctx.restore();}
+function drawWheel(w){
+  const {x,y}=WHEEL,r=26;ctx.save();ctx.translate(x,y);
+  ctx.fillStyle='#4a3a28';ctx.fillRect(14,-14,22,22);ctx.fillStyle='#2f2416';ctx.fillRect(18,-10,14,14); // 발전기 오두막
+  ctx.rotate(w.wheelAng);ctx.strokeStyle='#6b4f30';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,r,0,7);ctx.stroke();
+  ctx.lineWidth=2.5;for(let i=0;i<8;i++){ctx.rotate(Math.PI/4);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(r,0);ctx.stroke();ctx.fillStyle='#5a4228';ctx.fillRect(r-3,-5,8,10);}
+  ctx.restore();
+  ctx.strokeStyle='rgba(170,210,255,.5)';ctx.lineWidth=2;for(let i=0;i<3;i++){const t=(w.t*2+i/3)%1;ctx.beginPath();ctx.moveTo(x-30+i*6,y+18+t*12);ctx.lineTo(x-26+i*6,y+24+t*12);ctx.stroke();}
+}
+function drawHouse(w,h){
+  const s=h.s*(1+(h.pop||0)*0.15),x=h.x,y=h.y;ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+  // 기단·벽
+  ctx.fillStyle='#3d3a33';ctx.fillRect(-50,-4,100,8);
+  ctx.fillStyle='#b59f76';ctx.fillRect(-44,-40,88,36);
+  ctx.fillStyle='#5a3d22';[-44,-14,14,40].forEach(px=>ctx.fillRect(px,-40,5,36));
+  // 창호지 문 (호롱불이면 주황, 전구면 노랑)
+  const lamp=!h.bulb||h.b<0.3,flick=0.75+0.25*Math.sin(w.t*13+h.i)*Math.sin(w.t*7.3+h.i*2);
+  ctx.fillStyle=lamp?`rgba(255,150,60,${0.55*flick})`:`rgba(255,226,140,${0.4+0.6*h.b})`;
+  ctx.fillRect(-9,-34,22,26);
+  ctx.strokeStyle='#5a3d22';ctx.lineWidth=1;for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(-9+i*7.3,-34);ctx.lineTo(-9+i*7.3,-8);ctx.stroke();}
+  for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(-9,-34+i*6.5);ctx.lineTo(13,-34+i*6.5);ctx.stroke();}
+  // 지붕
+  if(h.kind==='giwa'){
+    ctx.fillStyle='#363c48';ctx.beginPath();ctx.moveTo(-64,-36);ctx.quadraticCurveTo(-40,-44,-30,-66);ctx.lineTo(30,-66);ctx.quadraticCurveTo(40,-44,64,-36);ctx.quadraticCurveTo(66,-44,70,-48);ctx.lineTo(60,-40);ctx.lineTo(-60,-40);ctx.lineTo(-70,-48);ctx.quadraticCurveTo(-66,-44,-64,-36);ctx.fill();
+    ctx.strokeStyle='#4b5262';ctx.lineWidth=1.2;for(let i=-26;i<=26;i+=6){ctx.beginPath();ctx.moveTo(i,-64);ctx.lineTo(i*1.9,-40);ctx.stroke();}
+    ctx.fillStyle='#2a2f38';ctx.fillRect(-32,-70,64,6);
+  }else{
+    ctx.fillStyle='#9c8150';ctx.beginPath();ctx.moveTo(-58,-36);ctx.quadraticCurveTo(-60,-78,0,-80);ctx.quadraticCurveTo(60,-78,58,-36);ctx.quadraticCurveTo(0,-30,-58,-36);ctx.fill();
+    ctx.strokeStyle='#6e5733';ctx.lineWidth=1.3;for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(-52+i*2,-46-i*8);ctx.quadraticCurveTo(0,-54-i*8,52-i*2,-46-i*8);ctx.stroke();}
+    ctx.strokeStyle='#b89a62';ctx.lineWidth=1;for(let i=-50;i<=50;i+=9){ctx.beginPath();ctx.moveTo(i,-37);ctx.lineTo(i*0.92,-33);ctx.stroke();}
+  }
+  if(h.kind==='jumak'){ctx.strokeStyle='#4a3420';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-46,-4);ctx.lineTo(-46,-62);ctx.stroke();ctx.fillStyle='#e8dcc0';ctx.fillRect(-45,-62,18,26);ctx.fillStyle='#2b1d0b';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText('주',-36,-51);ctx.fillText('막',-36,-41);}
+  ctx.restore();
+  if(h.bulb)drawBulb(w,h);
+}
+function drawBulb(w,h){
+  const p=bulbPos(h),s=h.s,b=h.b;
+  ctx.strokeStyle='#111';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x,p.y-8*s);ctx.lineTo(p.x,p.y-3*s);ctx.stroke();
+  ctx.fillStyle='#2b2b2b';ctx.fillRect(p.x-2.5*s,p.y-4*s,5*s,3*s);
+  // 필라멘트 색: 약하면 붉게, 세면 노랗게
+  const r=Math.round(lerp(110,255,clamp(b*2.2,0,1))),g=Math.round(lerp(40,240,clamp((b-0.25)*1.6,0,1))),bl=Math.round(lerp(30,170,clamp((b-0.6)*2.5,0,1)));
+  ctx.fillStyle=b<0.05?'rgba(180,190,200,.35)':`rgb(${r},${g},${bl})`;
+  ctx.beginPath();ctx.arc(p.x,p.y+3*s,7*s,0,7);ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=0.8;ctx.stroke();
+  if(h.gondal===2){ctx.fillStyle='#ffdf6a';ctx.font=`bold ${16}px sans-serif`;ctx.textAlign='center';const k=1+0.15*Math.sin(w.t*8);ctx.save();ctx.translate(p.x,p.y-20);ctx.scale(k,k);ctx.fillText('!',0,0);ctx.restore();
+    ctx.strokeStyle=`rgba(255,223,106,${0.5+0.5*Math.sin(w.t*8)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y+2,16,0,7);ctx.stroke();}
+}
+function drawGen(w){
+  const g=w.gen,{x,y}=GEN;ctx.save();
+  // 받침
+  ctx.fillStyle='#5b4128';ctx.fillRect(x-46,y+6,92,14);ctx.fillStyle='#4a3420';ctx.fillRect(x-42,y+18,8,10);ctx.fillRect(x+34,y+18,8,10);
+  // 몸통(자석·코일 드럼)
+  ctx.fillStyle='#6d2f22';ctx.beginPath();ctx.roundRect(x-40,y-30,62,38,8);ctx.fill();          // 말굽자석(붉게)
+  ctx.fillStyle='#8a3c2c';ctx.fillRect(x-40,y-30,62,8);
+  ctx.fillStyle='#b8752e';ctx.beginPath();ctx.ellipse(x-9,y-11,20,15,0,0,7);ctx.fill();          // 구리 코일
+  ctx.strokeStyle='#7a4a18';ctx.lineWidth=1;for(let i=-16;i<=14;i+=4){ctx.beginPath();ctx.moveTo(x-9+i,y-24);ctx.lineTo(x-9+i,y+2);ctx.stroke();}
+  // 전압계
+  const gx=x-26,gy=y-48;ctx.fillStyle='#c9a54a';ctx.beginPath();ctx.arc(gx,gy,17,0,7);ctx.fill();ctx.fillStyle='#f3e8c8';ctx.beginPath();ctx.arc(gx,gy,14,0,7);ctx.fill();
+  ctx.strokeStyle='#c44';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(gx,gy,11,-Math.PI*0.2,-Math.PI*0.05);ctx.stroke();
+  ctx.strokeStyle='#4a8';ctx.beginPath();ctx.arc(gx,gy,11,-Math.PI*0.55,-Math.PI*0.2);ctx.stroke();
+  const na=-Math.PI*0.95+Math.PI*0.9*clamp(g.V/1.4,0,1);ctx.strokeStyle='#222';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx+Math.cos(na)*12,gy+Math.sin(na)*12);ctx.stroke();
+  ctx.fillStyle='#2b1d0b';ctx.font='bold 6px sans-serif';ctx.textAlign='center';ctx.fillText('전압',gx,gy+9);
+  // 손잡이 바퀴
+  const c=CRANK;ctx.strokeStyle='#3a2a18';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x+18,y-11);ctx.lineTo(c.x,c.y);ctx.stroke();
+  ctx.strokeStyle='#7a5a32';ctx.lineWidth=5;ctx.beginPath();ctx.arc(c.x,c.y,c.r*0.62,0,7);ctx.stroke();
+  for(let i=0;i<4;i++){const a=g.ang+i*Math.PI/2;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(c.x,c.y);ctx.lineTo(c.x+Math.cos(a)*c.r*0.62,c.y+Math.sin(a)*c.r*0.62);ctx.stroke();}
+  const hx=c.x+Math.cos(g.ang)*c.r*0.62,hy=c.y+Math.sin(g.ang)*c.r*0.62;
+  ctx.fillStyle='#9a6a3a';ctx.beginPath();ctx.arc(hx,hy,6.5,0,7);ctx.fill();ctx.fillStyle='#c48a4a';ctx.beginPath();ctx.arc(hx-1.5,hy-1.5,3,0,7);ctx.fill();
+  ctx.fillStyle='#3a2a18';ctx.beginPath();ctx.arc(c.x,c.y,4,0,7);ctx.fill();
+  ctx.restore();
+}
+function drawHat(x,y,s,r){ctx.save();ctx.translate(x,y);ctx.rotate(r);ctx.scale(s,s);ctx.fillStyle='rgba(15,15,18,.88)';ctx.beginPath();ctx.ellipse(0,0,12,2.8,0,0,7);ctx.fill();ctx.fillRect(-4.5,-8,9,8);ctx.fillStyle='rgba(60,60,70,.6)';ctx.fillRect(-4.5,-2,9,1.4);ctx.restore();}
+function drawVill(w,v){
+  const s=sOf(v)*(v.type==='kid'?0.78:1),d=v.dir,p=v.p;
+  const shiver=(w.step===0&&w.gen.warm>0.5)?Math.sin(w.t*40+v.id)*0.6:0;
+  const jy=-v.jump*10,bob=v.walk?Math.abs(Math.sin(v.walk))*2:0;
+  ctx.save();ctx.translate(v.x+shiver,v.y+jy-bob);ctx.scale(s*d,s);
+  // 그림자
+  ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(4*p,0,12+8*p,3,0,0,7);ctx.fill();
+  const hipY=-lerp(17,8,p),lean=lerp(0,1.2,p),tl=18;
+  const shx=Math.sin(lean)*tl,shy=hipY-Math.cos(lean)*tl;
+  const hdx=shx+Math.sin(lean)*8,hdy=shy-Math.cos(lean)*8;
+  // 다리/치마
+  ctx.lineCap='round';
+  if(v.type==='woman'){ctx.fillStyle=v.c[0];ctx.beginPath();if(p<0.5){ctx.moveTo(-3,hipY-4);ctx.lineTo(3,hipY-4);ctx.lineTo(10,0);ctx.lineTo(-10,0);}else{ctx.ellipse(-2,-4,13,7,0,Math.PI,0);}ctx.fill();}
+  else{ctx.strokeStyle=v.c[1];ctx.lineWidth=7;ctx.beginPath();
+    if(p<0.5){const sw=v.walk?Math.sin(v.walk)*4:0;ctx.moveTo(0,hipY);ctx.lineTo(-3+sw,-1);ctx.moveTo(0,hipY);ctx.lineTo(3-sw,-1);}
+    else{ctx.moveTo(0,hipY);ctx.lineTo(-9,-3);ctx.lineTo(-2,-2);}ctx.stroke();}
+  // 몸통
+  ctx.strokeStyle=v.type==='woman'?v.c[1]:v.c[0];ctx.lineWidth=v.type==='kid'?10:12;ctx.beginPath();ctx.moveTo(0,hipY);ctx.lineTo(shx,shy);ctx.stroke();
+  if(v.type==='woman'){ctx.strokeStyle='#8a2a3a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(shx*0.8-3,shy+4);ctx.lineTo(shx*0.8+3,shy+6);ctx.stroke();}
+  // 팔
+  ctx.strokeStyle=v.type==='woman'?v.c[1]:v.c[0];ctx.lineWidth=4;ctx.beginPath();
+  if(p>0.6){ctx.moveTo(shx,shy+2);ctx.lineTo(shx+10,-2);}                          // 엎드려 땅 짚음
+  else if(v.arms>0.3||v.state==='shock'){ctx.moveTo(shx,shy+2);ctx.lineTo(shx+6,shy-14);ctx.moveTo(shx,shy+2);ctx.lineTo(shx-6,shy-14);}
+  else{ctx.moveTo(shx,shy+2);ctx.lineTo(shx+4,shy+14);}
+  ctx.stroke();
+  // 머리
+  ctx.fillStyle='#e6bf96';ctx.beginPath();ctx.arc(hdx,hdy,6.2,0,7);ctx.fill();
+  ctx.fillStyle='#1a1410';
+  if(v.type==='woman'){ctx.beginPath();ctx.arc(hdx,hdy-1.5,6.3,Math.PI*1.05,Math.PI*1.95);ctx.fill();ctx.beginPath();ctx.arc(hdx-6,hdy+1,3,0,7);ctx.fill();}
+  else if(v.type==='kid'){ctx.beginPath();ctx.arc(hdx,hdy-1.5,6.3,Math.PI*1.05,Math.PI*1.95);ctx.fill();ctx.strokeStyle='#1a1410';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(hdx-5,hdy);ctx.lineTo(hdx-8,hdy+10);ctx.stroke();ctx.fillStyle='#c33';ctx.fillRect(hdx-9.5,hdy+9,3,3);}
+  else{ctx.fillRect(hdx-2,hdy-9,4,4);} // 상투
+  if(v.type==='chief'){ctx.fillStyle='#f4f4f0';ctx.beginPath();ctx.moveTo(hdx+1,hdy+3);ctx.lineTo(hdx+7,hdy+3);ctx.lineTo(hdx+3,hdy+13);ctx.fill();}
+  // 눈
+  ctx.fillStyle='#1a1410';ctx.beginPath();ctx.arc(hdx+3,hdy-0.5,0.9,0,7);ctx.fill();
+  if(v.hat){ctx.save();ctx.translate(hdx,hdy-5);ctx.rotate(lean);ctx.scale(0.9,0.9);drawHatRaw();ctx.restore();}
+  ctx.restore();
+  if(w.step===0&&w.gen.warm>0.45&&v.id%2===0&&!w.replay){ctx.fillStyle='rgba(255,240,200,.8)';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('?',v.x,v.y-46*s);}
+}
+function drawHatRaw(){ctx.fillStyle='rgba(15,15,18,.88)';ctx.beginPath();ctx.ellipse(0,0,12,2.8,0,0,7);ctx.fill();ctx.fillRect(-4.5,-8,9,8);}
+function drawLight(w){
+  // 어둠 마스크: 불빛이 있는 곳만 뚫는다
+  const L=lctx;L.setTransform(1,0,0,1,0,0);L.clearRect(0,0,light.width,light.height);
+  const dark=w.step===0?0.8:lerp(0.8,Math.max(0.3,0.5-0.015*litHouses(w).length),w.amb)-0.25*sstep(w.flare||0);
+  L.fillStyle=`rgba(4,6,22,${dark})`;L.fillRect(0,0,light.width,light.height);
+  L.setTransform(dpr*sc,0,0,dpr*sc,dpr*ox,dpr*oy);L.globalCompositeOperation='destination-out';
+  const hole=(x,y,r,a)=>{const g=L.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(0,0,0,${a})`);g.addColorStop(1,'rgba(0,0,0,0)');L.fillStyle=g;L.beginPath();L.arc(x,y,r,0,7);L.fill();};
+  w.houses.forEach(h=>{if(!h.built)return;
+    if(!h.bulb||h.b<0.3){const f=0.8+0.2*Math.sin(w.t*11+h.i);hole(h.x,h.y-20*h.s,30*h.s*f,0.55);}
+    if(h.bulb&&h.b>0.02){const p=bulbPos(h),e=w.step===0?h.b*0.35:h.b;hole(p.x,p.y,lerp(20,h.i===0?330:170,e)*h.s,clamp(e*1.1,0,1));}});
+  hole(320,90,60,0.4);
+  if(w.step===0)hole(CRANK.x,CRANK.y,70,0.45+0.2*Math.sin(w.t*4));
+  if(w.wheel)hole(WHEEL.x,WHEEL.y,50,0.5);
+  L.globalCompositeOperation='source-over';
+  ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(light,0,0);
+}
+function drawGlow(w){
+  ctx.globalCompositeOperation='lighter';
+  if(w.step>=1){const h=w.houses[0],p=bulbPos(h),R=420,k=h.b*(0.35+0.5*sstep(w.flare||0));const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,R);g.addColorStop(0,`rgba(255,200,100,${0.5*k})`);g.addColorStop(0.4,`rgba(255,170,60,${0.22*k})`);g.addColorStop(1,'rgba(255,150,40,0)');ctx.fillStyle=g;ctx.fillRect(p.x-R,p.y-R,2*R,2*R);}
+  w.houses.forEach(h=>{if(!h.bulb||h.b<0.03)return;const p=bulbPos(h),b=h.b;
+    const red=b<0.55,R=lerp(18,h.i===0?200:130,b)*h.s;
+    const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,R);
+    g.addColorStop(0,red?`rgba(255,80,30,${0.5*b+0.1})`:`rgba(255,220,130,${0.55*b})`);g.addColorStop(0.25,red?`rgba(200,50,20,${0.2*b})`:`rgba(255,180,70,${0.22*b})`);g.addColorStop(1,'rgba(255,150,40,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,R,0,7);ctx.fill();});
+  ctx.globalCompositeOperation='source-over';
+}
+function drawOverlay(w){
+  // 첫 화면 안내: 빛나는 고리 + 화살표 + 한 줄
+  if(w.step===0&&!w.replay){
+    const c=CRANK,t=w.t,pul=0.5+0.5*Math.sin(t*5);
+    ctx.strokeStyle=`rgba(255,215,110,${0.45+0.45*pul})`;ctx.lineWidth=3;ctx.setLineDash([8,7]);ctx.lineDashOffset=-t*30;
+    ctx.beginPath();ctx.arc(c.x,c.y,c.r+12,0,7);ctx.stroke();ctx.setLineDash([]);
+    const a=t*2.6,ax=c.x+Math.cos(a)*(c.r+12),ay=c.y+Math.sin(a)*(c.r+12);
+    ctx.save();ctx.translate(ax,ay);ctx.rotate(a+Math.PI/2);ctx.fillStyle='#ffd76e';ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(-6,-7);ctx.lineTo(-6,7);ctx.fill();ctx.restore();
+    if(w.gen.warm<0.05&&w.gen.w<0.2){ // 손가락
+      ctx.save();ctx.translate(ax+10,ay+12);ctx.fillStyle='rgba(255,240,220,.95)';ctx.beginPath();ctx.ellipse(0,0,7,9,-0.4,0,7);ctx.fill();ctx.fillRect(-3,-18,6,14);ctx.restore();}
+    label('손잡이를 돌려 보시오',200,520,20,0.9+0.1*pul);
+  }
+  if(w.step===2&&!w.replay){const c=w.vill.find(v=>v.type==='chief');if(c&&w.stepT>1){const k=0.5+0.5*Math.sin(w.t*6);
+    ctx.strokeStyle=`rgba(255,215,110,${0.5+0.5*k})`;ctx.lineWidth=3;ctx.beginPath();ctx.arc(c.x+4,c.y-10,26+4*k,0,7);ctx.stroke();
+    ctx.fillStyle='#ffd76e';ctx.beginPath();const ay=c.y+30+6*k;ctx.moveTo(c.x+4,ay-10);ctx.lineTo(c.x-4,ay+2);ctx.lineTo(c.x+12,ay+2);ctx.fill();}}
+  // 말풍선
+  w.vill.forEach(v=>{if(v.bub)bubble(v.x+(v.p>0.5?v.dir*10:0),v.y-(v.p>0.5?30:56)*sOf(v),v.bub,v.big);});
+  // 엽전 날아가기
+  w.fx.forEach(f=>{if(f.t<0)return;if(f.k==='coin'){ctx.fillStyle='#e0b040';ctx.beginPath();ctx.arc(f.x,f.y,6,0,7);ctx.fill();ctx.fillStyle='#3a2806';ctx.fillRect(f.x-2,f.y-2,4,4);}
+    if(f.k==='spark'){ctx.strokeStyle=`rgba(255,240,150,${1-f.t/0.6})`;ctx.lineWidth=2;for(let i=0;i<8;i++){const a=i*Math.PI/4,r=8+f.t*40;ctx.beginPath();ctx.moveTo(f.x+Math.cos(a)*r*0.5,f.y+Math.sin(a)*r*0.5);ctx.lineTo(f.x+Math.cos(a)*r,f.y+Math.sin(a)*r);ctx.stroke();}}});
+  // 쇼츠 모드 자막
+  if(w.replay){
+    const a=clamp(w.auto/0.8,0,1)*clamp((7.6-w.auto)/0.6,0,1);
+    if(a>0)label('조선 마을에 처음 전깃불이 켜진 밤',200,150,22,a);
+    if(w.auto>18.5)label('조선에 전기가 들어온 날',200,150,26,clamp((w.auto-18.5)/0.6,0,1));
+  }
+}
+function label(t,x,y,size,a){ctx.save();ctx.globalAlpha=a;ctx.font=`800 ${size}px "Apple SD Gothic Neo","Noto Sans KR","WenQuanYi Zen Hei",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.lineWidth=5;ctx.strokeStyle='rgba(20,10,0,.85)';ctx.strokeText(t,x,y);ctx.fillStyle='#ffe7a8';ctx.fillText(t,x,y);ctx.restore();}
+function bubble(x,y,t,big){
+  ctx.save();const fs=big?17:12;ctx.font=`800 ${fs}px "Apple SD Gothic Neo","Noto Sans KR","WenQuanYi Zen Hei",sans-serif`;
+  const tw=ctx.measureText(t).width,pw=tw+16,ph=fs+12;let bx=clamp(x-pw/2,6,394-pw);const by=y-ph-8;
+  ctx.fillStyle=big?'#fff6d8':'rgba(255,255,255,.95)';ctx.strokeStyle='#2b1d0b';ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(bx,by,pw,ph,8);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(clamp(x,bx+10,bx+pw-10)-5,by+ph-1);ctx.lineTo(x,y-2);ctx.lineTo(clamp(x,bx+10,bx+pw-10)+5,by+ph-1);ctx.fill();
+  ctx.fillStyle=big?'#b01010':'#2b1d0b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,bx+pw/2,by+ph/2+1);ctx.restore();
+}
+
+// ───────── 루프 ─────────
+let last=performance.now(),saveT=0,paused=false;
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(!paused){tick(dt);saveT+=dt;if(saveT>5){saveT=0;save();}}
+  draw();refreshUI(false);requestAnimationFrame(frame);
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
+W=load();if(W.step>=3)showPill();refreshUI(true);
+requestAnimationFrame(frame);
+
+// ───────── 테스트용 ─────────
+window.__game={
+  get w(){return W;},
+  state:()=>({step:W.step,coins:Math.floor(W.coins),V:+W.gen.V.toFixed(2),warm:+W.gen.warm.toFixed(2),bulbs:nBulbs(W),lit:litHouses(W).length,income:income(W),
+    wheel:W.wheel,farWire:W.farWire,trans:W.trans,far:W.houses[9].b.toFixed(2),gondal:W.houses.filter(h=>h.gondal).map(h=>h.i),ended:W.ended,replay:W.replay,
+    prostrate:W.vill.filter(v=>v.state==='down'||v.p>0.9).length,hatsFlown:W.hats.length,facts:Object.keys(W.facts)}),
+  tick:(sec,step=1/60)=>{for(let t=0;t<sec;t+=step)tick(step);draw();refreshUI(true);},
+  actions:()=>actions().map(a=>a.id),act:doAct,
+  give:n=>{W.coins+=n;W.shown=W.coins;},
+  chief:()=>{const c=W.vill.find(v=>v.type==='chief');return {x:c.x*sc+ox,y:(c.y-25)*sc+oy};},
+  crankScreen:()=>({x:CRANK.x*sc+ox,y:CRANK.y*sc+oy,r:CRANK.r*sc}),
+  bulbScreen:i=>{const p=bulbPos(W.houses[i]);return {x:p.x*sc+ox,y:p.y*sc+oy};},
+  gondal:i=>{const h=W.houses[i];h.gondal=2;},
+  reset:()=>{try{localStorage.removeItem(SAVE_KEY);}catch(e){}W=newWorld(false);factQ=[];refreshUI(true);},
+  replay:enterReplay,exitReplay,pause:b=>{paused=b;},
+};
+</script>
+</body>
+</html>

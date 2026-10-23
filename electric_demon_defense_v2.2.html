@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#101a2b">
-<title>전기로 마왕군 100만 부대 막기 v3.31</title>
+<title>전기로 마왕군 100만 부대 막기 v3.33</title>
 <style>
 :root{color-scheme:dark;--bg:#0c1525;--panel:#152238;--edge:#2c415b;--ink:#eaf1fb;--muted:#a5b7ca;--gold:#f4c477;--cyan:#64ceeb;--green:#78e2ae;--red:#ee8c8c}*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px/1.5 system-ui,-apple-system,'Malgun Gothic',sans-serif;color:var(--ink)}button{cursor:pointer;border:1px solid #39526e;background:#243955;border-radius:9px;color:var(--ink);font:inherit;padding:9px 11px;font-weight:650}button:disabled{opacity:.32;cursor:not-allowed}button:not(:disabled):hover{background:#315476}button:focus-visible{outline:2px solid #73ddff;outline-offset:2px}.app{max-width:1590px;margin:auto;padding:14px 18px 26px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid var(--edge);padding:8px 0 16px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:11px}.logo{font-size:25px;background:#244051;border:1px solid #4a6d6a;padding:7px;border-radius:10px}h1{font-size:23px;letter-spacing:-.045em;margin:0}.sub{font-size:11px;color:var(--muted)}.topnums{display:flex;gap:9px}.num{background:#16253c;border:1px solid var(--edge);padding:7px 15px;border-radius:11px}.num small{display:block;color:var(--muted);font-size:11px}.num strong{font-size:19px;color:var(--gold)}.num:last-child strong{color:var(--green)}.layout{display:grid;grid-template-columns:230px minmax(0,1fr) 263px;gap:12px;margin-top:14px;align-items:start}.panel{border:1px solid var(--edge);border-radius:12px;background:var(--panel);margin-bottom:11px;overflow:hidden}.pad{padding:13px}.heading{font-size:15px;font-weight:850;margin:0 0 11px}.hint{color:var(--muted);font-size:11px;margin:7px 0}.muted{color:var(--muted)}.small{font-size:11px}.accent{color:var(--gold)}.line{display:flex;align-items:center;justify-content:space-between;gap:9px}.row{display:flex;gap:7px;align-items:center}.row>*{flex:1;min-width:0}.button{width:100%;margin-top:7px;text-align:center}.primary{background:#176180;border-color:#319fc1}.gold{background:#7d592f;border-color:#c69852}.danger{background:#743843;border-color:#c46b7d}.space{height:9px}.choice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.choice button{padding:8px 2px;font-size:11px}.choice .active{background:#1b6881;border-color:#6bc9e7}.stagehead{display:flex;justify-content:space-between;align-items:center;gap:9px;padding:13px 15px;border-bottom:1px solid var(--edge);flex-wrap:wrap}.stagehead strong{font-size:16px}.timer{font-size:21px;font-weight:850;color:#fbd38e;font-variant-numeric:tabular-nums}.canvaswrap{overflow:auto;max-width:100%;background:#0a1624;scrollbar-color:#4c6c87 transparent;scrollbar-width:thin}.canvaswrap canvas{display:block;touch-action:pan-x pan-y}.stagefoot{padding:9px 12px;border-top:1px solid var(--edge);display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.overlay{position:fixed;inset:0;z-index:50;background:#050c16cf;display:none;align-items:center;justify-content:center;padding:22px}.overlay.open{display:flex}.dialog{width:min(440px,100%);padding:25px;background:#192b44;border:1px solid #57738c;border-radius:18px;text-align:center}.roster{max-height:390px;overflow-y:auto;scrollbar-width:thin;display:grid;gap:5px}.hero{width:100%;text-align:left;background:#1b2d45;border:1px solid #334c65;padding:8px 10px;border-radius:8px}.hero.selected{border-color:var(--gold);background:#34415a}.hero b{display:block}.hero span{display:block;font-size:11px;color:var(--muted)}.heroDetail{margin:9px 0;border-radius:8px;background:#1c3049;padding:9px;font-size:12px}.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);padding:9px 17px;border-radius:10px;background:#254965;border:1px solid #6997b5;box-shadow:0 8px 35px #0009;pointer-events:none;opacity:0;transition:opacity .2s;z-index:60;max-width:90vw;text-align:center}.toast.on{opacity:1}.hidden{display:none!important}.badge{display:inline-block;border:1px solid #46617d;border-radius:6px;padding:2px 6px;background:#1b324d;font-size:11px;color:#c9deef}.bottomline{font-size:11px;text-align:center;color:#7f99b6;margin-top:10px}.controls > button{display:block;width:100%;margin:7px 0 0}.control-note{color:var(--muted);font-size:11px;margin-top:8px}.labelsep{font-size:11px;color:#b6cbdd;margin:10px 0 5px;border-top:1px solid #30465f;padding-top:9px}.meter{color:var(--red);font-weight:800}.battleControls{display:grid;grid-template-columns:1fr 1fr;gap:7px}.battleControls button{font-size:11px;padding:12px 5px}.marker{color:var(--cyan)}.summary{margin:7px 0 0;color:#b8cce0;font-size:12px}.scope{margin:8px 0 0;color:#b9cede;font-size:11px}
 @media(max-width:1180px){.layout{grid-template-columns:210px minmax(0,1fr)}.right{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:10px}.right .panel{margin:0}.roster{max-height:270px}}
@@ -2728,7 +2728,7 @@ function setupExpedition(){s.expeditions??=[];s.lootPeak??=0;V.expTab='dispatch'
  Object.assign(window.__edd.v3,{regions:V_REGIONS,loot:V_LOOT,price:k=>vLootPrice(V_LOOT.find(it=>it.k===k)),refIncome:vRefIncome,dispatch:vDispatch,pick:(r,ids)=>{V.expPick={region:r,ids:new Set(ids)};},askBuy:vAskBuy,confirmBuy:()=>V.buy&&vConfirmBuy(V.buy.token),eligible:r=>vExpPeople(V_REGIONS.find(x=>x.id===r)).map(x=>x.id),guards:id=>{const x=qFind(id);return {fusion:availablePart(x),office:qOfficeAuto(x),officeE:officeEligible(x),enhance:simpleEligible(x),hero:qHeroCandidate(x),kin:kinGrowthEligible(x,'camp'),res:iResEligible(x),move:moveHuman(x,'base')!==false,expedition:vExpEligible(x)};}});
  render();}
 // --- setup ----------------------------------------------------------------------------------------------------
-function setupPortrait(){document.body.classList.add('vp');const ver='v3.31';document.querySelector('.version').textContent=ver;document.title='전기로 마왕군 100만 부대 막기 '+ver;const tv=document.querySelector('.t-title-ver');if(tv)tv.textContent='ELECTRIC VILLAGE · '+ver;
+function setupPortrait(){document.body.classList.add('vp');const ver='v3.33';document.querySelector('.version').textContent=ver;document.title='전기로 마왕군 100만 부대 막기 '+ver;const tv=document.querySelector('.t-title-ver');if(tv)tv.textContent='ELECTRIC VILLAGE · '+ver;
  // map stage: a new visible canvas; the legacy board stays as an off-screen, world-sized surface whose context is redirected here
  const middle=document.querySelector('.middle'),box=document.createElement('div');box.id='vMap';box.innerHTML='<canvas id="vBoard" aria-label="게임 지도 · 위쪽 마을, 가운데 미로, 아래쪽 마왕성"></canvas>'
   +'<nav id="vRail" aria-label="지역 이동"><button data-v-region="village"><i>🏘</i>마을</button><button data-v-region="maze"><i>🧱</i>미로</button><button data-v-region="castle"><i>🏰</i>마왕성</button></nav>'
@@ -4893,7 +4893,225 @@ function xaBack(){const bug=$('xtBug');if(bug&&!bug.hidden){xtCloseBug();return;
 function setupV331(){if(!EDD_APP)return;document.body.classList.add('edd-app');
  if(EDD_IOS){const st=document.createElement('style');st.textContent='[data-title-exit]{display:none!important}';document.head.append(st);}
  try{xaApp()?.addListener?.('backButton',xaBack);}catch(e){console.error(e);}}
-s=load()||startState();initV12();initEnhance();initContent();fighters=(s.stationedSoldiers||[]).map(a=>({...a}));actorId=Math.max(actorId,0,...enemies.map(a=>a.uid||0),...fighters.map(a=>a.uid||0));selHero=s.humans[0]?.id||null;if(selHero!=null)selectedHeroes.add(selHero);resizeBoard();bind();bindV12();bindEnhance();uiSetup();setupSimple();initDemon();setupDirect();setupKin();setupSiege();setupOffice();setupIntegrated();setupPartyGrid();setupTutorial();setupTitle();setupV24();setupCastle();setupHealer();setupV27();setupV28();setupMobile();setupPortrait();setupExpedition();setupPatrol();setupV34();setupV35();setupV36();setupV37();setupV38();setupV39();setupV310();setupV311();setupV312();setupV313();setupV315();setupV316();setupV317();setupV318();setupV319();setupV320();setupV321();setupV322();setupV323();setupV324();setupV325();setupV326();setupV327();setupV328();setupV329();setupV330();setupV331();setupInfMoney();setupLab();render();requestAnimationFrame(frame);
+// v3.32: maze patrol that no longer wedges, spreads over the whole maze and moves less like one block.
+// (1) A fighter left on a closed cell (a wall or turret built under it) or cut off from the gate's network had no
+//     distance on any path field, so it never moved again; it now steps (or, if far, snaps) to the nearest open cell.
+// (2) Equal-length steps prefer the cell with fewer allies, so squads stop stacking on the same tiles.
+// (3) Patrol points now cover the whole maze (one per 3×3 block) instead of only junctions. Each squad keeps its own
+//     stretch of them (castle → village order), so many squads no longer share a few points and bunch into big blobs.
+// (5) Patrol walking speed differs a little per unit (±12%), units pause briefly now and then, and followers that stood
+//     still for a few seconds shuffle one cell.
+// (4) On screen each fighter stands at its own spot inside its cell (drawing only; combat uses the cell as before).
+// Engaging, retreating and move orders keep their old speed and rules.
+const XP={crowd:null,crowdF:-1,calm:['patrol','look','guard']};
+function xpRand(uid,salt){let h=Math.imul((uid|0)^0x9e3779b9,2654435761)^Math.imul(salt+1,40503);h^=h>>>15;h=Math.imul(h,2246822519);h^=h>>>13;return (h>>>0)/4294967296;}
+function xpCalm(a){return !a.pm||XP.calm.includes(a.pm);}
+function xpCrowd(){if(XP.crowdF===P.frame&&XP.crowd)return XP.crowd;const m=new Map();
+ for(const o of fighters){if(o.hp<=0)continue;for(const k of new Set([key(o.x,o.y),key(o.toX??o.x,o.toY??o.y)]))m.set(k,(m.get(k)||0)+1);}XP.crowd=m;XP.crowdF=P.frame;return m;}
+function xpUnstick(a){if(a.progress<1)return false;const g=pGate(),reach=pField(g[0],g[1]);if(reach.has(key(a.x,a.y)))return false;
+ let best=null,bd=Infinity;for(const k of reach.keys()){const [x,y]=k.split(',').map(Number),d=Math.abs(x-a.x)+Math.abs(y-a.y);if(d<bd){bd=d;best=[x,y];}}
+ if(!best)return false;if(bd===1){pStart(a,best[0],best[1]);return true;}
+ a.x=a.toX=a.fromX=best[0];a.y=a.toY=a.fromY=best[1];a.progress=1;a.route=[];return true;}
+pStart=(a,nx,ny)=>{a.fromX=a.x;a.fromY=a.y;a.toX=nx;a.toY=ny;a.progress=0;a.route=[];a.visited={};const d=dirs.findIndex(([dx,dy])=>a.x+dx===nx&&a.y+dy===ny);if(d>=0)a.dir=d;a.xpMoved=P.clock;};
+pStepToward=(a,d,stop=0)=>{const here=d.get(key(a.x,a.y));if(here!==undefined&&here<=stop)return false;let bd=here===undefined?Infinity:here;let opts=[];
+ for(const [dx,dy] of dirs){const nx=a.x+dx,ny=a.y+dy,n=d.get(key(nx,ny));if(n===undefined||!open(nx,ny,false))continue;if(n<bd){bd=n;opts=[[nx,ny]];}else if(n===bd&&opts.length)opts.push([nx,ny]);}
+ if(!opts.length)return false;if(opts.length>1){const c=xpCrowd(),low=Math.min(...opts.map(o=>c.get(key(o[0],o[1]))||0));opts=opts.filter(o=>(c.get(key(o[0],o[1]))||0)===low);}
+ const o=opts[Math.floor(Math.random()*opts.length)];pStart(a,o[0],o[1]);return true;};
+pAdvance=(a,dt)=>{if(a.progress>=1)return false;if((a.toX!==a.x||a.toY!==a.y)&&!open(a.toX,a.toY,false)){a.toX=a.x;a.toY=a.y;a.progress=1;return false;}
+ const k=xpCalm(a)?.88+.24*xpRand(a.uid,7):1;a.progress=Math.min(1,a.progress+dt/(a.step*k));if(a.progress>=1){a.x=a.toX;a.y=a.toY;}return true;};
+function xpPoints(){if(XP.pts&&P.clock-XP.ptsAt<2)return XP.pts;const g=pGate(),reach=pField(g[0],g[1]),best=new Map();
+ for(const k of reach.keys()){const [x,y]=k.split(',').map(Number),bx=Math.floor(x/3),by=Math.floor(y/3);let n=0;for(const [dx,dy] of dirs)if(open(x+dx,y+dy,false))n++;
+  const sc=Math.abs(x-bx*3-1)+Math.abs(y-by*3-1)-(n>=3?2:0),o=best.get(bx+','+by);if(!o||sc<o.sc)best.set(bx+','+by,{x,y,sc});}
+ XP.pts=[...best.values()].map(o=>[o.x,o.y]);XP.ptsAt=P.clock;return XP.pts;}
+pNewWp=(sq,old)=>{const J=xpPoints().slice().sort((p,q)=>p[0]-q[0]||p[1]-q[1]);if(!J.length)return {wp:pGate(),until:P.clock+5};
+ const nSq=Math.max(1,Math.ceil(P.of.size/P.squad)),nSec=clamp(nSq,1,Math.max(1,Math.floor(J.length/2))),sec=sq%nSec;
+ let list=J.slice(Math.floor(sec*J.length/nSec),Math.floor((sec+1)*J.length/nSec));if(list.length<2)list=J;
+ const pool=list.filter(p=>!old?.wp||p[0]!==old.wp[0]||p[1]!==old.wp[1]);const q={wp:choose(pool.length?pool:list),until:P.clock+18+12*Math.random()};P.sq.set(sq,q);return q;};
+const xpPrevPatrolStep=pPatrolStep;pPatrolStep=a=>{if(Math.random()<.06){a.pt=.25+Math.random()*.7;return;}
+ const x=a.x,y=a.y;xpPrevPatrolStep(a);if(a.progress<1||a.x!==x||a.y!==y){return;}
+ // a follower parked near the point: after a few quiet seconds take one step to a free neighbouring cell
+ if(P.clock-(a.xpMoved??P.clock)<3+3*xpRand(a.uid,11)){a.xpMoved??=P.clock;return;}const c=xpCrowd(),free=dirs.map(([dx,dy])=>[x+dx,y+dy]).filter(([nx,ny])=>open(nx,ny,false));
+ if(free.length){free.sort((p,q)=>(c.get(key(p[0],p[1]))||0)-(c.get(key(q[0],q[1]))||0)||Math.random()-.5);pStart(a,free[0][0],free[0][1]);}else a.xpMoved=P.clock;};
+const xpPrevPWander=pWander;pWander=(a,dt)=>{if(a.progress>=1)xpUnstick(a);return xpPrevPWander(a,dt);};
+const xpPrevActorPos=vActorPos;vActorPos=a=>{const p=xpPrevActorPos(a);if(!a||a.hp<=0||!P.of.has(a.uid)||!pOn())return p;
+ return {x:p.x+(xpRand(a.uid,1)-.5)*.34,y:p.y+(xpRand(a.uid,2)-.5)*.3};};
+function setupV332(){Object.assign(window.__edd,{v332:{XP,unstick:xpUnstick,crowd:xpCrowd,rand:xpRand,points:xpPoints}});}
+// v3.33: first-minute prologue (games/defense-opening/BRIEF.md). On a brand-new start — ‘게임시작’ with no played save and
+// the prologue never seen — the player lands straight on a battlefield before the difficulty picker: a snaking maze path
+// already open, ~100 of the demon army pouring out of the castle, one glowing cell. One tap builds a free lightning tower whose
+// chain bolt jumps through the crowd and wipes dozens at once (a second cell lights up for an optional second tower). It cannot
+// be lost: prologue foes have 1 HP, they never get past the last bend before the village, and if any are left ~44 s in a sky
+// strike clears them. Then ‘첫 방어 성공!’, one line about real lightning, ‘다음’ → the existing difficulty picker → new game.
+// The prologue is a self-contained overlay with its own little simulation: it never touches `s`, the save, startState or the
+// game clock, so nothing needs cleaning up afterwards and 이어하기 / old saves / legacy saves never see it.
+// Shown once: ‘edd_prologue_seen’ is set when it ends or is skipped, and a restart over a played save skips it (that player
+// has played already; the blank save the page writes on a first visit does not count). Skip = 건너뛰기 tapped twice (or Android back). Test hook: window.__edd.v333.
+const XO={open:false,raf:0,el:null,cv:null,c:null,bg:null,W:0,H:0,T:0,ox:0,oy:0,dpr:1,t:0,acc:0,lastNow:0,phase:'aim',
+ towers:[],foes:[],bolts:[],parts:[],texts:[],kills:0,total:0,shake:0,flash:0,pop:0,plan:[],winAt:0,factShown:false,skipArm:0,strike:null,still:false,
+ seenKey:'edd_prologue_seen',cols:9,rows:13,
+ // path through tile centres (x = column, y = row). Same layout as the real board: village on top, castle at the bottom, so the
+ // army climbs from the castle gate below row 12 up to the village above row 0
+ path:[[7,13.3],[7,10],[1,10],[1,7],[7,7],[7,4],[1,4],[1,1],[4,1],[4,-1.2]],
+ slots:[{x:4,y:8.5},{x:4,y:2.5}],range:3.9,jump:1.75,maxHits:34,cool:.62,speed:1.55,strikeAt:44,holdEarly:18.3,holdLate:31.3,
+ waves:[[0,20,false,3.2],[4,18],[9,22],[15,26],[22,18],[28,14,true]],maxParts:240};
+(function xoPathSetup(){let L=0;XO.seg=[];for(let i=1;i<XO.path.length;i++){const [ax,ay]=XO.path[i-1],[bx,by]=XO.path[i],len=Math.hypot(bx-ax,by-ay);XO.seg.push({ax,ay,bx,by,len,d0:L});L+=len;}XO.len=L;
+ // cells the path runs through (rows 0…12) — everything else in the maze is wall
+ XO.cells=new Set();for(const g of XO.seg){const n=Math.ceil(g.len*4);for(let k=0;k<=n;k++){const x=Math.round(g.ax+(g.bx-g.ax)*k/n),y=Math.round(g.ay+(g.by-g.ay)*k/n);if(y>=0&&y<XO.rows)XO.cells.add(x+','+y);}}})();
+function xoAt(d){d=Math.max(0,Math.min(XO.len,d));let g=XO.seg[XO.seg.length-1];for(const q of XO.seg)if(d<=q.d0+q.len){g=q;break;}const k=(d-g.d0)/g.len,dx=(g.bx-g.ax)/g.len,dy=(g.by-g.ay)/g.len;return {x:g.ax+(g.bx-g.ax)*k,y:g.ay+(g.by-g.ay)*k,dx,dy};}
+function xoPos(e){const p=xoAt(e.d),off=e.off+(e.held?Math.sin(XO.t*2.3+e.ph)*.08:0);return {x:p.x-p.dy*off,y:p.y+p.dx*off};}
+function xoSeen(){try{return localStorage.getItem(XO.seenKey)==='1';}catch(e){return false;}}
+function xoMarkSeen(){try{localStorage.setItem(XO.seenKey,'1');}catch(e){}}
+// a brand-new player: no save at all, or only the untouched game the page writes on its first load (wave 1, nobody, nothing
+// built, no time played). Legacy saves and anything played count as an existing player.
+function xoPristine(){try{if(T_SAVE_KEYS.some(k=>k!==STORE&&localStorage.getItem(k)))return false;}catch(e){return false;}if(!tTitleSave)return true;if(tTitleSave.legacy)return false;try{const r=JSON.parse(localStorage.getItem(STORE)||'null');if(!r)return true;
+ return (r.wave||1)<=1&&!(r.killed>0)&&!(r.humans?.length)&&!(r.turrets?.length)&&!(r.simTime>5)&&!r.gameOver;}catch(e){return false;}}
+function xoShould(){return !xoSeen()&&xoPristine();}
+function xoScreen(x,y){return {x:XO.ox+(x+.5)*XO.T,y:XO.oy+(y+.5)*XO.T};}
+// ---- layout + the static layer (walls, path, castle, village) ---------------------------------------------------------------
+function xoLayout(){if(!XO.cv)return;const W=innerWidth,H=innerHeight,top=72,castle=1.4,village=1.3;XO.W=W;XO.H=H;XO.dpr=Math.min(2,window.devicePixelRatio||1);
+ XO.T=Math.max(18,Math.floor(Math.min((W-12)/XO.cols,(H-top-16)/(XO.rows+castle+village))));const T=XO.T;
+ XO.ox=Math.round((W-XO.cols*T)/2);XO.oy=Math.round(top+village*T+Math.max(0,(H-top-16-(XO.rows+castle+village)*T)/2));
+ XO.cv.width=Math.round(W*XO.dpr);XO.cv.height=Math.round(H*XO.dpr);XO.cv.style.width=W+'px';XO.cv.style.height=H+'px';
+ const bg=document.createElement('canvas');bg.width=XO.cv.width;bg.height=XO.cv.height;const c=bg.getContext('2d');c.setTransform(XO.dpr,0,0,XO.dpr,0,0);
+ const sky=c.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#0c1824');sky.addColorStop(.5,'#101d27');sky.addColorStop(1,'#13241c');c.fillStyle=sky;c.fillRect(0,0,W,H);
+ let r=11;const rnd=()=>(r=(r*9301+49297)%233280)/233280;const box=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
+ const ox=XO.ox,oy=XO.oy;
+ for(let y=0;y<XO.rows;y++)for(let x=0;x<XO.cols;x++){const X=ox+x*T,Y=oy+y*T;
+  if(XO.cells.has(x+','+y)){box(X,Y,T,T,'#8c8676');for(let i=0;i<3;i++)box(X+rnd()*(T-4),Y+rnd()*(T-4),2,2,'#787264');}
+  else{box(X,Y,T,T,'#1f2c38');box(X+1,Y+1,T-3,T-3,'#32465a');box(X+1,Y+1,T-3,2,'#3d546a');if(rnd()<.35){const a=X+T*.25+rnd()*T*.4,b=Y+T*.3+rnd()*T*.3;box(a,b,T*.12,1,'#26364a');box(a+T*.12,b-T*.06,1,T*.06,'#26364a');}}}
+ // castle band below the maze, gate under the path entry (column 7)
+ const cy0=oy+XO.rows*T;box(ox-6,cy0,XO.cols*T+12,1.4*T,'#20242f');box(ox-6,cy0,XO.cols*T+12,2,'#2b2f42');
+ for(const cx of [0,2.6,5.2]){box(ox+cx*T-2,cy0+.2*T,T+4,1.2*T,'#2b2f42');c.fillStyle='#713e4b';c.beginPath();c.moveTo(ox+cx*T-4,cy0+.2*T);c.lineTo(ox+cx*T+T/2,cy0-.3*T);c.lineTo(ox+cx*T+T+4,cy0+.2*T);c.fill();}
+ box(ox+7*T+T*.12,cy0,T*.76,1.1*T,'#0c0a10');box(ox+7*T+T*.12,cy0,T*.76,3,'#8c8676');XO.windows=[0,2.6,5.2].map(cx=>[ox+cx*T+T*.42,cy0+.55*T]);
+ // village strip above the maze with the 본진 at the path's end
+ const vy=oy-1.3*T;box(ox-6,vy,XO.cols*T+12,1.3*T,'#4c7139');for(let x=ox;x<ox+XO.cols*T;x+=9)box(x,vy+4+(x*7)%(T*1.1|0),1,2,'#6b9450');
+ box(ox+4*T+T*.1,oy-T*.35,T*.8,T*.35+1,'#8c8676');
+ const hx=ox+4.5*T,hy=vy+.9*T;box(hx-T*.62,hy-T*.55,T*1.24,T*.55,'#c9b48a');c.fillStyle='#8e3b32';c.beginPath();c.moveTo(hx-T*.78,hy-T*.52);c.lineTo(hx,hy-T*1.02);c.lineTo(hx+T*.78,hy-T*.52);c.fill();
+ box(hx-T*.12,hy-T*.32,T*.24,T*.32,'#4a3324');box(hx-T*.45,hy-T*.42,T*.18,T*.14,'#ffe9a6');box(hx+T*.27,hy-T*.42,T*.18,T*.14,'#ffe9a6');
+ for(const [dx,col] of [[-2.6,'#b49770'],[2.4,'#a98d66']]){const x=hx+dx*T;box(x-T*.34,hy-T*.34,T*.68,T*.34,col);c.fillStyle='#6d4a3a';c.beginPath();c.moveTo(x-T*.44,hy-T*.32);c.lineTo(x,hy-T*.66);c.lineTo(x+T*.44,hy-T*.32);c.fill();}
+ XO.bg=bg;XO.hpBar={x:hx+T*1.25,y:hy-T*.6};xoPlaceHint();}
+function xoPlaceHint(){const h=$('xoHint');if(!h)return;const i=XO.towers.length,sl=XO.slots[Math.min(i,XO.slots.length-1)],p=xoScreen(sl.x,sl.y);h.style.left=Math.round(p.x)+'px';h.style.top=Math.round(p.y-XO.T*.72)+'px';}
+// ---- simulation ------------------------------------------------------------------------------------------------------------
+function xoReset(){Object.assign(XO,{t:0,acc:0,phase:'aim',towers:[],foes:[],bolts:[],parts:[],texts:[],kills:0,best:0,shake:0,flash:0,pop:0,winAt:0,factShown:false,skipArm:0,strike:null});
+ XO.plan=XO.waves.map(([at,n,elite,lead])=>({at,n,elite:!!elite,lead:lead||0}));XO.total=XO.waves.reduce((a,w)=>a+w[1],0);}
+const XO_KINDS=[0,1,3,5,6,8];
+function xoSpawn(w){for(let i=0;i<w.n;i++){const elite=w.elite&&i===0,kind=elite?4:XO_KINDS[Math.floor(Math.random()*XO_KINDS.length)];
+  XO.foes.push({d:w.lead-i*.13-Math.random()*.1-(elite?.6:0),off:elite?0:(Math.random()-.5)*.76,sp:XO.speed*(.96+Math.random()*.08),hp:elite?5:1,max:elite?5:1,elite,
+   img:pixelSprite('enemy',kind,elite),ph:Math.random()*6,k:Math.random()*2.4,held:false,dead:false,hitT:0});}}
+function xoAlive(){return XO.foes.filter(e=>!e.dead);}
+function xoSpark(x,y,n,col){for(let i=0;i<n&&XO.parts.length<XO.maxParts;i++){const a=Math.random()*Math.PI*2,v=1.2+Math.random()*2.6;XO.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-1,life:.35+Math.random()*.35,col:col||(Math.random()<.5?'#fff6b0':'#a6f7fe')});}}
+function xoHit(e){if(e.dead)return false;e.hp-=1;e.hitT=.15;if(e.hp>0)return false;e.dead=true;XO.kills++;XO.pop=1;const p=xoPos(e);xoSpark(p.x,p.y,e.elite?14:3);return true;}
+function xoBolt(pts,life=.24,wide=1){let r=Math.random()*1000;const rnd=()=>(r=(r*9301+49297)%233280)/233280-.5;const out=[pts[0]];
+ for(let i=1;i<pts.length;i++){const [ax,ay]=pts[i-1],[bx,by]=pts[i],n=Math.max(2,Math.round(Math.hypot(bx-ax,by-ay)/.35));for(let k=1;k<n;k++){const f=k/n;out.push([ax+(bx-ax)*f+rnd()*.32,ay+(by-ay)*f+rnd()*.32]);}out.push([bx,by]);}
+ XO.bolts.push({pts:out,life,max:life,wide});}
+function xoFire(tw){const vis=XO.foes.filter(e=>!e.dead&&e.d>=0);let first=null;for(const e of vis){const p=xoPos(e);if(Math.hypot(p.x-tw.x,p.y-tw.y)<=XO.range&&(!first||e.d>first.d))first=e;}
+ if(!first)return false;const chain=[first],hit=new Set([first]);let cur=first;
+ while(chain.length<XO.maxHits){const cp=xoPos(cur);let best=null,bd=XO.jump;for(const e of vis){if(hit.has(e))continue;const p=xoPos(e),d=Math.hypot(p.x-cp.x,p.y-cp.y);if(d<bd){bd=d;best=e;}}if(!best)break;chain.push(best);hit.add(best);cur=best;}
+ const pts=[[tw.x,tw.y-.72],...chain.map(e=>{const p=xoPos(e);return [p.x,p.y-.15];})];xoBolt(pts);let n=0;for(const e of chain)if(xoHit(e))n++;
+ tw.glow=1;XO.best=Math.max(XO.best,n);XO.shake=Math.min(XO.still?0:14,XO.shake+n*.5);XO.flash=Math.min(.42,XO.flash+n*.025);
+ if(n>=6){const p=xoPos(chain[chain.length-1]);XO.texts.push({x:p.x,y:p.y-.4,txt:n+'연쇄!',life:1.1,big:n>=15});}
+ try{XM.sfx('tesla_chain',.1);if(n)XM.sfx('enemy_down',.09);}catch(e){}return true;}
+function xoStrike(){const left=xoAlive().filter(e=>e.d>=0);if(!left.length)return;const p=xoPos(left[Math.floor(left.length/2)]);
+ xoBolt([[p.x+.4,-2.2],[p.x-.3,p.y*.45],[p.x,p.y]],.5,2.4);for(const e of left){e.hp=1;xoHit(e);}XO.flash=.7;XO.shake=XO.still?0:18;XO.texts.push({x:p.x,y:p.y-.6,txt:'낙뢰!',life:1.4,big:true});try{XM.sfx('boom',.3);}catch(e){}}
+function xoBuild(i){const sl=XO.slots[i];if(!sl||XO.towers.length!==i||XO.phase==='fact')return false;XO.towers.push({x:sl.x,y:sl.y,cd:.15,glow:0,born:XO.t});xoSpark(sl.x,sl.y,18,'#ffd34a');
+ if(XO.phase==='aim')XO.phase='fight';const h=$('xoHint');if(h){if(i===0&&XO.slots[1]){h.textContent='원하면 여기에 하나 더';h.classList.add('more');xoPlaceHint();clearTimeout(XO.hintT);XO.hintT=setTimeout(()=>{if(XO.towers.length<2)h.hidden=true;},6000);}else h.hidden=true;}
+ try{XM.sfx('build_done',.1);}catch(e){}return true;}
+function xoStep(dt){XO.t+=dt;const t=XO.t;
+ while(XO.plan.length&&XO.plan[0].at<=t)xoSpawn(XO.plan.shift());
+ // nobody reaches the village: before the first tower the army stops at the second bend, after it at the last bend
+ const hold=XO.towers.length?XO.holdLate:XO.holdEarly;
+ for(const e of XO.foes){if(e.dead)continue;const lim=hold-e.k*(XO.towers.length?1:2.2);if(e.d<lim){e.d=Math.min(lim,e.d+e.sp*dt);e.held=false;}else{e.held=true;e.d=Math.max(e.d-dt*.4,Math.min(e.d,lim));}if(e.hitT>0)e.hitT-=dt;}
+ for(const tw of XO.towers){tw.glow=Math.max(0,tw.glow-dt*3);tw.cd-=dt;if(tw.cd<=0)tw.cd=xoFire(tw)?XO.cool:0;}
+ if(XO.towers.length&&!XO.strike&&!XO.plan.length&&t>=XO.strikeAt&&xoAlive().length){XO.strike=true;xoStrike();}
+ if(XO.foes.length>40&&XO.foes.filter(e=>e.dead).length>20)XO.foes=XO.foes.filter(e=>!e.dead);
+ for(const b of XO.bolts)b.life-=dt;XO.bolts=XO.bolts.filter(b=>b.life>0);
+ for(const p of XO.parts){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=5*dt;}XO.parts=XO.parts.filter(p=>p.life>0);
+ for(const x of XO.texts){x.life-=dt;x.y-=dt*.7;}XO.texts=XO.texts.filter(x=>x.life>0);
+ XO.shake*=Math.exp(-dt*7);XO.flash*=Math.exp(-dt*6);XO.pop=Math.max(0,XO.pop-dt*4);
+ if(XO.phase==='fight'&&!XO.plan.length&&!xoAlive().length){XO.phase='win';XO.winAt=t;xoWin();}
+ if(XO.phase==='win'&&!XO.factShown&&t>=XO.winAt+1.8){XO.factShown=true;XO.phase='fact';xoFact();}}
+// ---- drawing ---------------------------------------------------------------------------------------------------------------
+function xoDraw(){const c=XO.c;if(!c||!XO.bg)return;const T=XO.T,u=T/40,t=XO.t;const sx=XO.shake>.3?(Math.random()-.5)*XO.shake:0,sy=XO.shake>.3?(Math.random()-.5)*XO.shake:0;
+ c.setTransform(1,0,0,1,0,0);if(sx||sy){c.fillStyle='#0b141c';c.fillRect(0,0,XO.cv.width,XO.cv.height);}c.drawImage(XO.bg,Math.round(sx*XO.dpr),Math.round(sy*XO.dpr));c.setTransform(XO.dpr,0,0,XO.dpr,sx*XO.dpr,sy*XO.dpr);
+ c.imageSmoothingEnabled=false;const S=(x,y)=>xoScreen(x,y);
+ // castle windows flicker
+ const gl=.55+.45*Math.abs(Math.sin(t*2.4));c.fillStyle='rgba(255,106,90,'+gl.toFixed(2)+')';for(const [x,y] of XO.windows||[])c.fillRect(Math.round(x),Math.round(y),Math.max(2,Math.round(T*.16)),Math.max(3,Math.round(T*.22)));
+ // empty slots: the next one glows (the first strongly, the optional second softly)
+ XO.slots.forEach((sl,i)=>{if(i<XO.towers.length||i>XO.towers.length||XO.phase==='win'||XO.phase==='fact')return;const p=S(sl.x,sl.y),a=(i?.35:.6)+(i?.2:.4)*Math.abs(Math.sin(t*4));
+  c.fillStyle='rgba(255,211,74,'+(a*.35).toFixed(2)+')';c.fillRect(p.x-T/2,p.y-T/2,T,T);c.strokeStyle='rgba(255,226,120,'+a.toFixed(2)+')';c.lineWidth=Math.max(2,3*u);c.strokeRect(p.x-T/2+2,p.y-T/2+2,T-4,T-4);
+  if(!i){c.strokeStyle='rgba(255,211,74,'+(.5*(1-(t*1.2%1))).toFixed(2)+')';const g=T*.5+T*.6*(t*1.2%1);c.strokeRect(p.x-g,p.y-g,g*2,g*2);}});
+ // tower ranges (faint) and towers
+ for(const tw of XO.towers){const p=S(tw.x,tw.y),k=Math.min(1,(t-tw.born)/.25),sc=.4+.6*k;
+  c.fillStyle='rgba(166,247,254,.05)';c.beginPath();c.arc(p.x,p.y,XO.range*T,0,Math.PI*2);c.fill();
+  c.save();c.translate(p.x,p.y+14*u);c.scale(sc,sc);const r=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(Math.round(x*u),Math.round(y*u),Math.ceil(w*u),Math.ceil(h*u));};
+  r(-15,-2,30,6,'#0a1418');r(-13,-8,26,8,'#405a74');r(-6,-34,12,27,'#b48665');for(let y=-30;y<-8;y+=5)r(-8,y,16,2,'#e7c693');r(-11,-38,22,5,'#5d7896');
+  const o=.55+.45*Math.abs(Math.sin(t*6))+tw.glow;c.fillStyle='rgba(166,247,254,'+Math.min(1,o).toFixed(2)+')';c.beginPath();c.arc(0,-43*u,6*u,0,Math.PI*2);c.fill();
+  if(tw.glow>0){c.fillStyle='rgba(255,250,210,'+(tw.glow*.5).toFixed(2)+')';c.beginPath();c.arc(0,-43*u,14*u,0,Math.PI*2);c.fill();}c.restore();}
+ // the army
+ const h0=T*.66;for(const e of XO.foes){if(e.dead||e.d<0)continue;const q=xoPos(e),p=S(q.x,q.y),h=e.elite?T*1.05:h0,w=e.img.width*h/e.img.height,bob=Math.sin(t*9+e.ph)*1.5*u;
+  c.fillStyle='#0a161066';c.fillRect(Math.round(p.x-w*.35),Math.round(p.y+h*.36),Math.round(w*.7),2);c.drawImage(e.img,Math.round(p.x-w/2),Math.round(p.y-h*.62+bob),Math.round(w),Math.round(h));
+  if(e.elite){c.fillStyle='#200d12';c.fillRect(p.x-w/2,p.y-h*.7,w,3);c.fillStyle='#ef4d52';c.fillRect(p.x-w/2,p.y-h*.7,w*e.hp/e.max,3);}}
+ // bolts
+ c.save();c.globalCompositeOperation='lighter';c.lineJoin='round';
+ for(const b of XO.bolts){const a=Math.max(0,b.life/b.max);for(const [wd,col] of [[7*b.wide,'rgba(255,211,74,'+(a*.28).toFixed(2)+')'],[3*b.wide,'rgba(166,247,254,'+(a*.6).toFixed(2)+')'],[1.4*b.wide,'rgba(255,255,240,'+a.toFixed(2)+')']]){c.strokeStyle=col;c.lineWidth=wd*u;c.beginPath();b.pts.forEach(([x,y],i)=>{const p=S(x,y);i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y);});c.stroke();}}
+ for(const p of XO.parts){const q=S(p.x,p.y);c.fillStyle=p.col;c.globalAlpha=Math.min(1,p.life*2.5);c.fillRect(Math.round(q.x),Math.round(q.y),Math.max(2,Math.round(2.5*u)),Math.max(2,Math.round(2.5*u)));}
+ c.globalAlpha=1;c.restore();
+ // 본진: full health, the whole time
+ if(XO.hpBar){const {x,y}=XO.hpBar,w=T*1.3;c.fillStyle='#0b1a12';c.fillRect(x,y,w,5);c.fillStyle='#62d98b';c.fillRect(x+1,y+1,w-2,3);c.fillStyle='#eaffef';c.font='700 '+Math.max(10,Math.round(11*u))+'px system-ui,sans-serif';c.textAlign='left';c.fillText('본진 피해 0',x,y+16*u);}
+ for(const x of XO.texts){const p=S(x.x,x.y);c.font='900 '+Math.round((x.big?26:18)*u)+'px system-ui,sans-serif';c.textAlign='center';c.globalAlpha=Math.min(1,x.life*2);c.lineWidth=4*u;c.strokeStyle='#1a1205';c.strokeText(x.txt,p.x,p.y);c.fillStyle=x.big?'#ffd34a':'#fff6b0';c.fillText(x.txt,p.x,p.y);}
+ c.globalAlpha=1;if(XO.flash>.02){c.setTransform(1,0,0,1,0,0);c.fillStyle='rgba(235,250,255,'+(XO.flash*(XO.still?.35:1)).toFixed(3)+')';c.fillRect(0,0,XO.cv.width,XO.cv.height);}
+ const k=$('xoKills');if(k){const v=String(XO.kills);if(k.textContent!==v)k.textContent=v;k.style.transform='scale('+(1+XO.pop*.35).toFixed(3)+')';}}
+function xoLoop(now){if(!XO.open){XO.raf=0;return;}const dt=Math.min(.05,Math.max(0,(now-XO.lastNow)/1000));XO.lastNow=now;XO.acc+=dt;while(XO.acc>=1/60){xoStep(1/60);XO.acc-=1/60;}xoDraw();XO.raf=requestAnimationFrame(xoLoop);}
+// ---- overlay: open / win / fact / finish ---------------------------------------------------------------------------------------
+function xoWin(){const w=$('xoWin');if(!w)return;$('xoWinSub').textContent='처치 '+XO.kills+' · 본진 피해 0';w.hidden=false;const h=$('xoHint');if(h)h.hidden=true;try{XM.sfx('wave_clear',.3);}catch(e){}}
+function xoFact(){const f=$('xoFact');if(!f)return;f.hidden=false;f.querySelector('[data-xo-next]')?.focus();}
+function xoOpen(){if(XO.open)return;xoReset();XO.still=!!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+ const el=document.createElement('div');el.id='xoOpen';el.setAttribute('role','dialog');el.setAttribute('aria-label','첫 방어');
+ el.innerHTML='<canvas id="xoCv" aria-label="마왕군이 미로를 따라 몰려오는 전장"></canvas>'
+  +'<div class="xo-top"><div class="xo-kills" aria-live="polite"><small>처치</small><b id="xoKills">0</b></div><button class="xo-skip" data-xo-skip>건너뛰기</button></div>'
+  +'<div class="xo-hint" id="xoHint">여기에 번개탑을 놓으세요</div>'
+  +'<div class="xo-win" id="xoWin" hidden><b>첫 방어 성공!</b><span id="xoWinSub"></span></div>'
+  +'<div class="xo-fact" id="xoFact" hidden><p class="xo-fact-main">⚡ 실제 낙뢰 한 번은 수만 암페어. 그래서 건물엔 피뢰침과 접지가 있죠</p>'
+  +'<p class="xo-fact-sub">피뢰침은 번개를 막는 게 아니라, 땅(접지)으로 안전하게 흘려보내는 길이에요</p><button class="xo-next" data-xo-next>다음 ▶</button></div>';
+ document.body.append(el);XO.el=el;XO.cv=$('xoCv');XO.c=XO.cv.getContext('2d');XO.open=true;xoLayout();addEventListener('resize',xoLayout);
+ XO.cv.addEventListener('pointerdown',e=>{e.preventDefault();if(XO.phase==='win'||XO.phase==='fact')return;const i=XO.towers.length,sl=XO.slots[i];if(!sl)return;const p=xoScreen(sl.x,sl.y);
+  if(Math.hypot(e.clientX-p.x,e.clientY-p.y)<=XO.T*1.15)xoBuild(i);});
+ el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.hasAttribute('data-xo-next'))xoFinish();
+  else if(b.hasAttribute('data-xo-skip')){const now=performance.now();if(XO.skipArm>now){xoFinish();return;}XO.skipArm=now+2500;b.textContent='한 번 더 누르면 건너뛰기';b.classList.add('armed');
+   setTimeout(()=>{if(XO.skipArm<=performance.now()&&b.isConnected){b.textContent='건너뛰기';b.classList.remove('armed');}},2600);}});
+ XO.lastNow=performance.now();XO.raf=requestAnimationFrame(xoLoop);}
+function xoClose(){XO.open=false;if(XO.raf)cancelAnimationFrame(XO.raf);XO.raf=0;clearTimeout(XO.hintT);removeEventListener('resize',xoLayout);XO.el?.remove();XO.el=XO.cv=XO.c=XO.bg=null;XO.foes=[];XO.bolts=[];XO.parts=[];XO.texts=[];last=performance.now();}
+// end (또는 건너뛰기) → the existing difficulty picker; nothing in the game state was touched, so 돌아가기 there leaves the title as it was
+function xoFinish(){if(!XO.open)return;xoMarkSeen();xoClose();xwPicker(true);}
+const xoPrevStart=tTitleStart;tTitleStart=()=>{if(!XO.open&&xoShould()){xoOpen();return;}xoPrevStart();};
+// Android back during the prologue skips it (instead of quitting the app from the title underneath)
+const xoPrevExit=tTitleExit;tTitleExit=()=>{if(XO.open){xoFinish();return;}xoPrevExit();};
+// battle music while the prologue runs (the title track otherwise)
+const xoPrevScene=xmScene;xmScene=()=>XO.open?'bgm05':xoPrevScene();
+// the board behind the title is not drawn while the prologue covers the screen
+const xoPrevFrame=frame;frame=now=>{if(XO.open){last=now;requestAnimationFrame(frame);return;}xoPrevFrame(now);};
+function setupV333(){const st=document.createElement('style');st.textContent=
+  '#xoOpen{position:fixed;inset:0;z-index:260;background:#0b141c;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;color:#eaf1fb}'
+ +'#xoCv{position:absolute;inset:0;display:block;image-rendering:pixelated}'
+ +'.xo-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:flex-start;justify-content:center;padding:max(8px,env(safe-area-inset-top,0px)) 12px 0;pointer-events:none}'
+ +'.xo-kills{display:flex;align-items:baseline;gap:8px;font-weight:900;text-shadow:0 2px 0 #000a}.xo-kills small{font-size:15px;color:#a6f7fe}.xo-kills b{display:inline-block;min-width:2ch;font-size:44px;line-height:1;color:#ffd34a;transform-origin:50% 60%}'
+ +'.xo-skip{pointer-events:auto;position:absolute;right:max(10px,env(safe-area-inset-right,0px));top:max(10px,env(safe-area-inset-top,0px));min-height:40px;padding:0 12px;border-radius:20px;border:1px solid #ffffff2e;background:#0b141ccc;color:#cfdbe3;font:inherit;font-size:13px}'
+ +'.xo-skip.armed{border-color:#ffd34a;color:#ffd34a}'
+ +'.xo-hint{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;padding:8px 14px;border-radius:12px;background:#ffd34a;color:#1a1205;font-weight:800;font-size:16px;pointer-events:none;box-shadow:0 6px 18px #0008;animation:xoBob 1s ease-in-out infinite}'
+ +'.xo-hint::after{content:"";position:absolute;left:50%;bottom:-8px;margin-left:-8px;border:8px solid transparent;border-bottom:0;border-top-color:#ffd34a}'
+ +'.xo-hint.more{background:#ffffffe6;font-size:14px;font-weight:700;opacity:.9}.xo-hint.more::after{border-top-color:#ffffffe6}.xo-hint[hidden]{display:none}'
+ +'@keyframes xoBob{0%,100%{margin-top:0}50%{margin-top:-6px}}@media (prefers-reduced-motion: reduce){.xo-hint{animation:none}}'
+ +'.xo-win{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 26px;border-radius:18px;background:#0b141ce6;border:2px solid #ffd34a;box-shadow:0 0 40px #ffd34a55;pointer-events:none}'
+ +'.xo-win b{font-size:30px;color:#ffd34a;white-space:nowrap}.xo-win span{font-size:14px;color:#cfdbe3}.xo-win[hidden],.xo-fact[hidden]{display:none}'
+ +'.xo-fact{position:absolute;left:12px;right:12px;bottom:max(16px,env(safe-area-inset-bottom,0px));margin:0 auto;max-width:420px;padding:16px;border-radius:16px;background:#15232ef2;border:1px solid #2c4555;box-shadow:0 14px 40px #000a;display:flex;flex-direction:column;gap:8px}'
+ +'.xo-fact-main{margin:0;font-size:17px;font-weight:800;line-height:1.45;color:#fff6d6}.xo-fact-sub{margin:0;font-size:13px;line-height:1.45;color:#9fb3bf}'
+ +'.xo-next{margin-top:4px;min-height:52px;border-radius:14px;border:0;background:#ffd34a;color:#1a1205;font:inherit;font-size:18px;font-weight:900}';
+ document.head.append(st);
+ Object.assign(window.__edd,{v333:{XO,open:xoOpen,finish:xoFinish,should:xoShould,build:xoBuild,back:()=>tTitleExit(),
+  step:sec=>{for(let i=0;i<Math.round(sec*60);i++)xoStep(1/60);xoDraw();},
+  state:()=>({open:XO.open,phase:XO.phase,t:+XO.t.toFixed(2),kills:XO.kills,best:XO.best,total:XO.total,alive:xoAlive().length,towers:XO.towers.length,parts:XO.parts.length,seen:xoSeen()})}});}
+s=load()||startState();initV12();initEnhance();initContent();fighters=(s.stationedSoldiers||[]).map(a=>({...a}));actorId=Math.max(actorId,0,...enemies.map(a=>a.uid||0),...fighters.map(a=>a.uid||0));selHero=s.humans[0]?.id||null;if(selHero!=null)selectedHeroes.add(selHero);resizeBoard();bind();bindV12();bindEnhance();uiSetup();setupSimple();initDemon();setupDirect();setupKin();setupSiege();setupOffice();setupIntegrated();setupPartyGrid();setupTutorial();setupTitle();setupV24();setupCastle();setupHealer();setupV27();setupV28();setupMobile();setupPortrait();setupExpedition();setupPatrol();setupV34();setupV35();setupV36();setupV37();setupV38();setupV39();setupV310();setupV311();setupV312();setupV313();setupV315();setupV316();setupV317();setupV318();setupV319();setupV320();setupV321();setupV322();setupV323();setupV324();setupV325();setupV326();setupV327();setupV328();setupV329();setupV330();setupV331();setupV332();setupV333();setupInfMoney();setupLab();render();requestAnimationFrame(frame);
 })();
 </script>
 </body>

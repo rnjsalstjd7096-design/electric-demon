@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>전기 미니게임 모음</title>
+<!-- Hub for the electricity games that actually exist in this folder (one self-contained index.html each) plus the main defense game one level up. Keep this list in sync with web/build.mjs MINI. -->
+<style>
+:root{--bg:#0a1320;--panel:#152238;--edge:#2c415b;--ink:#eaf1fb;--muted:#a5b7ca;--cyan:#64ceeb;--gold:#f2c66d}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif}
+body{min-height:100vh;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:radial-gradient(ellipse 80% 40% at 50% 0,rgba(242,198,109,.12),transparent 70%),var(--bg)}
+main{max-width:880px;margin:0 auto}
+h1{margin:6px 0 2px;font-size:clamp(24px,6vw,34px);letter-spacing:-.5px}
+h1 span{color:var(--gold);text-shadow:0 0 14px rgba(242,198,109,.55)}
+.sub{color:var(--muted);margin:0 0 18px}
+ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+li a{display:flex;gap:12px;align-items:flex-start;height:100%;padding:14px;border:1px solid var(--edge);border-radius:14px;background:var(--panel);color:inherit;text-decoration:none;transition:border-color .15s,transform .15s}
+li a:hover,li a:focus-visible{border-color:var(--cyan);transform:translateY(-2px)}
+.ic{font-size:30px;line-height:1;flex:0 0 auto}
+b{display:block;font-size:17px;margin-bottom:3px}
+small{color:var(--muted);display:block}
+.main b{color:var(--gold)}
+.foot{margin-top:22px;color:var(--muted);font-size:13px}
+.foot a{color:var(--cyan)}
+</style>
+<meta name="description" content="설치 없이 바로 하는 전기 미니게임 모음"><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/"><meta property="og:title" content="전기 미니게임 모음"><meta property="og:description" content="설치 없이 바로 하는 전기 미니게임 모음"><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"></head>
+<body>
+<main>
+<h1>⚡ 전기 <span>미니게임</span> 모음</h1>
+<p class="sub">설치 없이 휴대폰 브라우저에서 바로. 전부 무료, 광고 없음.</p>
+<ul>
+<li class="main"><a href="../"><span class="ic">🏰</span><div><b>전기로 마왕군 100만 부대 막기</b><small>전기기사들로 미로를 짓고 번개로 마왕군을 막는 디펜스 (본편)</small></div></a></li>
+<li><a href="run-or-zap/"><span class="ic">🏃</span><div><b>뛰어야 산다</b><small>버튼 하나로 점프. 늘어진 전선과 누전 물웅덩이를 피하는 감전 러너</small></div></a></li>
+<li><a href="joseon-generator/"><span class="ic">💡</span><div><b>조선에 전기가 들어온 날</b><small>손발전기를 돌려 초가집 전구를 켜고 마을을 키우는 경영 게임</small></div></a></li>
+<li><a href="escape-electric-room/"><span class="ic">🔦</span><div><b>방탈출: 정전된 전기실</b><small>손전등 하나로 분전반·전선 색상·옴의 법칙 퍼즐을 풀고 탈출</small></div></a></li>
+<li><a href="lbs-facility/"><span class="ic">🚨</span><div><b>정전입니다</b><small>새벽 3시 경보. LBS·VCB·ACB를 실제 순서대로 올려 건물 불을 되살리기</small></div></a></li>
+<li><a href="plc-ladder/"><span class="ic">🔧</span><div><b>PLC 래더 퍼즐</b><small>래더 회로를 그려 램프와 모터를 움직이기. a접점·b접점·자기유지·인터록</small></div></a></li>
+<li><a href="beggar-electrician/"><span class="ic">🪙</span><div><b>거지키우기</b><small>버려진 전선을 줍던 주인공이 공구를 사고 자격증을 따 전기공사 사장까지</small></div></a></li>
+</ul>
+<p class="foot">만든 사람: 전기견문록 · <a href="https://blog.naver.com/mms7096" target="_blank" rel="noopener">네이버 블로그</a> · <a href="https://cafe.naver.com/eleccommander" target="_blank" rel="noopener">네이버 카페</a></p>
+</main>
+</body>
+</html>

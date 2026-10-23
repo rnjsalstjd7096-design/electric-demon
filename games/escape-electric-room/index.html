@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#05070b">
+<title>방탈출 — 정전된 전기실 v0.1</title>
+<style>
+:root{color-scheme:dark;--ink:#e8edf3;--muted:#9aa6b4;--gold:#f4c96b;--green:#59e08f;--red:#ff6b6b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#05070b;overscroll-behavior:none}
+body{font:15px/1.45 system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;color:var(--ink);
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:480px;margin:0 auto;padding-top:env(safe-area-inset-top)}
+#bar{flex:0 0 46px;display:flex;align-items:center;gap:8px;padding:0 10px;background:#0a0d12;border-bottom:1px solid #1b222c;z-index:30}
+#roomName{font-weight:700;font-size:14px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#timer{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
+#bar button{background:#18202a;border:1px solid #2b3644;border-radius:9px;padding:6px 9px;font-size:13px;font-weight:650}
+#stage{position:relative;flex:1;overflow:hidden;touch-action:none;background:#0d1015}
+#scene,#dark,#glints{position:absolute;inset:0}
+#dark{z-index:10;pointer-events:none;width:100%;height:100%}
+#glints{z-index:11;pointer-events:none}
+.obj{position:absolute}
+/* 방 공통 */
+.wall{position:absolute;left:0;right:0;top:0;height:76%;background:
+  repeating-linear-gradient(0deg,transparent 0 38px,rgba(0,0,0,.18) 38px 40px),
+  repeating-linear-gradient(90deg,transparent 0 78px,rgba(0,0,0,.12) 78px 80px),
+  linear-gradient(#4b525b,#3a4048)}
+.floor{position:absolute;left:0;right:0;bottom:0;height:24%;background:
+  repeating-linear-gradient(90deg,transparent 0 60px,rgba(0,0,0,.25) 60px 62px),linear-gradient(#3a3934,#25241f)}
+.tray{position:absolute;height:14px;background:repeating-linear-gradient(90deg,#77808a 0 6px,#5d656e 6px 18px);border-top:2px solid #8b949e;border-bottom:2px solid #444b53}
+.pipe{position:absolute;width:12px;background:linear-gradient(90deg,#6c737b,#a0a8b0,#5a6168);border-radius:3px}
+.sticker{position:absolute;background:#f2c230;color:#111;font-weight:800;font-size:11px;padding:2px 5px;border-radius:2px;border:2px solid #111;white-space:nowrap}
+/* 문 */
+.door{background:#11151a;border:4px solid #555d66;border-bottom:0;perspective:700px}
+.door .doorway{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,#fff4cf,#d9b867 55%,#6e5a2c)}
+.door .leaf{position:absolute;inset:0;background:linear-gradient(90deg,#3d454f,#2e343c 70%,#262b31);transform-origin:0 50%;transition:transform 1.1s cubic-bezier(.3,.7,.3,1);box-shadow:inset 0 0 0 2px #4a525c}
+.door.open .leaf{transform:rotateY(-78deg)}
+.door .dsign{position:absolute;left:10%;right:10%;top:9%;background:#d8dde2;color:#1a1d21;font-weight:800;text-align:center;font-size:12px;border-radius:2px;padding:2px 0}
+.door .knob{position:absolute;right:9%;top:62%;width:16%;height:4%;background:#a9b0b8;border-radius:3px}
+.lock{position:absolute;right:7%;top:36%;width:28%;height:22%;background:#16191d;border:1px solid #606870;border-radius:5px;padding:6% 8%}
+.lcd{height:34%;background:#090b0d;border-radius:2px;font-size:10px;font-weight:800;color:transparent;text-align:center;line-height:1.9;transition:all .2s}
+.lcd.on{background:#2ee26f;color:#04260f;box-shadow:0 0 14px #42ff8c}
+.lock .pad{margin-top:10%;height:44%;background:repeating-linear-gradient(90deg,#2a2f35 0 30%,transparent 30% 35%),#16191d;border-radius:2px}
+.redlamp{position:absolute;width:10px;height:10px;border-radius:50%;background:#7a1010}
+.redlamp.on{background:#ff3b3b;box-shadow:0 0 10px #ff3b3b}
+.redlamp.ok{background:#3bff7a;box-shadow:0 0 10px #3bff7a}
+/* 분전반 */
+.panel{background:linear-gradient(135deg,#9aa1a8,#6d737a);border:2px solid #3a3f45;border-radius:3px;box-shadow:2px 3px 0 rgba(0,0,0,.35)}
+.panel .plabel{position:absolute;left:8%;top:8%;font-weight:800;font-size:12px;color:#1c1f23}
+.panel .pwarn{position:absolute;right:8%;top:8%;width:20px;height:18px;background:#f2c230;clip-path:polygon(50% 0,100% 100%,0 100%);text-align:center;font-size:10px;line-height:22px;color:#111;font-weight:900}
+.panel .phandle{position:absolute;right:8%;top:45%;width:6px;height:20%;background:#2a2e33;border-radius:2px}
+/* 안내 화살표/반짝 */
+.glint{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:2px solid rgba(255,230,150,.9);animation:gl 1.4s ease-out infinite}
+@keyframes gl{0%{transform:scale(.5);opacity:1}100%{transform:scale(1.9);opacity:0}}
+.tapArrow{position:absolute;transform:translate(-50%,-100%);font-size:13px;font-weight:800;color:#ffe9a8;text-shadow:0 0 6px #000;animation:bob .8s ease-in-out infinite alternate;white-space:nowrap;text-align:center}
+@keyframes bob{to{margin-top:-8px}}
+.swipe{position:absolute;left:50%;top:58%;font-size:34px;animation:sw 1.6s ease-in-out infinite;opacity:.9}
+@keyframes sw{0%,100%{transform:translateX(-70px)}50%{transform:translateX(30px)}}
+/* 자막·토스트·카드 */
+#caption{position:absolute;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:20;text-align:center;font-weight:700;font-size:16px;
+  text-shadow:0 1px 4px #000,0 0 12px #000;pointer-events:none;transition:opacity .3s}
+#toast{position:absolute;left:12px;right:12px;top:12px;z-index:40;background:rgba(14,18,24,.94);border:1px solid #3a4656;border-radius:12px;padding:10px 12px;font-size:14px;
+  opacity:0;transform:translateY(-8px);transition:all .25s;pointer-events:none}
+#toast.show{opacity:1;transform:none}
+#toast b{color:var(--gold)}
+.card{position:absolute;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:35;background:rgba(10,14,20,.96);border:1px solid #475466;border-radius:14px;padding:14px;
+  box-shadow:0 8px 30px rgba(0,0,0,.6);animation:up .35s ease-out}
+@keyframes up{from{transform:translateY(20px);opacity:0}}
+.card .k{font-size:12px;color:var(--gold);font-weight:800;margin-bottom:4px}
+.card p{margin:0 0 12px;font-size:15px;font-weight:600}
+.btn{display:block;width:100%;background:linear-gradient(#f6cf6f,#e0a93c);color:#2a1a00;border:0;border-radius:11px;padding:12px;font-weight:800;font-size:16px}
+.btn.pulse{animation:pl 1.2s ease-in-out infinite}
+@keyframes pl{50%{box-shadow:0 0 0 6px rgba(246,207,111,.25)}}
+.btn.ghost{background:#1b232e;color:var(--ink);border:1px solid #384557;margin-top:8px}
+#fade{position:absolute;inset:0;background:#000;z-index:60;opacity:0;pointer-events:none;transition:opacity .35s}
+#fade.on{opacity:1}
+/* 클로즈업 */
+#close{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:12px}
+#close[hidden]{display:none}
+.cu{position:relative;width:100%;max-width:440px;border-radius:14px;padding:14px 12px 16px;border:1px solid #4a5462;
+  background:radial-gradient(ellipse at 50% 35%,#59606a,#2b3036 70%,#1a1d22);box-shadow:0 10px 40px #000}
+.cu h3{margin:0 0 10px;font-size:15px;font-weight:800}
+.cu .x{position:absolute;right:8px;top:8px;background:#20262e;border:1px solid #3d4855;border-radius:9px;padding:5px 10px;font-size:13px}
+.cu .msg{min-height:42px;margin-top:10px;font-size:14px;font-weight:600;text-align:center;color:#ffeab0}
+/* 차단기 */
+.brks{display:flex;justify-content:center;gap:8px;background:#c9ccc8;border-radius:6px;padding:10px 6px 8px;box-shadow:inset 0 0 0 3px #9da19c}
+.brk{flex:1;max-width:80px;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:0;position:relative}
+.blab{background:#fff;color:#111;font-size:12px;font-weight:800;border:1px solid #777;border-radius:2px;padding:1px 3px;min-height:34px;width:100%;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15}
+.bbody{width:46px;height:92px;background:linear-gradient(90deg,#f4f4ef,#dedfd8);border-radius:4px;position:relative;box-shadow:inset 0 0 0 2px #a9aaa4,1px 2px 0 #888}
+.bslot{position:absolute;left:12px;top:10px;width:22px;height:72px;background:#3a3d40;border-radius:3px}
+.bhandle{position:absolute;left:14px;width:18px;height:32px;background:linear-gradient(#2c2f33,#111);border-radius:3px;transition:top .12s;box-shadow:0 2px 0 #000}
+.brk.on .bhandle{top:12px}.brk.off .bhandle{top:48px}
+.bst{font-size:11px;font-weight:800;color:#333}
+.brk.on .bst{color:#0a7a2f}.brk.off .bst{color:#b31b1b}
+.brk.ring::after{content:'';position:absolute;left:50%;top:62px;width:56px;height:56px;margin-left:-28px;border-radius:50%;border:3px solid #ffd76a;animation:gl 1.2s ease-out infinite}
+.elb .bbody{width:60px;background:linear-gradient(90deg,#f6f6f1,#d9dad3)}
+.elb .bslot{left:19px}.elb .bhandle{left:21px}
+.elb .test{position:absolute;right:-14px;top:96px;background:#f1c40f;border:2px solid #7a5d00;color:#3b2a00;border-radius:50%;width:34px;height:34px;font-size:10px;font-weight:900;padding:0;z-index:2}
+.lamps{display:flex;justify-content:space-around;margin-top:10px;font-size:12px;color:#cfd6de}
+.lamps span{display:flex;align-items:center;gap:5px}
+/* 전선 */
+.wires{position:relative;height:300px;background:linear-gradient(#2f343a,#22262b);border-radius:8px;border:2px solid #4c535c}
+.wires svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.term,.wend{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;background:none}
+.term{top:46px;width:56px;height:62px}
+.term .tb{display:block;width:40px;height:34px;margin:0 auto;background:linear-gradient(#cfd4d9,#8d949b);border-radius:4px;border:2px solid #555;position:relative}
+.term .tb::after{content:'';position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px;border-radius:50%;background:radial-gradient(#999,#444)}
+.term .tl{display:block;font-weight:900;font-size:14px;margin-top:3px}
+.term.hl .tb{box-shadow:0 0 0 3px #ffd76a}
+.wend{top:258px;width:52px;height:64px}
+.wend .wc{display:block;width:22px;height:40px;margin:0 auto;border-radius:6px 6px 3px 3px;border:2px solid rgba(255,255,255,.35)}
+.wend .wc::before{content:'';display:block;width:8px;height:10px;margin:-10px auto 0;background:#c88c3a;border-radius:2px}
+.wend .wn{display:block;white-space:nowrap;margin-left:-10px;margin-right:-10px;font-size:11px;font-weight:700;margin-top:3px;color:#cfd6de}
+.wend.sel .wc{box-shadow:0 0 0 3px #ffd76a,0 0 14px #ffd76a}
+.wend.used{opacity:.35}
+/* 안내문 */
+.poster{background:#efe9d6;color:#222;border-radius:4px;padding:12px;position:relative;clip-path:polygon(0 0,100% 0,100% 62%,93% 66%,97% 72%,90% 78%,95% 86%,88% 92%,92% 100%,0 100%)}
+.poster h4{margin:0 0 2px;font-size:16px;font-weight:900}
+.poster .sub{font-size:12px;margin-bottom:8px;color:#555}
+.poster table{border-collapse:collapse;width:88%}
+.poster td{border:1px solid #999;padding:5px 6px;font-weight:700;font-size:14px}
+.sw{display:inline-block;width:28px;height:14px;vertical-align:middle;border-radius:2px;border:1px solid #333;margin-right:6px}
+.torn{background:repeating-linear-gradient(45deg,#cfc6ab 0 4px,#bdb397 4px 8px);color:transparent}
+/* 명판·쪽지·키패드·계산기 */
+.plate{background:linear-gradient(#d7dbdf,#aab1b8);color:#15181b;border-radius:6px;padding:12px 14px;border:2px solid #6b737b;font-weight:700}
+.plate .pt{font-size:16px;font-weight:900;border-bottom:2px solid #555;padding-bottom:4px;margin-bottom:6px}
+.plate .row{display:flex;justify-content:space-between;font-size:15px;padding:2px 0}
+.note{background:#fdf6c4;color:#2a2600;padding:10px 12px;border-radius:3px;transform:rotate(-1.5deg);font-weight:700;font-size:14px;margin-bottom:10px;box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.disp{background:#0b1a10;color:#5dff9b;font:800 26px/1 ui-monospace,Menlo,monospace;letter-spacing:8px;text-align:center;padding:10px;border-radius:6px;margin-bottom:10px;min-height:46px;border:2px solid #263a2c}
+.disp.calc{letter-spacing:1px;text-align:right;font-size:22px;overflow:hidden;white-space:nowrap}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.keys.c4{grid-template-columns:repeat(4,1fr)}
+.keys button{background:linear-gradient(#3d444d,#2a2f35);border:1px solid #59626d;border-radius:9px;padding:12px 0;font-size:19px;font-weight:800}
+.keys button.op{background:linear-gradient(#5b4a24,#3f3318);color:#ffe2a0}
+/* 엔딩 */
+#end{position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at 50% 30%,rgba(255,236,170,.35),rgba(0,0,0,.85) 70%)}
+#end[hidden]{display:none}
+#end .card{position:static;width:100%;text-align:center}
+#end h2{margin:4px 0 8px;font-size:26px}
+#end .big{font-size:34px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--gold)}
+#end .small{font-size:13px;color:var(--muted);margin:6px 0 14px}
+/* 방별 */
+.heater{background:linear-gradient(#d9d6cf,#b8b4aa);border-radius:8px;border:2px solid #77736b}
+.heater .grill{position:absolute;left:10%;right:10%;top:16%;height:46%;background:repeating-linear-gradient(0deg,#5a2a10 0 4px,#2a1408 4px 8px);border-radius:4px}
+.heater .np{position:absolute;left:24%;right:24%;bottom:10%;height:20%;background:#c5ccd3;border:1px solid #666;border-radius:2px}
+.safe{background:linear-gradient(135deg,#59616a,#353a41);border:3px solid #23272c;border-radius:6px}
+.safe .dial{position:absolute;left:18%;top:28%;width:38%;height:44%;background:#20252b;border-radius:4px;border:2px solid #7c858f}
+.safe .snote{position:absolute;right:8%;top:14%;width:28%;height:30%;background:#fdf6c4;transform:rotate(6deg)}
+.safe.open{background:#15181c}
+.calcobj{background:#24282e;border:2px solid #555;border-radius:5px;transform:rotate(-14deg)}
+.calcobj::before{content:'';position:absolute;left:12%;right:12%;top:12%;height:26%;background:#7d9a77;border-radius:2px}
+.calcobj::after{content:'';position:absolute;left:12%;right:12%;top:46%;bottom:10%;background:repeating-linear-gradient(90deg,#555 0 18%,transparent 18% 27%)}
+.reader{position:absolute;width:14%;height:14%;background:#16191d;border:1px solid #666;border-radius:4px}
+.shutter{background:repeating-linear-gradient(0deg,#8d949b 0 14px,#6a7077 14px 16px);border:4px solid #3f454c;border-top-width:14px;transition:clip-path 2.2s ease-in;clip-path:inset(0 0 0 0)}
+.shutter.open{clip-path:inset(0 0 100% 0)}
+.shutwrap{background:radial-gradient(ellipse at 50% 70%,#fff8da,#e7c879 50%,#7a6431)}
+.sbox{background:#d9dde1;border:2px solid #555;border-radius:4px}
+.sbox .sb{position:absolute;left:50%;top:56%;width:44%;height:30%;transform:translate(-50%,-50%);border-radius:50%;background:#5a1d1d;border:2px solid #333}
+.sbox.live .sb{background:#21d36a;box-shadow:0 0 12px #3dff8a}
+.sbox .sl{position:absolute;left:0;right:0;top:4%;text-align:center;font-size:10px;font-weight:800;color:#222}
+.outlet{background:#e8e6df;border:2px solid #888;border-radius:4px}
+.outlet::before,.outlet::after{content:'';position:absolute;top:35%;width:14%;height:30%;background:#333;border-radius:50%}
+.outlet::before{left:28%}.outlet::after{right:28%}
+.drip{position:absolute;width:4px;height:9px;background:#8fc6ff;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;animation:dr 1.3s linear infinite;opacity:.8}
+@keyframes dr{0%{transform:translateY(0);opacity:0}10%{opacity:.9}100%{transform:translateY(90px);opacity:0}}
+.puddle{background:radial-gradient(ellipse,rgba(120,170,230,.55),rgba(80,120,180,.15) 70%,transparent 72%)}
+.ceilLamp{position:absolute;width:70px;height:10px;margin-left:-35px;background:#9aa1a8;border-radius:0 0 6px 6px}
+.ceilLamp.lit{background:#fffbe6;box-shadow:0 0 30px 10px rgba(255,248,210,.7)}
+@media (prefers-reduced-motion:reduce){.glint,.drip,.swipe,.tapArrow,.btn.pulse{animation:none}}
+</style>
+<meta name="description" content="정전된 지하 전기실에서 손전등 하나로 분전반·전선 색상·옴의 법칙 퍼즐을 풀고 탈출하는 방탈출 게임."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/escape-electric-room/"><meta property="og:title" content="방탈출 — 정전된 전기실"><meta property="og:description" content="정전된 지하 전기실에서 손전등 하나로 분전반·전선 색상·옴의 법칙 퍼즐을 풀고 탈출하는 방탈출 게임."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"></head>
+<body>
+<div id="app">
+  <header id="bar">
+    <span id="roomName">1/4 · 전기실</span>
+    <span id="timer">00:00</span>
+    <button id="hintBtn" data-act="hint" aria-label="힌트">💡 힌트</button>
+    <button id="muteBtn" data-act="mute" aria-label="음소거">🔊</button>
+  </header>
+  <main id="stage">
+    <div id="scene"></div>
+    <canvas id="dark"></canvas>
+    <div id="glints"></div>
+    <div id="caption"></div>
+    <div id="toast"></div>
+    <div id="cardBox"></div>
+    <div id="close" hidden></div>
+    <div id="end" hidden></div>
+    <div id="fade"></div>
+  </main>
+</div>
+<script>
+'use strict';
+(function(){
+const SAVE_KEY='escape-electric-room.save.v1';
+const $=s=>document.querySelector(s);
+const stage=$('#stage'),scene=$('#scene'),cv=$('#dark'),ctx=cv.getContext('2d'),glintsEl=$('#glints'),
+  captionEl=$('#caption'),toastEl=$('#toast'),cardBox=$('#cardBox'),closeEl=$('#close'),endEl=$('#end'),fadeEl=$('#fade');
+
+/* ---------- 저장 ---------- */
+const S={room:0,t:0,best:null,muted:false,hints:[0,0,0,0],done:false};
+function load(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(d&&typeof d==='object'){
+  S.best=typeof d.best==='number'?d.best:null;S.muted=!!d.muted;
+  if(!d.done&&d.room>=0&&d.room<4){S.room=d.room|0;S.t=+d.t||0;if(Array.isArray(d.hints))S.hints=d.hints.slice(0,4).map(n=>n|0);}
+}}catch(e){}}
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({room:S.room,t:Math.round(S.t),best:S.best,muted:S.muted,hints:S.hints,done:S.done}));}catch(e){}}
+
+/* ---------- 소리 (WebAudio 합성) ---------- */
+let AC=null;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){AC=false;}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,dur,type,vol,slide,delay){const a=ac();if(!a||S.muted)return;const t=a.currentTime+(delay||0),o=a.createOscillator(),g=a.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+dur);
+  g.gain.setValueAtTime(vol||.2,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.02);}
+function noise(dur,vol,freq,q,delay){const a=ac();if(!a||S.muted)return;const t=a.currentTime+(delay||0),n=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type='bandpass';f.frequency.value=freq||2000;f.Q.value=q||1;
+  const g=a.createGain();g.gain.value=vol||.3;s.connect(f).connect(g).connect(a.destination);s.start(t);}
+const SFX={
+  click(){noise(.04,.5,3500,2);tone(1800,.03,'square',.06);},
+  clack(){noise(.06,.7,1400,1.5);tone(220,.06,'square',.12,120);},
+  beep(){tone(1320,.08,'square',.08);},
+  open(){[880,1175,1568].forEach((f,i)=>tone(f,.12,'square',.07,0,i*.09));tone(90,.6,'sawtooth',.06,50,.3);},
+  wrong(){tone(220,.18,'square',.1,160);},
+  spark(){noise(.18,.6,5000,.7);noise(.1,.4,900,1,.05);},
+  trip(){noise(.05,.9,900,1.2);tone(140,.08,'square',.15,80);},
+  hint(){tone(988,.1,'sine',.12);tone(1319,.14,'sine',.1,0,.08);},
+  win(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,.25,'triangle',.12,0,i*.12));},
+  shutter(){noise(2,.25,300,.6);tone(70,2,'sawtooth',.05,90);}
+};
+
+/* ---------- 손전등 / 어둠 ---------- */
+let W=0,H=0;const L={x:0,y:0,tx:0,ty:0,moved:0};let LR=110;
+const D={alpha:.94,glows:[],flashUntil:0,flashFrom:0};
+function resize(){const r=stage.getBoundingClientRect();W=r.width;H=r.height;cv.width=Math.round(W);cv.height=Math.round(H);LR=Math.max(90,Math.min(150,Math.min(W,H)*.3));}
+function relRect(el){const s=stage.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-s.left,y:r.top-s.top,w:r.width,h:r.height,cx:r.left-s.left+r.width/2,cy:r.top-s.top+r.height/2};}
+function hole(x,y,r,k){const g=ctx.createRadialGradient(x,y,r*.12,x,y,r);g.addColorStop(0,'rgba(0,0,0,'+k+')');g.addColorStop(.55,'rgba(0,0,0,'+(k*.8)+')');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+function flashing(now){if(now>D.flashUntil)return false;const p=now-D.flashFrom;return (p<130)||(p>260&&p<380);}
+function drawDark(now){ctx.globalCompositeOperation='source-over';ctx.clearRect(0,0,W,H);
+  const a=flashing(now)?.12:D.alpha;if(a<=0.01)return;
+  ctx.fillStyle='rgba(3,4,8,'+a+')';ctx.fillRect(0,0,W,H);
+  ctx.globalCompositeOperation='destination-out';
+  hole(L.x,L.y,LR,1);
+  for(const g of D.glows){if(!g.el.isConnected)continue;const r=relRect(g.el);hole(r.cx,r.cy,g.r||Math.max(r.w,r.h)*.75,g.k==null?.85:g.k);}
+  ctx.globalCompositeOperation='source-over';
+  const t=ctx.createRadialGradient(L.x,L.y,0,L.x,L.y,LR);t.addColorStop(0,'rgba(255,232,170,.10)');t.addColorStop(1,'rgba(255,232,170,0)');
+  ctx.fillStyle=t;ctx.beginPath();ctx.arc(L.x,L.y,LR,0,Math.PI*2);ctx.fill();}
+function pointAt(e){const s=stage.getBoundingClientRect();const off=e.pointerType==='touch'?28:0;
+  const nx=e.clientX-s.left,ny=e.clientY-s.top-off;L.moved+=Math.hypot(nx-L.tx,ny-L.ty);L.tx=nx;L.ty=ny;}
+stage.addEventListener('pointerdown',e=>{ac();if(closeEl.hidden)pointAt(e);},true);
+stage.addEventListener('pointermove',e=>{if(closeEl.hidden&&(e.pointerType==='mouse'||e.buttons||e.pressure>0))pointAt(e);});
+
+/* ---------- 공통 UI ---------- */
+let toastTimer=0;
+function toast(html,ms){toastEl.innerHTML=html;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('show'),ms||2600);}
+function caption(t){captionEl.textContent=t;}
+function setGlints(list){glintsEl.innerHTML='';for(const it of list){const el=typeof it.el==='string'?scene.querySelector(it.el):it.el;if(!el)continue;const r=relRect(el);
+  const d=document.createElement('div');d.className=it.arrow?'tapArrow':'glint';d.style.left=(r.cx)+'px';d.style.top=(it.arrow?r.y-4:r.cy)+'px';if(it.arrow)d.innerHTML=it.arrow+'<br>👇';glintsEl.appendChild(d);}}
+let glintSpec=[];function glints(list){glintSpec=list;setGlints(list);}
+function card(kicker,text,btn,act){cardBox.innerHTML='<div class="card"><div class="k">'+kicker+'</div><p>'+text+'</p><button class="btn pulse" data-act="'+act+'">'+btn+'</button></div>';captionEl.style.opacity=0;}
+function clearCard(){cardBox.innerHTML='';captionEl.style.opacity=1;}
+function openClose(html){closeEl.innerHTML='<div class="cu">'+html+'<button class="x" data-act="closeCu">✕ 닫기</button></div>';closeEl.hidden=false;glintsEl.style.display='none';}
+function closeCu(){closeEl.hidden=true;closeEl.innerHTML='';glintsEl.style.display='';setGlints(glintSpec);if(ROOM.onClose)ROOM.onClose();}
+function cuMsg(t){const m=closeEl.querySelector('.msg');if(m)m.innerHTML=t;}
+function fmt(ms){const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+/* 방이 바뀌면 이전 방의 예약 작업은 무시 */
+let epoch=0;function after(ms,fn){const e=epoch;setTimeout(()=>{if(e===epoch)fn();},ms);}
+
+/* ---------- 방 정의 ---------- */
+const NAMES=['전기실','배전반실','창고','셔터 앞'];
+let R={},ROOM=null;
+
+const ROOMS=[
+/* 1. 전기실: 분전반 */
+{
+  caption:'문이 안 열린다… 전기실이다',
+  scene:()=>`<div class="wall"></div><div class="floor"></div>
+    <div class="tray" style="left:0;right:0;top:9%"></div>
+    <div class="pipe" style="left:94%;top:0;height:76%"></div>
+    <div class="ceilLamp" id="lamp1" style="left:50%;top:2%"></div>
+    <div class="obj door" id="door1" data-act="door" style="left:6%;top:26%;width:42%;height:50%">
+      <div class="doorway"></div>
+      <div class="leaf"><div class="dsign">전기실</div><div class="knob"></div>
+        <div class="lock" data-act="lock"><div class="lcd" id="lcd1">OPEN</div><div class="pad"></div></div></div>
+    </div>
+    <div class="obj panel" id="panel1" data-act="panel" style="left:57%;top:33%;width:31%;height:27%">
+      <div class="plabel">분전반</div><div class="pwarn">!</div><div class="phandle"></div></div>
+    <div class="sticker" style="left:58%;top:62%">⚡ 감전 주의</div>`,
+  init(){R={brk:[1,1,0,1],solved:false,lit:false,arrow:false};D.alpha=.94;L.tx=W*.27;L.ty=H*.5;L.x=L.tx;L.y=L.ty;L.moved=0;
+    glints([{el:'#panel1'}]);
+    const sw=document.createElement('div');sw.className='swipe';sw.id='swipe';sw.textContent='👆';glintsEl.appendChild(sw);
+    after(7000,()=>{if(!R.arrow&&!R.solved)showPanelArrow();});},
+  tick(){if(R.solved)return;const p=$('#panel1');if(!p)return;const r=relRect(p);
+    const m=LR*.3;if(!R.lit&&L.x>r.x-m&&L.x<r.x+r.w+m&&L.y>r.y-m&&L.y<r.y+r.h+m){R.lit=true;caption('문 옆에 분전반이 있다');showPanelArrow();}
+    const s=$('#swipe');if(s&&L.moved>80)s.remove();},
+  act(a,el){
+    if(a==='panel'){if(R.solved)return toast('도어락은 이제 전원이 들어와 있다.');SFX.click();openPanel1();}
+    else if(a==='lock'||a==='door'){if(R.solved)return;SFX.beep();toast('도어락 표시창이 꺼져 있다. <b>전원이 없나?</b>');}
+    else if(a==='brk'){const i=+el.dataset.i;if(R.solved)return;
+      if(R.brk[i]){SFX.click();if(i===0){D.flashFrom=performance.now();D.flashUntil=D.flashFrom+420;$('#lamp1').classList.add('lit');after(420,()=>{const l=$('#lamp1');l&&l.classList.remove('lit');});
+          cuMsg('천장 등이 깜빡… 하고 꺼졌다. 이건 이미 올라가 있다.');}
+        else cuMsg('이미 올라가 있다(ON). 내려가 있는 건?');return;}
+      R.brk[i]=1;SFX.clack();el.classList.remove('off','ring');el.classList.add('on');el.querySelector('.bst').textContent='ON';solve1();}
+  },
+  hints:['문 옆 회색 상자 <b>분전반</b>을 비춰서 탭해 보자.','차단기 중 <b>하나만 아래로</b> 내려가 있다.','<b>"도어락·비상"</b> 차단기를 위로 올리자.'],
+  solve(){if(R.solved)return;if(closeEl.hidden)openPanel1();R.brk[2]=1;solve1();}
+},
+/* 2. 배전반실: 전선 색상 */
+{
+  caption:'배전반실. 출구 잠금장치에 빨간 불',
+  scene:()=>`<div class="wall"></div><div class="floor"></div>
+    <div class="tray" style="left:0;right:0;top:7%"></div>
+    <div class="obj panel" id="cab2" data-act="cab" style="left:5%;top:24%;width:46%;height:54%">
+      <div class="plabel">배전반</div><div class="pwarn">!</div><div class="phandle"></div>
+      <svg style="position:absolute;left:30%;top:62%;width:60%;height:60%;overflow:visible" viewBox="0 0 100 100">
+        <path d="M10 0 C10 40 30 60 20 90" stroke="#8b5a2b" stroke-width="5" fill="none"/>
+        <path d="M30 0 C30 50 50 55 45 85" stroke="#1d1d1d" stroke-width="5" fill="none"/>
+        <path d="M50 0 C55 45 70 60 68 92" stroke="#9a9a9a" stroke-width="5" fill="none"/>
+        <path d="M70 0 C75 40 85 50 90 80" stroke="#2f6fd6" stroke-width="5" fill="none"/>
+        <path d="M90 0 C95 30 100 60 110 70" stroke="#e8d23a" stroke-width="5" fill="none" stroke-dasharray="6 6"/></svg></div>
+    <div class="obj poster" id="poster2" data-act="poster" style="left:58%;top:13%;width:36%;height:18%;padding:4px;font-size:9px;line-height:1.2">
+      <b style="font-size:10px">KEC 2021 시행</b><br>전선 색상 안내<br><span class="sw" style="width:14px;height:6px;background:#8b5a2b"></span><span class="sw torn" style="width:14px;height:6px"></span><span class="sw torn" style="width:14px;height:6px"></span></div>
+    <div class="obj door" id="door2" data-act="door" style="left:58%;top:38%;width:36%;height:38%">
+      <div class="doorway"></div><div class="leaf"><div class="dsign">출구</div><div class="knob"></div></div></div>
+    <div class="redlamp on" id="lamp2" style="left:74%;top:34%"></div>`,
+  init(){R={conn:{},sel:null,solved:false,tries:0};D.alpha=.93;L.tx=W*.3;L.ty=H*.45;glints([{el:'#cab2'},{el:'#poster2'}]);D.glows=[{el:$('#lamp2'),r:26,k:.6}];},
+  act(a,el){
+    if(a==='cab'){if(R.solved)return toast('배전반은 다시 연결됐다.');SFX.click();openWires();}
+    else if(a==='poster'){SFX.click();openPoster();}
+    else if(a==='door'){if(R.solved)return;SFX.wrong();toast('잠겨 있다. 배전반 전원이 끊겨 잠금이 안 풀린다.');}
+    else if(a==='wire'){if(R.solved)return;const c=el.dataset.c;
+      for(const t in R.conn)if(R.conn[t]===c){delete R.conn[t];}
+      R.sel=(R.sel===c)?null:c;SFX.click();renderWires();}
+    else if(a==='term'){if(R.solved)return;const t=el.dataset.t;
+      if(R.sel){R.conn[t]=R.sel;R.sel=null;SFX.clack();renderWires();checkWires();}
+      else if(R.conn[t]){delete R.conn[t];SFX.click();renderWires();}
+      else cuMsg('먼저 아래 전선 끝을 탭하세요.');}
+  },
+  hints:['배전반의 끊어진 케이블을 단자에 다시 꽂아야 한다. <b>벽 안내문</b>도 보자.','<b>N은 청색, PE는 녹색-노란색, L1은 갈색.</b>','<b>L2 흑색, L3 회색.</b>'],
+  solve(){if(R.solved)return;if(closeEl.hidden)openWires();R.conn={L1:'brown',L2:'black',L3:'grey',N:'blue',PE:'gy'};renderWires();checkWires();}
+},
+/* 3. 창고: 옴의 법칙 금고 */
+{
+  caption:'창고. 문은 카드키로 잠겨 있다',
+  scene:()=>`<div class="wall"></div><div class="floor"></div>
+    <div class="pipe" style="left:3%;top:0;height:40%"></div>
+    <div class="obj door" id="door3" data-act="door" style="left:33%;top:14%;width:34%;height:62%">
+      <div class="doorway"></div><div class="leaf"><div class="dsign">기계실</div><div class="knob"></div></div></div>
+    <div class="reader" id="reader3" style="left:70%;top:36%"><div class="redlamp on" id="lamp3" style="left:30%;top:20%;position:absolute"></div></div>
+    <div class="obj heater" id="heater3" data-act="heater" style="left:3%;top:52%;width:28%;height:26%"><div class="grill"></div><div class="np"></div></div>
+    <div class="obj safe" id="safe3" data-act="safe" style="left:68%;top:54%;width:29%;height:26%"><div class="dial"></div><div class="snote"></div></div>
+    <div class="obj calcobj" id="calc3" data-act="calc" style="left:40%;top:83%;width:17%;height:9%"></div>`,
+  init(){R={code:'',solved:false,calc:'',tries:0};D.alpha=.93;L.tx=W*.5;L.ty=H*.55;glints([{el:'#heater3'},{el:'#safe3'},{el:'#calc3'}]);D.glows=[{el:$('#lamp3'),r:24,k:.6}];},
+  act(a,el){
+    if(a==='heater'){SFX.click();openClose('<h3>전기히터 명판</h3><div class="plate"><div class="pt">전기히터 EH-11</div><div class="row"><span>정격전압</span><span>220 V</span></div><div class="row"><span>정격소비전력</span><span>1100 W</span></div><div class="row"><span>주파수</span><span>60 Hz</span></div></div><div class="msg">계산기가 바닥에 굴러다니던데…</div>');}
+    else if(a==='safe'){if(R.solved)return toast('금고는 이미 열렸다.');SFX.click();openSafe();}
+    else if(a==='calc'){SFX.click();openCalc();}
+    else if(a==='door'){if(R.solved)return;SFX.wrong();toast('카드키가 있어야 열린다. 금고 안에 있지 않을까?');}
+    else if(a==='key'){if(R.solved)return;const k=el.dataset.k;SFX.beep();
+      if(k==='back')R.code=R.code.slice(0,-1);else if(R.code.length<4)R.code+=k;
+      $('#sdisp').textContent=R.code.padEnd(4,'_');if(R.code.length===4)after(250,checkSafe);}
+    else if(a==='ck'){calcKey(el.dataset.k);}
+  },
+  hints:['<b>히터 명판</b>과 <b>금고 쪽지</b>를 읽자. 계산기는 바닥에.','전력 = 전압 × 전류 → <b>전류 = 1100 ÷ 220</b>.','전류 5A → <b>05</b>, 저항 = 220 ÷ 5 = 44Ω → 비밀번호 <b>0544</b>.'],
+  solve(){if(R.solved)return;if(closeEl.hidden)openSafe();R.code='0544';checkSafe();}
+},
+/* 4. 셔터 앞: 누전차단기 */
+{
+  caption:'마지막 셔터. 분전반 누전차단기가 떨어져 있다',
+  scene:()=>`<div class="wall"></div><div class="floor"></div>
+    <div class="ceilLamp" id="lamp4" style="left:38%;top:2%"></div>
+    <div class="obj shutwrap" id="exit4" style="left:5%;top:12%;width:60%;height:64%"><div class="obj shutter" id="shutter4" data-act="shutter" style="inset:0"></div></div>
+    <div class="obj sbox" id="sbox4" data-act="sbtn" style="left:71%;top:21%;width:20%;height:13%"><div class="sl">셔터 열림</div><div class="sb"></div></div>
+    <div class="obj panel" id="panel4" data-act="panel" style="left:70%;top:38%;width:25%;height:20%"><div class="plabel">분전반</div><div class="pwarn">!</div><div class="phandle"></div></div>
+    <div class="obj outlet" id="outlet4" data-act="leak" style="left:76%;top:68%;width:13%;height:6%"></div>
+    <div class="drip" style="left:81%;top:61%"></div><div class="drip" style="left:84%;top:61%;animation-delay:.6s"></div>
+    <div class="obj puddle" style="left:64%;top:80%;width:36%;height:12%"></div>`,
+  init(){R={elb:0,br:[1,1,1,1],solved:false,found:false,tested:false};D.alpha=.93;L.tx=W*.55;L.ty=H*.45;glints([{el:'#panel4'}]);D.glows=[];},
+  act(a,el){
+    if(a==='panel'){SFX.click();openElb();}
+    else if(a==='leak'){SFX.click();toast('천장에서 물이 떨어져 <b>창고 콘센트</b>가 젖어 있다…');}
+    else if(a==='shutter'){if(R.solved)return;toast(power4().shut?'옆의 <b>셔터 버튼</b>을 누르자.':'셔터는 전동식. 전원이 없으면 꿈쩍도 안 한다.');}
+    else if(a==='sbtn'){if(R.solved)return;if(power4().shut)win4();else{SFX.wrong();toast('버튼에 불이 꺼져 있다. 셔터 회로에 전원이 없다.');}}
+    else if(a==='elb'){elbToggle();}
+    else if(a==='test'){elbTest();}
+    else if(a==='brk'){brToggle(+el.dataset.i,el);}
+  },
+  hints:['누전이 있으면 누전차단기가 바로 떨어진다. <b>분기 차단기를 전부 내리고</b> 메인을 올려 보자.','분기를 <b>하나씩</b> 올려 보자. 올리자마자 메인이 떨어지는 분기가 누전 회로.','<b>창고 콘센트</b>는 내린 채로 메인·셔터를 올리고 <b>셔터 버튼</b>.'],
+  solve(){if(R.solved)return;R.br=[1,1,1,0];R.elb=1;R.found=true;refresh4();win4();}
+}];
+
+/* ---------- 방 1 ---------- */
+function showPanelArrow(){if(R.arrow||R.solved||S.room!==0)return;R.arrow=true;glints([{el:'#panel1'},{el:'#panel1',arrow:'탭'}]);}
+function brkHtml(lab,on,i,extra){return '<button class="brk '+(on?'on':'off')+(extra||'')+'" data-act="brk" data-i="'+i+'"><span class="blab">'+lab+'</span><span class="bbody"><span class="bslot"></span><span class="bhandle"></span></span><span class="bst">'+(on?'ON':'OFF')+'</span></button>';}
+function openPanel1(){const labs=['전등','콘센트','도어락·비상','에어컨'];
+  openClose('<h3>분전반</h3><div class="brks">'+labs.map((l,i)=>brkHtml(l,R.brk[i],i,(!R.brk[i]?' ring':''))).join('')+'</div><div class="msg">내려가 있는 차단기가 하나 있다.</div>');}
+function solve1(){R.solved=true;cuMsg('딸깍!');
+  after(550,()=>{closeCu();glints([]);const lcd=$('#lcd1');lcd.classList.add('on');D.glows=[{el:lcd,r:46,k:.8}];SFX.beep();caption('도어락에 불이 들어왔다!');
+    after(650,()=>{SFX.open();$('#door1').classList.add('open');D.glows.push({el:$('#door1 .doorway'),r:Math.max(W,H)*.32,k:.9});
+      after(900,()=>card('한 줄 상식','차단기가 내려가 있으면 먼저 원인부터. 다시 떨어지면 누전·과부하를 의심하세요.','배전반실로 →','next'));});});}
+
+/* ---------- 방 2 ---------- */
+const WIRES=[{c:'blue',n:'청색',col:'#2f6fd6'},{c:'grey',n:'회색',col:'#9a9a9a'},{c:'gy',n:'녹색-노란색',col:'gy'},{c:'brown',n:'갈색',col:'#8b5a2b'},{c:'black',n:'흑색',col:'#1d1d1d'}];
+const TERMS=['L1','L2','L3','N','PE'];const ANS={L1:'brown',L2:'black',L3:'grey',N:'blue',PE:'gy'};
+function openPoster(){openClose('<h3>벽에 붙은 안내문</h3><div class="poster"><h4>KEC 2021 시행</h4><div class="sub">한국전기설비규정 — 전선 색상이 바뀌었습니다</div><table>'+
+  '<tr><td>L1</td><td><span class="sw" style="background:#8b5a2b"></span>갈색</td></tr>'+
+  '<tr><td>L2</td><td class="torn">찢어짐</td></tr><tr><td>L3</td><td class="torn">찢어짐</td></tr>'+
+  '<tr><td>N</td><td><span class="sw" style="background:#2f6fd6"></span>청색</td></tr>'+
+  '<tr><td>PE</td><td><span class="sw" style="background:repeating-linear-gradient(90deg,#2e9d47 0 5px,#e8d23a 5px 10px)"></span>녹색-노란색</td></tr></table></div>'+
+  '<div class="msg">L2, L3 칸이 찢어져 있다…</div>');}
+function openWires(){openClose('<h3>배전반 — 끊어진 케이블</h3><div class="wires" id="wbox"></div><div class="msg">아래 전선 끝을 탭하고, 맞는 단자를 탭하세요.</div>');renderWires();}
+function renderWires(){const box=$('#wbox');if(!box)return;const xs=[10,30,50,70,90];
+  let h='<svg viewBox="0 0 100 300" preserveAspectRatio="none">';
+  for(const t in R.conn){const ti=TERMS.indexOf(t),wi=WIRES.findIndex(w=>w.c===R.conn[t]);const x1=xs[wi],x2=xs[ti],col=WIRES[wi].col;
+    const d='M'+x1+' 238 C'+x1+' 160 '+x2+' 140 '+x2+' 64';
+    if(col==='gy')h+='<path d="'+d+'" stroke="#e8d23a" stroke-width="3.2" fill="none" vector-effect="non-scaling-stroke" style="stroke-width:7px"/><path d="'+d+'" stroke="#2e9d47" fill="none" vector-effect="non-scaling-stroke" style="stroke-width:7px" stroke-dasharray="10 10"/>';
+    else h+='<path d="'+d+'" stroke="'+col+'" fill="none" vector-effect="non-scaling-stroke" style="stroke-width:7px"/>'+(R.conn[t]==='black'?'<path d="'+d+'" stroke="#666" fill="none" vector-effect="non-scaling-stroke" style="stroke-width:1px"/>':'');}
+  h+='</svg>';
+  TERMS.forEach((t,i)=>{h+='<button class="term'+(R.sel&&!R.conn[t]?' hl':'')+'" data-act="term" data-t="'+t+'" style="left:'+xs[i]+'%"><span class="tb"></span><span class="tl">'+t+'</span></button>';});
+  WIRES.forEach((w,i)=>{const used=Object.values(R.conn).includes(w.c);const bg=w.col==='gy'?'repeating-linear-gradient(0deg,#2e9d47 0 7px,#e8d23a 7px 14px)':w.col;
+    h+='<button class="wend'+(R.sel===w.c?' sel':'')+(used?' used':'')+'" data-act="wire" data-c="'+w.c+'" style="left:'+xs[i]+'%"><span class="wc" style="background:'+bg+'"></span><span class="wn">'+w.n+'</span></button>';});
+  box.innerHTML=h;}
+function checkWires(){if(Object.keys(R.conn).length<5)return;R.tries++;
+  const wrong=TERMS.filter(t=>R.conn[t]!==ANS[t]);
+  if(!wrong.length){R.solved=true;cuMsg('철컥! 전원이 돌아왔다.');SFX.open();
+    after(700,()=>{closeCu();glints([]);const l=$('#lamp2');l.classList.remove('on');l.classList.add('ok');$('#door2').classList.add('open');
+      D.glows=[{el:l,r:26,k:.6},{el:$('#door2 .doorway'),r:Math.max(W,H)*.3,k:.9}];caption('출구가 열렸다!');
+      after(900,()=>card('한 줄 상식','KEC(2021년 전면 시행) 전선 색: L1 갈색 · L2 흑색 · L3 회색 · N 청색 · PE 녹색-노란색.','창고로 →','next'));});return;}
+  SFX.spark();wrong.forEach(t=>delete R.conn[t]);
+  after(120,()=>{renderWires();cuMsg('퍽! 틀린 선 '+wrong.length+'개가 튕겨 나갔다. 맞은 선은 그대로.');});}
+
+/* ---------- 방 3 ---------- */
+function openSafe(){openClose('<h3>금고</h3><div class="note">비밀번호 = 히터 <u>전류(A)</u> 2자리 + 히터 <u>저항(Ω)</u> 2자리<br><span style="font-size:12px">(예: 3A, 70Ω → 0370)</span></div><div class="disp" id="sdisp">'+R.code.padEnd(4,'_')+'</div><div class="keys">'+
+  ['1','2','3','4','5','6','7','8','9','back','0'].map(k=>'<button data-act="key" data-k="'+k+'">'+(k==='back'?'←':k)+'</button>').join('')+'</div><div class="msg"></div>');}
+function checkSafe(){if(R.code==='0544'){R.solved=true;cuMsg('삐리릭! 금고 안에 카드키가 있다.');SFX.open();
+    after(800,()=>{closeCu();glints([]);const l=$('#lamp3');l.classList.remove('on');l.classList.add('ok');$('#safe3').classList.add('open');SFX.beep();
+      after(400,()=>{$('#door3').classList.add('open');SFX.open();D.glows=[{el:l,r:24,k:.6},{el:$('#door3 .doorway'),r:Math.max(W,H)*.34,k:.9}];caption('카드키로 문이 열렸다!');
+        after(900,()=>card('한 줄 상식','전력 = 전압 × 전류, 전압 = 전류 × 저항. 220V 1100W 히터엔 5A가 흐르고, 저항은 44Ω.','셔터 앞으로 →','next'));});});}
+  else{R.tries++;SFX.wrong();R.code='';const d=$('#sdisp');if(d)d.textContent='____';cuMsg('삑— 틀렸다. 명판 숫자로 계산해 보자.');}}
+let calcAfterEq=false;
+function openCalc(){openClose('<h3>바닥에 굴러다니던 계산기</h3><div class="disp calc" id="cdisp">'+(R.calc||'0')+'</div><div class="keys c4">'+
+  ['7','8','9','÷','4','5','6','×','1','2','3','−','C','0','=','+'].map(k=>'<button data-act="ck" data-k="'+k+'"'+('÷×−+=C'.includes(k)?' class="op"':'')+'>'+k+'</button>').join('')+'</div>');}
+function calcEval(s){const tk=s.match(/\d+(\.\d+)?|[+−×÷]/g);if(!tk)return 0;
+  const a=[];for(let i=0;i<tk.length;i++){const t=tk[i];if(t==='×'||t==='÷'){const x=a.pop(),y=+tk[++i];if(isNaN(y)){a.push(x);break;}a.push(t==='×'?x*y:(y===0?NaN:x/y));}else a.push(/\d/.test(t)?+t:t);}
+  let r=+a[0];for(let i=1;i<a.length;i+=2){const y=+a[i+1];if(isNaN(y))break;r=a[i]==='+'?r+y:r-y;}
+  return isFinite(r)?Math.round(r*1e6)/1e6:'오류';}
+function calcKey(k){SFX.beep();let c=R.calc||'';
+  if(k==='C')c='';else if(k==='='){c=String(calcEval(c));calcAfterEq=true;}
+  else{if(calcAfterEq&&/\d/.test(k))c='';calcAfterEq=false;if(c==='오류')c='';if('+−×÷'.includes(k)&&(!c||'+−×÷'.includes(c.slice(-1))))c=c.slice(0,-1)+(c?k:'');else c+=k;if(c.length>16)c=c.slice(0,16);}
+  R.calc=c;const d=$('#cdisp');if(d)d.textContent=c||'0';}
+
+/* ---------- 방 4 ---------- */
+const BR4=['전등','셔터','사무실 콘센트','창고 콘센트'];
+function power4(){const on=R.elb===1;return{light:on&&R.br[0],shut:on&&R.br[1]};}
+function openElb(){openClose('<h3>분전반 — 누전차단기</h3><div class="brks" id="elbrow"></div><div class="lamps" id="lamps4"></div><div class="msg">'+(R.elb?'':'메인 누전차단기가 내려가 있다.')+'</div>');refresh4();}
+function refresh4(){const row=$('#elbrow');
+  if(row){row.innerHTML='<div class="brk elb '+(R.elb?'on':'off')+'" style="max-width:96px"><span class="blab" style="background:#ffe7a0">누전<br>차단기</span><button class="bbody" data-act="elb" style="border:0;padding:0"><span class="bslot"></span><span class="bhandle"></span></button><span class="bst">'+(R.elb?'ON':'OFF')+'</span><button class="test" data-act="test">시험</button></div>'+
+    BR4.map((l,i)=>brkHtml(l,R.br[i],i)).join('');}
+  const p=power4();const lm=$('#lamps4');if(lm)lm.innerHTML='<span><i class="redlamp '+(p.light?'ok':'')+'" style="position:static;display:inline-block"></i>전등</span><span><i class="redlamp '+(p.shut?'ok':'')+'" style="position:static;display:inline-block"></i>셔터 전원</span>';
+  const lamp=$('#lamp4');if(lamp)lamp.classList.toggle('lit',!!p.light);D.alpha=p.light?.28:.93;
+  const sb=$('#sbox4');if(sb)sb.classList.toggle('live',!!p.shut);
+  if(!R.solved)glints(p.shut?[{el:'#sbox4'},{el:'#sbox4',arrow:'탭'}]:[{el:'#panel4'}]);
+  D.glows=p.shut&&sb?[{el:sb,r:40,k:.7}]:[];}
+function trip(msg,delay){after(delay||280,()=>{if(!R.elb)return;R.elb=0;SFX.trip();refresh4();cuMsg(msg);});}
+function elbToggle(){if(R.solved)return;if(R.elb){R.elb=0;SFX.clack();refresh4();cuMsg('메인을 내렸다.');return;}
+  R.elb=1;SFX.clack();refresh4();
+  if(R.br[3]){cuMsg('…');trip(R.found?'창고 콘센트가 올라가 있어서 또 떨어졌다.':'올리자마자 <b>탁!</b> 떨어진다. 어딘가 누전?');}
+  else cuMsg(R.br.some(b=>b)?'버틴다! 이제 분기를 하나씩.':'메인이 버틴다. 분기를 하나씩 올려 보자.');}
+function elbTest(){if(R.solved)return;SFX.click();
+  if(!R.elb){cuMsg('메인이 내려가 있어서 시험 버튼을 눌러도 반응이 없다.');return;}
+  R.tested=true;trip('시험 버튼에 <b>탁</b> 떨어졌다 → 누전차단기는 정상. 사람 보호용은 보통 30mA, 0.03초 안에 끊는다. 범인은 회로 쪽.',120);}
+function brToggle(i,el){if(R.solved)return;R.br[i]=R.br[i]?0:1;SFX.click();refresh4();
+  if(R.elb&&i===3&&R.br[3]){R.found=true;cuMsg('…');trip('<b>창고 콘센트</b>를 올리자 메인이 떨어졌다! 여기가 누전 회로.');return;}
+  if(R.elb&&R.br[i])cuMsg(BR4[i]+' 올림 — 메인이 버틴다.'+(i===1?' 셔터 전원 들어옴!':''));
+  else cuMsg(BR4[i]+' '+(R.br[i]?'올림':'내림')+'.');}
+function win4(){R.solved=true;closeCu();glints([]);SFX.shutter();const sh=$('#shutter4');sh.classList.add('open');D.glows=[{el:$('#exit4'),r:Math.max(W,H)*.45,k:.95}];caption('셔터가 올라간다…');
+  after(2300,finish);}
+function finish(){S.done=true;const t=Math.round(S.t);S.t=t;const newBest=S.best==null||t<S.best;if(newBest)S.best=t;save();SFX.win();
+  const used=S.hints.reduce((a,b)=>a+b,0);
+  endEl.innerHTML='<div class="card"><div class="k">탈출 성공</div><h2>밖이다! 🎉</h2><div class="big">'+fmt(t)+'</div><div class="small">'+(newBest?'최고 기록!':'최고 기록 '+fmt(S.best))+' · 힌트 '+used+'회</div>'+
+    '<p style="font-size:13px;font-weight:500;color:#cfd6de">누전차단기가 계속 떨어지면: 분기를 다 내리고 → 메인을 올리고 → 분기를 하나씩 올려 떨어지는 회로를 찾는다.</p><button class="btn" data-act="again">다시 하기</button></div>';
+  endEl.hidden=false;}
+
+/* ---------- 방 전환 / 진행 ---------- */
+function enterRoom(n){epoch++;S.room=n;ROOM=ROOMS[n];closeEl.hidden=true;closeEl.innerHTML='';glintsEl.style.display='';clearCard();endEl.hidden=true;
+  D.glows=[];D.flashUntil=0;scene.innerHTML=ROOM.scene();$('#roomName').textContent=(n+1)+'/4 · '+NAMES[n];caption(ROOM.caption);
+  ROOM.init();L.x=L.tx;L.y=L.ty;updHint();save();}
+function goNext(){if(S.room>=3)return;fadeEl.classList.add('on');SFX.click();const e=++epoch;setTimeout(()=>{if(e!==epoch)return;enterRoom(S.room+1);fadeEl.classList.remove('on');},380);}
+function updHint(){const n=S.hints[S.room]||0;$('#hintBtn').textContent='💡 힌트 '+n+'/3';}
+function hint(){const h=ROOM.hints;let n=S.hints[S.room]||0;if(n<3){n++;S.hints[S.room]=n;save();}SFX.hint();updHint();toast('<b>힌트 '+n+'/3</b> · '+h[n-1],5200);}
+function setMute(m){S.muted=m;$('#muteBtn').textContent=m?'🔇':'🔊';save();}
+function reset(){S.room=0;S.t=0;S.hints=[0,0,0,0];S.done=false;save();enterRoom(0);}
+
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act;
+  if(a==='hint')return hint();if(a==='mute')return setMute(!S.muted);
+  if(a==='closeCu'){SFX.click();return closeCu();}
+  if(a==='next')return goNext();if(a==='again')return reset();
+  if(el.closest('#scene')&&!closeEl.hidden)return;
+  if(S.done)return;
+  ROOM.act(a,el);});
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!closeEl.hidden)closeCu();});
+
+/* ---------- 루프 ---------- */
+let last=performance.now(),saveAcc=0;
+function frame(now){const dt=Math.min(100,now-last);last=now;
+  if(!S.done&&!document.hidden){S.t+=dt;saveAcc+=dt;if(saveAcc>5000){saveAcc=0;save();}}
+  $('#timer').textContent=fmt(S.t);
+  const k=Math.min(1,dt/1000*16);L.x+=(L.tx-L.x)*k;L.y+=(L.ty-L.y)*k;
+  if(ROOM&&ROOM.tick)ROOM.tick();
+  drawDark(now);requestAnimationFrame(frame);}
+window.addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
+window.addEventListener('resize',()=>{resize();setGlints(glintSpec);});
+
+/* ---------- 테스트용 ---------- */
+window.__game={
+  get state(){return JSON.parse(JSON.stringify({room:S.room,t:Math.round(S.t),best:S.best,hints:S.hints,done:S.done,muted:S.muted,r:R,light:{x:Math.round(L.x),y:Math.round(L.y),r:Math.round(LR)},dark:D.alpha,closeup:!closeEl.hidden}));},
+  goto:n=>enterRoom(n),reset,advance:ms=>{S.t+=ms;},solve:()=>ROOM.solve(),next:goNext,saveKey:SAVE_KEY,
+  light:(x,y)=>{L.tx=L.x=x;L.ty=L.y=y;}
+};
+
+load();resize();setMute(S.muted);enterRoom(S.room);requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

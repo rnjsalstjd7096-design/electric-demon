@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>정전입니다 — LBS 시설관리</title>
+<style>
+:root{--bg:#0b0f14;--panel:#111821;--dead:#556273;--live:#ffb020;--red:#ff4a4a;--green:#2fd06a;--txt:#e8eef5;--sub:#8fa0b3;--warn:#ff9a3c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
+#app.shake{animation:shake .45s linear}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-7px,3px)}40%{transform:translate(6px,-4px)}60%{transform:translate(-5px,-2px)}80%{transform:translate(4px,3px)}}
+#top{display:flex;align-items:center;gap:8px;padding:calc(6px + env(safe-area-inset-top)) 10px 4px;font-size:13px;color:var(--sub)}
+#clock{font-variant-numeric:tabular-nums;color:var(--txt);font-weight:700;font-size:15px}
+#stageBtn{flex:1;text-align:left;background:none;border:0;color:var(--sub);font-size:13px;padding:6px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#miss{color:var(--warn);font-weight:700}
+#mute{background:#1b2430;border:0;border-radius:10px;width:40px;height:34px;font-size:17px}
+#head{padding:2px 12px 8px;font-size:20px;font-weight:800;line-height:1.25;min-height:34px;transition:color .2s}
+#head.alarm{color:var(--red);animation:blink .7s steps(2,start) infinite}
+#head.done{color:var(--green)}
+#head.nudge{animation:nudge .35s}
+@keyframes blink{50%{opacity:.35}}
+@keyframes nudge{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#mid{flex:1;display:flex;min-height:0;padding:0 6px;gap:6px}
+#sld{flex:1;position:relative;background:var(--panel);border-radius:12px;min-width:0;overflow:hidden}
+#sld.dark{background:#0d131a}
+#sld svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+#sld [data-id]{cursor:pointer}
+.ring{fill:none;stroke:#fff;stroke-width:2.5;transform-box:fill-box;transform-origin:center;animation:ring 1.1s ease-out infinite}
+@keyframes ring{0%{opacity:.95;transform:scale(.75)}100%{opacity:0;transform:scale(1.35)}}
+.arrow{animation:bob .8s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateX(-5px)}}
+#bld{width:100px;display:flex;flex-direction:column;padding:6px 0 0}
+.roof{height:10px;margin:0 6px;background:#2a3442;border-radius:4px 4px 0 0}
+.fl{flex:1;display:flex;align-items:center;gap:4px;padding:0 6px;margin:0 6px;background:#1a222d;border-left:2px solid #2a3442;border-right:2px solid #2a3442;border-top:1px solid #2a3442;position:relative}
+.fl span{font-size:11px;color:var(--sub);width:18px}
+.fl i{flex:1;height:58%;max-height:40px;background:#0a0e13;border-radius:2px;transition:background .25s,box-shadow .25s}
+.fl.on i{background:#ffe08a;box-shadow:0 0 10px rgba(255,214,110,.75)}
+.fl.em i{background:#1f4a35;box-shadow:0 0 5px rgba(80,220,140,.4)}
+.fl.on span{color:#ffe08a}
+.ground{height:4px;background:#5a4630;margin:0 0}
+.b1{flex:1.2;background:#141a22;border-bottom:2px solid #2a3442;flex-wrap:wrap;align-content:center;font-size:10px;color:var(--sub);gap:2px}
+.b1 b{font-weight:400;font-size:10px;padding:1px 3px;border-radius:3px;background:#0a0e13}
+.b1.on b.eq{background:#ffe08a;color:#222}
+.b1 .me{width:100%;font-size:10px}
+#bottom{padding:6px 12px calc(10px + env(safe-area-inset-bottom));min-height:126px;display:flex;flex-direction:column;gap:6px}
+#toast{font-size:13.5px;color:#ffd27a;min-height:38px;line-height:1.38;transition:opacity .3s}
+#toast.off{opacity:0}
+#acts{min-height:62px;display:flex;align-items:center;justify-content:center}
+.btn{display:block;width:100%;padding:17px 12px;font-size:18px;font-weight:800;border-radius:14px;border:0;background:#25303d;color:var(--txt)}
+.btn.glow{background:#e23b3b;box-shadow:0 0 0 0 rgba(255,74,74,.7);animation:pulse 1.2s infinite}
+.btn.glow.blue{background:#2f6fe0;animation-name:pulseb}
+.btn.glow.gold{background:#c98a10;animation-name:pulsey}
+@keyframes pulse{70%{box-shadow:0 0 0 14px rgba(255,74,74,0)}100%{box-shadow:0 0 0 0 rgba(255,74,74,0)}}
+@keyframes pulseb{0%{box-shadow:0 0 0 0 rgba(80,140,255,.7)}70%{box-shadow:0 0 0 14px rgba(80,140,255,0)}100%{box-shadow:none}}
+@keyframes pulsey{0%{box-shadow:0 0 0 0 rgba(255,190,60,.7)}70%{box-shadow:0 0 0 14px rgba(255,190,60,0)}100%{box-shadow:none}}
+.tip{font-size:13px;color:var(--sub);text-align:center}
+.ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);z-index:20;padding:20px}
+.hidden{display:none!important}
+.card{width:100%;max-width:360px;background:#18212c;border-radius:18px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:pop .25s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}}
+.who{font-size:15px;color:var(--sub);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.who .ringing{display:inline-block;animation:wig .25s infinite alternate}
+@keyframes wig{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+.msg{font-size:18px;font-weight:700;line-height:1.4;margin-bottom:6px}
+.lesson{font-size:13.5px;color:#ffd27a;line-height:1.4;margin-bottom:14px}
+#flash{position:fixed;inset:0;z-index:30;pointer-events:none;background:#fff;opacity:0;display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:900;color:#2050ff;text-shadow:0 0 18px #9cf}
+#flash.go{animation:flash .7s ease-out}
+@keyframes flash{0%{opacity:1;background:#fff}15%{opacity:1;background:#bfe0ff}30%{opacity:.95;background:#fff}100%{opacity:0}}
+.paper{width:100%;max-width:360px;max-height:92vh;overflow:auto;background:#f3ecd9;color:#2a2418;border-radius:6px;padding:18px 18px 14px;position:relative;font-family:inherit;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.paper h2{margin:0 0 2px;font-size:20px;letter-spacing:2px}
+.paper .meta{font-size:12px;color:#6a5e44;margin-bottom:8px;border-bottom:1px solid #b9ab88;padding-bottom:6px}
+.paper ol{margin:0;padding:0 0 0 0;list-style:none;font-size:12.5px;line-height:1.55;max-height:38vh;overflow:auto}
+.paper li{display:flex;gap:8px}
+.paper li em{font-style:normal;color:#7a6c4e;font-variant-numeric:tabular-nums;width:40px;flex:none}
+.paper li.bad{color:#b02020}
+.paper .sum{margin-top:10px;font-size:13.5px;font-weight:700;border-top:1px solid #b9ab88;padding-top:8px}
+.paper .boss{font-size:13px;color:#5a4e34;margin-top:4px}
+#stampMark{position:absolute;right:18px;top:14px;width:78px;height:78px;border:4px solid #d42020;border-radius:50%;color:#d42020;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;transform:rotate(-14deg);opacity:0}
+#stampMark.go{animation:stamp .45s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes stamp{0%{opacity:0;transform:scale(3) rotate(-14deg)}60%{opacity:.95;transform:scale(.92) rotate(-14deg)}100%{opacity:.9;transform:scale(1) rotate(-14deg)}}
+.row{display:flex;gap:8px;margin-top:12px}
+.row button{flex:1;padding:14px 8px;border-radius:12px;border:0;font-size:16px;font-weight:800;background:#d8cdb0;color:#2a2418}
+.row button.pri{background:#2a2418;color:#f3ecd9}
+.menu h3{margin:0 0 12px;font-size:17px}
+.menu button{display:block;width:100%;text-align:left;margin:6px 0;padding:14px;border-radius:12px;border:0;background:#25303d;font-size:15px}
+.menu button[disabled]{opacity:.4}
+.menu small{color:var(--sub)}
+</style>
+<meta name="description" content="새벽 3시 "정전입니다". LBS·VCB·ACB를 실제 순서대로 올려 건물 불을 되살리는 시설관리 게임."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/lbs-facility/"><meta property="og:title" content="정전입니다 — LBS 시설관리"><meta property="og:description" content="새벽 3시 "정전입니다". LBS·VCB·ACB를 실제 순서대로 올려 건물 불을 되살리는 시설관리 게임."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"></head>
+<body>
+<div id="app">
+  <div id="top">
+    <span id="clock">03:00</span>
+    <button id="stageBtn" aria-label="스테이지 선택">1. 한전 정전</button>
+    <span id="miss"></span>
+    <button id="mute" aria-label="음소거">🔊</button>
+  </div>
+  <div id="head" class="alarm">정전입니다</div>
+  <div id="mid">
+    <div id="sld" class="dark"></div>
+    <div id="bld">
+      <div class="roof"></div>
+      <div class="fl" data-f="F4"><span>4F</span><i></i><i></i><i></i></div>
+      <div class="fl" data-f="F3"><span>3F</span><i></i><i></i><i></i></div>
+      <div class="fl" data-f="F2"><span>2F</span><i></i><i></i><i></i></div>
+      <div class="fl" data-f="F1"><span>1F</span><i></i><i></i><i></i></div>
+      <div class="ground"></div>
+      <div class="fl b1" data-f="B1"><span>B1</span><b class="eq">펌프</b><b class="eq">승강기</b><div class="me">🔦 전기실(나)</div></div>
+    </div>
+  </div>
+  <div id="bottom">
+    <div id="toast" class="off"></div>
+    <div id="acts"></div>
+  </div>
+</div>
+
+<div id="phone" class="ov hidden"><div class="card">
+  <div class="who"><span class="ringing">📞</span><span id="phoneWho">반장님</span></div>
+  <div class="msg" id="phoneMsg"></div>
+  <div class="lesson" id="phoneLesson"></div>
+  <button class="btn" id="phoneOk">넵… 다시 하겠습니다</button>
+</div></div>
+
+<div id="journal" class="ov hidden"><div class="paper">
+  <div id="stampMark">확인</div>
+  <h2>운전일지</h2>
+  <div class="meta" id="jmeta"></div>
+  <ol id="jlog"></ol>
+  <div class="sum" id="jsum"></div>
+  <div class="boss" id="jboss"></div>
+  <div class="row"><button id="retry">다시 하기</button><button id="next" class="pri">다음 근무 ▶</button></div>
+</div></div>
+
+<div id="menu" class="ov hidden"><div class="card menu">
+  <h3>근무표</h3>
+  <div id="menuList"></div>
+  <button id="menuClose">닫기</button>
+</div></div>
+
+<div id="flash"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ───────── 저장 (lbs-facility.save.v1, 막혀 있어도 게임은 돎) ───────── */
+const SAVE_KEY = 'lbs-facility.save.v1';
+let save = { v: 1, unlocked: 1, last: 1, best: {}, muted: false };
+try {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (raw) { const o = JSON.parse(raw); if (o && o.v === 1) save = Object.assign(save, o); }
+} catch (e) {}
+function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
+
+/* ───────── 소리 (WebAudio 합성) ───────── */
+const AU = {
+  ctx: null, master: null, gen: null,
+  init() {
+    if (this.ctx) return;
+    try {
+      const C = window.AudioContext || window.webkitAudioContext; if (!C) return;
+      this.ctx = new C(); this.master = this.ctx.createGain();
+      this.master.gain.value = save.muted ? 0 : 0.45; this.master.connect(this.ctx.destination);
+    } catch (e) { this.ctx = null; }
+  },
+  resume() { this.init(); try { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); } catch (e) {} },
+  ok() { return this.ctx && this.ctx.state === 'running'; },
+  setMuted(m) { if (this.master) this.master.gain.value = m ? 0 : 0.45; },
+  tone(f, dur, type = 'sine', vol = .25, delay = 0, slide) {
+    if (!this.ok()) return;
+    const c = this.ctx, t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + dur + .02);
+  },
+  noise(dur, vol = .3, freq = 1200, type = 'lowpass', delay = 0) {
+    if (!this.ok()) return;
+    const c = this.ctx, t = c.currentTime + delay, n = Math.floor(c.sampleRate * dur);
+    const b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = b; f.type = type; f.frequency.value = freq;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(this.master); s.start(t);
+  },
+  beep() { this.tone(2400, .22, 'square', .08); },
+  clunk() { this.noise(.08, .5, 900); this.tone(90, .15, 'sine', .4); },
+  arc() { this.noise(.5, .7, 5000, 'highpass'); this.noise(.25, .6, 800, 'lowpass', .05); for (let i = 0; i < 6; i++) this.noise(.04, .4, 3000, 'bandpass', .08 + i * .06); },
+  hum() { this.tone(120, 1.1, 'sine', .3); this.tone(240, 1.1, 'sine', .06); },
+  ring() { for (let i = 0; i < 3; i++) { this.tone(1300, .09, 'sine', .15, i * .2); this.tone(1650, .09, 'sine', .15, i * .2 + .1); } },
+  light() { this.tone(1320, .18, 'triangle', .12); },
+  chime() { [660, 880, 1320].forEach((f, i) => this.tone(f, .35, 'triangle', .14, i * .12)); },
+  stamp() { this.noise(.12, .8, 400); this.tone(70, .25, 'sine', .6); },
+  nope() { this.tone(220, .12, 'square', .07); },
+  genOn(on) {
+    if (!this.ok()) return;
+    if (on && !this.gen) {
+      const c = this.ctx, o = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
+      o.type = 'sawtooth'; o.frequency.value = 38; f.type = 'lowpass'; f.frequency.value = 180; g.gain.value = .12;
+      o.connect(f); f.connect(g); g.connect(this.master); o.start(); this.gen = { o, g };
+    } else if (!on && this.gen) {
+      try { this.gen.g.gain.exponentialRampToValueAtTime(.0001, this.ctx.currentTime + .8); this.gen.o.stop(this.ctx.currentTime + .9); } catch (e) {}
+      this.gen = null;
+    }
+  }
+};
+
+/* ───────── 스테이지 정의 ─────────
+   노드: type src(인입) lbs ds vcb acb mccb(개폐) tr(확인) mof la load(수동) gen ats relay
+   x = 폭 비율, y = 줄 번호. closed = 투입. 투입=빨강, 개방=초록(국내 수배전반 관행). */
+const MAIN = [
+  { id: 'IN', type: 'src', name: '한전 인입', sub: '22.9kV-Y' },
+  { id: 'LBS', type: 'lbs', p: 'IN', name: 'LBS', sub: '수전 부하개폐기' },
+  { id: 'LA', type: 'la', p: 'LBS', name: 'LA', sub: '피뢰기' },
+  { id: 'MOF', type: 'mof', p: 'LBS', name: 'MOF', sub: '한전 계량용' }
+];
+function mainAt(x, y0, lbsClosed) {
+  const pos = { IN: [x, y0], LBS: [x, y0 + 1], LA: [Math.min(.8, x + .34), y0 + 1.55], MOF: [x, y0 + 2] };
+  return MAIN.map(n => Object.assign({}, n, { x: pos[n.id][0], y: pos[n.id][1] }, n.type === 'lbs' ? { closed: lbsClosed } : {}));
+}
+const closed = id => s => !!s.n[id].closed;
+const live = id => s => isLive(s, id);
+
+const STAGES = [
+{
+  n: 1, name: '한전 정전', start: 3 * 60, rows: 7,
+  nodes: mainAt(.42, 0, false).concat([
+    { id: 'VCB', type: 'vcb', p: 'MOF', x: .42, y: 3, name: 'VCB', sub: '진공차단기', closed: false, trip: 'UVR' },
+    { id: 'TR', type: 'tr', p: 'VCB', x: .42, y: 4, name: 'TR', sub: '22.9kV/380V' },
+    { id: 'ACB', type: 'acb', p: 'TR', x: .42, y: 5, name: 'ACB', sub: '저압 주차단기', closed: false },
+    { id: 'M1', type: 'mccb', p: 'ACB', x: .12, y: 6, name: '1F', closed: false },
+    { id: 'M2', type: 'mccb', p: 'ACB', x: .37, y: 6, name: '2F', closed: false },
+    { id: 'M3', type: 'mccb', p: 'ACB', x: .62, y: 6, name: '3F', closed: false },
+    { id: 'M4', type: 'mccb', p: 'ACB', x: .87, y: 6, name: '4F', closed: false }
+  ]),
+  loads: { F1: ['M1'], F2: ['M2'], F3: ['M3'], F4: ['M4'], B1: [] },
+  init(s) { s.kepco = false; s.buzzer = true; },
+  gate(s) { if (!s.flags.checked) return '상황 확인부터. 한전 쪽인지 우리 쪽인지.'; },
+  steps: [
+    { t: 'btn:buzzer', hint: '정전입니다', alarm: true, done: s => !s.buzzer },
+    { t: 'btn:check', hint: '상황 확인', done: s => !!s.flags.checked },
+    { t: null, hint: '한전 복전 대기…', done: s => s.kepco },
+    { t: 'LBS', hint: '전원측부터: 수전 LBS 투입', done: closed('LBS') },
+    { t: 'VCB', hint: 'VCB 투입', done: closed('VCB') },
+    { t: 'TR', hint: '변압기 확인 (탭)', done: s => !!s.trOk.TR },
+    { t: 'ACB', hint: 'ACB 투입', done: closed('ACB') },
+    { t: 'M1', hint: '층별 MCCB 하나씩 투입', done: live('M1') },
+    { t: 'M2', hint: '층별 MCCB 하나씩 투입', done: live('M2') },
+    { t: 'M3', hint: '층별 MCCB 하나씩 투입', done: live('M3') },
+    { t: 'M4', hint: '층별 MCCB 하나씩 투입', done: live('M4') },
+    { t: 'btn:stamp', hint: '복전 완료. 운전일지 쓰셔야죠?', final: true, done: s => !!s.flags.stamped }
+  ],
+  facts: {
+    'btn:buzzer': '실무 1순위: 일단 저 소리부터 끈다.',
+    'btn:check': '인입 전압 0 · 구내 계전기 표시 없음 → 한전 측 정전. VCB는 UVR(부족전압계전기)이 트립시켜 둠.',
+    'kepco': '한전 복전! 인입 22.9kV 확인. 투입은 전원측 → 부하측.',
+    'LBS:close': 'LBS(부하개폐기): 부하전류는 끊지만 고장전류는 못 끊음 → 그래서 PF(전력퓨즈)랑 짝.',
+    'VCB:close': 'VCB(진공차단기): 고장전류까지 끊는 주차단기. 투입=빨간불, 개방=초록불.',
+    'TR:check': '변압기 여자 확인: 웅— (60Hz 계통이라 120Hz로 웅) · 2차 380V ✓',
+    'ACB:close': 'ACB(기중차단기): 저압 주차단기. 분기는 아직 내려 둔 채로.',
+    'M1:close': '1층 점등. 분기는 하나씩 — 한꺼번에 넣으면 돌입전류.',
+    'M2:close': '2층 점등.', 'M3:close': '3층 점등.', 'M4:close': '4층 점등. 전 층 복전!'
+  }
+},
+{
+  n: 2, name: '발전기·ATS', start: 14 * 60 + 20, rows: 8,
+  nodes: mainAt(.34, 0, true).concat([
+    { id: 'VCB', type: 'vcb', p: 'MOF', x: .34, y: 3, name: 'VCB', sub: '진공차단기', closed: false, trip: 'UVR' },
+    { id: 'TR', type: 'tr', p: 'VCB', x: .34, y: 4, name: 'TR', sub: '22.9kV/380V' },
+    { id: 'ACB', type: 'acb', p: 'TR', x: .34, y: 5, name: 'ACB', sub: '저압 주차단기', closed: false },
+    { id: 'G12', type: 'mccb', p: 'ACB', x: .12, y: 6.3, name: '1·2F', closed: false },
+    { id: 'G34', type: 'mccb', p: 'ACB', x: .42, y: 6.3, name: '3·4F', closed: false },
+    { id: 'GEN', type: 'gen', x: .78, y: 3.4, name: '발전기', sub: '비상' },
+    { id: 'ATS', type: 'ats', pN: 'ACB', pE: 'GEN', x: .78, y: 6.3, name: 'ATS', pos: 'N' },
+    { id: 'EML', type: 'load', p: 'ATS', x: .78, y: 7.05, name: '비상부하', sub: '비상등·소방펌프·승강기' }
+  ]),
+  loads: { F1: ['G12'], F2: ['G12'], F3: ['G34'], F4: ['G34'], B1: ['EML'], em: ['EML'] },
+  init(s) {
+    s.kepco = false; s.buzzer = true; s.gen = 'off';
+    after(s, 1800, () => { s.gen = 'start'; AU.noise(.6, .25, 300); render(); });
+    after(s, 3000, () => { s.gen = 'run'; AU.genOn(true); render(); });
+    after(s, 4000, () => { s.n.ATS.pos = 'E'; AU.clunk(); s.log.push(logLine('ATS 비상 자동 절체')); render(); });
+  },
+  steps: [
+    { t: 'btn:buzzer', hint: '정전입니다', alarm: true, done: s => !s.buzzer },
+    { t: 'GEN', hint: '발전기 자동기동 확인', done: s => !!s.flags.genOk },
+    { t: 'ATS', hint: 'ATS 비상 절체 확인', done: s => !!s.flags.atsOk },
+    { t: 'btn:call', hint: '한전에 전화 (123)', done: s => !!s.flags.called },
+    { t: null, hint: '한전 복전 대기…', done: s => s.kepco },
+    { t: 'VCB', hint: '상용 복귀: VCB 투입', done: closed('VCB') },
+    { t: 'TR', hint: '변압기 확인 (탭)', done: s => !!s.trOk.TR },
+    { t: 'ACB', hint: 'ACB 투입', done: closed('ACB') },
+    { t: 'ATS', hint: 'ATS 상용 복귀', done: s => s.n.ATS.pos === 'N' && s.flags.atsOk },
+    { t: 'G12', hint: '일반 분기 하나씩 투입', done: live('G12') },
+    { t: 'G34', hint: '일반 분기 하나씩 투입', done: live('G34') },
+    { t: 'GEN', hint: s => s.t < s.coolEnd ? '발전기 무부하 냉각운전 중…' : '발전기 정지', done: s => s.gen === 'off' && s.flags.genOk },
+    { t: 'btn:stamp', hint: '상용 복귀 완료. 일지 쓰셔야죠?', final: true, done: s => !!s.flags.stamped }
+  ],
+  facts: {
+    'btn:buzzer': '부저 OFF. 비상발전기는 정전을 감지하면 알아서 기동합니다.',
+    'GEN:ok': '비상발전기 자동기동 · 380V 60Hz 확립 ✓',
+    'ATS:ok': 'ATS 비상 절체 ✓ 지금은 비상부하(비상등·소방펌프·승강기)만 살아 있음.',
+    'btn:call': '한전 123: "배전선로 고장으로 복구 중입니다." 곧 들어온답니다.',
+    'kepco': '한전 복전! 상용 복귀는 수전 → 저압 → ATS 순서.',
+    'VCB:close': 'VCB 투입. UVR 트립은 복전 확인하고 다시 넣으면 끝.',
+    'TR:check': '변압기 웅— 2차 380V ✓',
+    'ACB:close': 'ACB 투입. ATS 상용측에 전압이 들어왔습니다.',
+    'ATS:back': '상용 복귀 ✓ (실제 ATS는 복귀 지연 뒤 자동으로 넘어감. 상용·비상은 인터록이라 동시 투입 불가.)',
+    'G12:close': '1·2층 점등.', 'G34:close': '3·4층 점등.',
+    'GEN:stop': '무부하 냉각운전 후 정지 ✓ 다음 정전 대비 자동 대기.'
+  }
+},
+{
+  n: 3, name: '구내 고장 (펑!)', start: 4 * 60 + 10, rows: 9, coordBad: true,
+  nodes: mainAt(.5, 0, true).concat([
+    { id: 'RELAY', type: 'relay', x: .17, y: .45, name: '계전기반' },
+    { id: 'VCBM', type: 'vcb', p: 'MOF', x: .5, y: 3, name: 'VCB', sub: '메인', closed: true },
+    { id: 'DS1', type: 'ds', p: 'VCBM', x: .25, y: 4, name: 'DS-1', closed: true },
+    { id: 'DS2', type: 'ds', p: 'VCBM', x: .75, y: 4, name: 'DS-2', closed: true },
+    { id: 'VCB1', type: 'vcb', p: 'DS1', x: .25, y: 5, name: 'VCB-1', closed: true },
+    { id: 'VCB2', type: 'vcb', p: 'DS2', x: .75, y: 5, name: 'VCB-2', closed: true, faulted: true },
+    { id: 'TR1', type: 'tr', p: 'VCB1', x: .25, y: 6, name: 'TR-1', sub: '전등' },
+    { id: 'TR2', type: 'tr', p: 'VCB2', x: .75, y: 6, name: 'TR-2', sub: '동력', fault: true },
+    { id: 'ACB1', type: 'acb', p: 'TR1', x: .25, y: 7, name: 'ACB-1', closed: true },
+    { id: 'ACB2', type: 'acb', p: 'TR2', x: .75, y: 7, name: 'ACB-2', closed: true },
+    { id: 'M12', type: 'mccb', p: 'ACB1', x: .1, y: 8, name: '1·2F', closed: true },
+    { id: 'M34', type: 'mccb', p: 'ACB1', x: .38, y: 8, name: '3·4F', closed: true },
+    { id: 'MP', type: 'mccb', p: 'ACB2', x: .62, y: 8, name: '펌프', closed: true },
+    { id: 'ME', type: 'mccb', p: 'ACB2', x: .9, y: 8, name: '승강기', closed: true }
+  ]),
+  loads: { F1: ['M12'], F2: ['M12'], F3: ['M34'], F4: ['M34'], B1: ['MP', 'ME'] },
+  init(s) {
+    s.kepco = true; s.intro = true; s.n.TR2.faultArmed = false;
+    s.trOk.TR1 = s.trOk.TR2 = true;
+    after(s, 1600, () => { s.intro = false; s.n.TR2.faultArmed = true; checkFaults(false); });
+  },
+  gate(s, id) { if (!s.flags.relayOk && id !== 'RELAY') return '계전기 표시부터 봐야 어디가 고장인지 알죠.'; },
+  steps: [
+    { t: null, hint: '04:10 조용한 새벽…', done: s => !s.intro },
+    { t: 'btn:buzzer', hint: '펑! 정전입니다', alarm: true, done: s => !s.buzzer },
+    { t: 'RELAY', hint: '계전기 표시 확인', done: s => !!s.flags.relayOk },
+    { t: 'DS2', hint: '고장 분기 분리: DS-2 개방', done: s => !s.n.DS2.closed },
+    { t: 'M12', hint: '분기부터 내리기 (부하측 → 전원측)', done: s => !s.n.M12.closed || s.n.VCBM.closed },
+    { t: 'M34', hint: '분기부터 내리기 (부하측 → 전원측)', done: s => !s.n.M34.closed || s.n.VCBM.closed },
+    { t: 'ACB1', hint: 'ACB-1 개방', done: s => !s.n.ACB1.closed || s.n.VCBM.closed },
+    { t: 'VCBM', hint: '메인 VCB 재투입', done: closed('VCBM') },
+    { t: 'TR1', hint: 'TR-1 확인 (탭)', done: s => !!s.trOk.TR1 },
+    { t: 'ACB1', hint: 'ACB-1 투입', done: live('ACB1') },
+    { t: 'M12', hint: '분기 하나씩 투입', done: live('M12') },
+    { t: 'M34', hint: '분기 하나씩 투입', done: live('M34') },
+    { t: 'btn:stamp', hint: '나머지 복전 완료. 일지!', final: true, done: s => !!s.flags.stamped }
+  ],
+  facts: {
+    'btn:buzzer': '부저 OFF. 이번엔 "펑" 소리가 났습니다. 우리 쪽 고장.',
+    'RELAY:ok': 'VCB(메인)·VCB-2 둘 다 OCGR(51G, 지락과전류) 동작 → 고장점은 TR-2(동력) 피더. 메인까지 같이 떨어진 건 보호협조 문제. 표시 기록 후 리셋.',
+    'DS2:open': 'DS-2 개방 ✓ DS는 무부하에서만 — VCB-2가 이미 떨어져 있어서 OK.',
+    'M12:open': '개방은 부하측 → 전원측. 다시 넣을 때 한꺼번에 돌입하지 않게.',
+    'M34:open': '3·4F 분기 개방.',
+    'ACB1:open': 'ACB-1 개방. 이제 변압기 2차는 무부하.',
+    'VCBM:close': '메인 재투입. 고장 분기는 DS-2로 떨어져 있으니 안전.',
+    'TR1:check': 'TR-1 웅— 2차 380V ✓',
+    'ACB1:close': 'ACB-1 투입.',
+    'M12:close': '1·2층 점등.', 'M34:close': '3·4층 점등. 동력(펌프·승강기)은 절연저항 측정 후 복구 — 아침에 업체 호출.'
+  }
+}
+];
+
+/* ───────── 상태 ───────── */
+let S = null;
+const $ = id => document.getElementById(id);
+
+function newState(def) {
+  const s = { def, t: 0, clock: def.start * 60, kepco: false, buzzer: false, gen: 'off', n: {}, trOk: {}, flags: {},
+    timers: [], log: [], mistakes: 0, ops: 0, intro: false, coolEnd: 0, relay: {}, toastUntil: 0, lastBeep: -1e9, overlay: null, finalLogged: false };
+  def.nodes.forEach(o => { s.n[o.id] = Object.assign({}, o); });
+  s.kids = {};
+  def.nodes.forEach(o => {
+    if (o.type === 'ats') { (s.kids[o.pN] = s.kids[o.pN] || []).push({ id: o.id, via: 'N' }); (s.kids[o.pE] = s.kids[o.pE] || []).push({ id: o.id, via: 'E' }); }
+    else if (o.p) (s.kids[o.p] = s.kids[o.p] || []).push({ id: o.id });
+  });
+  return s;
+}
+function after(s, ms, fn) { s.timers.push({ at: s.t + ms, fn }); }
+
+const SWITCHES = ['lbs', 'ds', 'vcb', 'acb', 'mccb'];
+function isLive(s, id) {
+  const n = s.n[id]; if (!n) return false;
+  switch (n.type) {
+    case 'src': return s.kepco;
+    case 'gen': return s.gen === 'run';
+    case 'relay': return false;
+    case 'ats': return isLive(s, n.pos === 'N' ? n.pN : n.pE);
+    default:
+      if (SWITCHES.includes(n.type) && !n.closed) return false;
+      return isLive(s, n.p);
+  }
+}
+function srcUp(s, id) { // 맨 위 전원이 살아 있나
+  const n = s.n[id];
+  if (n.type === 'src') return s.kepco;
+  if (n.type === 'gen') return s.gen === 'run';
+  if (n.type === 'ats') return srcUp(s, n.pos === 'N' ? n.pN : n.pE);
+  return srcUp(s, n.p);
+}
+// id 아래(열린 개폐기에서 멈춤)에 투입돼 있는 저압 차단기(ACB·MCCB)
+function closedLoadsBelow(s, id) {
+  const out = [];
+  (function walk(pid) {
+    (s.kids[pid] || []).forEach(k => {
+      const c = s.n[k.id];
+      if (c.type === 'ats' && c.pos !== k.via) return;
+      if (SWITCHES.includes(c.type) && !c.closed) return;
+      if (c.type === 'acb' || c.type === 'mccb') out.push(c);
+      walk(c.id);
+    });
+  })(id);
+  return out;
+}
+function firstKidBreaker(s, id) { const k = (s.kids[id] || [])[0]; return k ? s.n[k.id] : null; }
+function litFloors(s) {
+  const L = s.def.loads, out = [];
+  ['F1', 'F2', 'F3', 'F4', 'B1'].forEach(f => { if ((L[f] || []).some(id => isLive(s, id))) out.push(f); });
+  return out;
+}
+function label(n) { return n.type === 'mccb' ? `MCCB ${n.name}` : n.name; }
+function clockStr(s) { const m = Math.floor(s.clock / 60) % (24 * 60); return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+function logLine(text, bad) { return { at: clockStr(S), text, bad: !!bad }; }
+
+function curStep(s) { return s.def.steps.find(st => !st.done(s)); }
+
+/* ───────── 조작 ───────── */
+function toast(msg, ms = 5200) { if (!msg) return; S.toast = msg; S.toastUntil = S.t + ms; renderToast(); }
+function fact(key) { toast(S.def.facts[key]); }
+function nudge(msg) {
+  AU.nope(); toast(msg, 3000);
+  const h = $('head'); h.classList.remove('nudge'); void h.offsetWidth; h.classList.add('nudge');
+}
+const PHONE = {
+  order: ['너 지금 뭐 올렸어?', 'CCTV로 다 보고 있다. 그거 아래부터 올리는 거 아니다.', '야, 위가 죽어 있는데 그걸 왜 먼저 올려?'],
+  inrush: ['분기 다 물려 놓고 위에서 넣으면 어떡해!', '그렇게 넣으면 돌입전류로 또 떨어진다.'],
+  tr: ['변압기 2차 전압은 보고 넣는 거지?'],
+  ds: ['DS를 부하 걸린 채로 만져?!', '방금 그 번쩍, 너 눈썹 괜찮냐?'],
+  fault: ['고장 난 데를 다시 넣으면 어떡해!!', '방금 그 펑 소리, 내 집까지 들렸다.'],
+  iso: ['고장 분기는 건드리지 마라.'],
+  lost: ['멀쩡히 켜져 있는 걸 왜 내려?'],
+  ats: ['상용측 전압도 없는데 넘기면 어떡해!'],
+  genload: ['비상부하 물려 있는데 발전기를 세워?!'],
+  cool: ['뜨거운 엔진을 바로 세우게?']
+};
+const LESSON = {
+  order: '투입은 전원측 → 부하측. 위가 살아 있는 걸 보고 바로 아래 하나씩.',
+  inrush: '복전 때는 분기(아래)를 내려 둔 채 위부터 넣고, 분기는 하나씩.',
+  tr: '변압기가 살면 웅— 소리와 2차 전압부터 확인하고 저압 투입.',
+  ds: 'DS(단로기)는 무부하에서만. 열 땐 차단기 먼저 → DS, 넣을 땐 DS 먼저 → 차단기.',
+  fault: '고장 원인(절연저항 측정 등) 확인 전 재투입 금지. 고장 분기는 분리.',
+  iso: '고장 분기는 절연저항 측정 전까지 투입 금지. 아침에 업체 호출.',
+  lost: '개방은 계획이 있을 때만. 갑자기 끄면 민원 전화가 옵니다.',
+  ats: 'ATS 상용 복귀는 상용측(ACB 2차) 전압이 들어온 뒤에.',
+  genload: '발전기 정지는 ATS가 상용으로 돌아간 뒤에.',
+  cool: '발전기는 무부하 냉각운전 후 정지.'
+};
+function penalty(kind, what, opt = {}) {
+  const s = S; s.mistakes++;
+  s.log.push(logLine(`✗ ${what}`, true));
+  const lines = PHONE[kind]; const msg = lines[Math.floor(Math.random() * lines.length)];
+  const show = () => {
+    s.overlay = 'phone';
+    $('phoneWho').textContent = opt.who || '반장님';
+    $('phoneMsg').textContent = '"' + msg + '"';
+    $('phoneLesson').textContent = LESSON[kind];
+    $('phone').classList.remove('hidden'); AU.ring();
+  };
+  if (opt.arc) {
+    AU.arc(); const f = $('flash'); f.textContent = '파지직!'; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+    const a = $('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake');
+    s.overlay = 'wait'; setTimeout(show, 650);
+  } else {
+    const a = $('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake');
+    show();
+  }
+  render();
+}
+function arcFx() {
+  AU.arc(); const f = $('flash'); f.textContent = '펑!'; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+  const a = $('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake');
+}
+
+function tapNode(id) {
+  const s = S; if (!s || s.overlay) return;
+  const n = s.n[id]; if (!n) return;
+  if (s.intro) return nudge('…?');
+  const passive = { src: '한전 22.9kV-Y 배전선로에서 받는 특고압.', mof: 'MOF: 한전 전력량계용 계기용변성기. 손대는 거 아닙니다.', la: 'LA(피뢰기): 낙뢰·개폐 서지를 대지로 흘려보냄.', load: '비상부하: 비상등·소방펌프·비상용 승강기. ATS 2차에 물려 있음.' };
+  if (passive[n.type]) return toast(passive[n.type], 3500);
+  if (s.buzzer) return nudge('일단 부저부터 끄고요.');
+  const g = s.def.gate && s.def.gate(s, id); if (g) return nudge(g);
+  if (n.type === 'tr') return tapTR(n);
+  if (n.type === 'gen') return tapGEN(n);
+  if (n.type === 'ats') return tapATS(n);
+  if (n.type === 'relay') return tapRelay(n);
+  return n.closed ? tryOpen(n) : tryClose(n);
+}
+
+function tryClose(n) {
+  const s = S, parentLive = isLive(s, n.p);
+  if (n.type === 'ds') {
+    const b = firstKidBreaker(s, n.id);
+    if (parentLive && b && b.closed) return penalty('ds', `${n.name} 부하 상태 투입`, { arc: true });
+    return commit(n, true);
+  }
+  if (n.faulted) {
+    if (!parentLive) return penalty('iso', `고장 분기 ${n.name} 투입 시도`);
+    return commit(n, true); // 고장점으로 투입 → checkFaults가 펑
+  }
+  if (!parentLive) {
+    if (!srcUp(s, n.p)) return nudge('아직 전원이 없어요. 한전 복전 대기.');
+    return penalty('order', `${label(n)} 먼저 투입 (전원측 미투입)`);
+  }
+  const below = closedLoadsBelow(s, n.id);
+  if (below.length) return penalty('inrush', `분기 물린 채 ${label(n)} 투입`);
+  const up = s.n[n.p];
+  if (n.type === 'acb' && up.type === 'tr' && !s.trOk[up.id]) return penalty('tr', `${up.name} 확인 없이 ${n.name} 투입`);
+  commit(n, true);
+}
+function tryOpen(n) {
+  const s = S;
+  if (n.type === 'ds') {
+    const b = firstKidBreaker(s, n.id);
+    if (isLive(s, n.p) && b && b.closed) return penalty('ds', `${n.name} 부하 상태 개방`, { arc: true });
+  }
+  const before = litFloors(s);
+  commit(n, false);
+  const lost = before.filter(f => !litFloors(s).includes(f));
+  if (lost.length) penalty('lost', `${label(n)} 개방 → ${lost.join('·')} 정전`, { who: lost[0] === 'B1' ? '관리사무소' : `${lost[0].slice(1)}층 사무실` });
+}
+function commit(n, on) {
+  const s = S; n.closed = on; if (on) n.trip = null;
+  s.ops++; s.log.push(logLine(`${label(n)} ${on ? '투입' : '개방'}`));
+  AU.clunk();
+  const lit0 = s._lit || [];
+  settle();
+  if (!checkFaults(true)) {
+    const lit = litFloors(s);
+    if (lit.length > lit0.length) AU.light();
+    fact(`${n.id}:${on ? 'close' : 'open'}`);
+  }
+  render();
+}
+function settle() { // 죽은 변압기는 다시 확인해야 함
+  const s = S;
+  Object.values(s.n).forEach(n => { if (n.type === 'tr' && !isLive(s, n.id)) s.trOk[n.id] = false; });
+  s._lit = litFloors(s);
+}
+function checkFaults(byPlayer) {
+  const s = S; let hit = false;
+  Object.values(s.n).forEach(n => {
+    if (!n.fault || n.faultArmed === false || !isLive(s, n.id)) return;
+    hit = true;
+    arcFx();
+    let p = s.n[n.p], first = true;
+    while (p) {
+      if (p.type === 'vcb' && p.closed) {
+        if (first || s.def.coordBad) { p.closed = false; p.trip = '51G'; s.relay[p.id] = '51G'; s.log.push(logLine(`${p.name} 트립 (OCGR 51G)`, true)); }
+        if (!s.def.coordBad) break;
+        first = false;
+      }
+      p = s.n[p.p];
+    }
+    s.buzzer = true; s.flags.relayOk = false;
+    settle();
+    if (byPlayer) { s.overlay = 'wait'; setTimeout(() => { S.overlay = null; penalty('fault', '고장 분기 재투입'); }, 650); }
+  });
+  return hit;
+}
+function tapTR(n) {
+  const s = S;
+  if (!isLive(s, n.id)) return nudge('아직 전압이 없어요.');
+  if (s.trOk[n.id]) return toast(`${n.name}: 이미 확인함. 2차 380V.`, 2500);
+  s.trOk[n.id] = true; s.ops++; s.log.push(logLine(`${n.name} 여자 확인 (2차 380V)`));
+  AU.hum(); fact(`${n.id}:check`); render();
+}
+function tapGEN(n) {
+  const s = S;
+  if (s.gen === 'off' && !s.flags.genOk) return nudge('자동기동 중… 잠깐만요.');
+  if (s.gen === 'start') return nudge('크랭킹 중… 곧 섭니다.');
+  if (s.gen === 'run' && !s.flags.genOk) { s.flags.genOk = true; s.ops++; s.log.push(logLine('발전기 기동 확인 (380V 60Hz)')); AU.light(); fact('GEN:ok'); return render(); }
+  if (s.gen === 'run') {
+    if (s.n.ATS.pos === 'E') return penalty('genload', '비상부하 운전 중 발전기 정지 시도');
+    if (s.t < s.coolEnd) return penalty('cool', '냉각운전 없이 발전기 정지 시도');
+    s.gen = 'off'; AU.genOn(false); s.ops++; s.log.push(logLine('발전기 냉각운전 후 정지')); fact('GEN:stop'); return render();
+  }
+  toast('발전기: 자동 대기.', 2000);
+}
+function tapATS(n) {
+  const s = S;
+  if (n.pos === 'N' && !s.flags.atsOk) return nudge('아직 절체 전이에요.');
+  if (n.pos === 'E' && !s.flags.atsOk) { s.flags.atsOk = true; s.ops++; s.log.push(logLine('ATS 비상측 절체 확인')); AU.light(); fact('ATS:ok'); return render(); }
+  if (n.pos === 'E') {
+    if (!isLive(s, n.pN)) return penalty('ats', '상용측 무전압에서 ATS 상용 복귀 시도');
+    n.pos = 'N'; s.ops++; s.log.push(logLine('ATS 상용 복귀')); AU.clunk();
+    s.coolEnd = s.t + 5000; fact('ATS:back'); return render();
+  }
+  toast('ATS: 상용 운전 중.', 2000);
+}
+function tapRelay() {
+  const s = S;
+  const ks = Object.keys(s.relay);
+  if (!ks.length) return toast('계전기: 동작 표시 없음.', 2500);
+  ks.forEach(k => s.log.push(logLine(`계전기 표시 기록: ${s.n[k].name} OCGR(51G)`)));
+  s.relay = {}; s.flags.relayOk = true; s.ops++; s.log.push(logLine('계전기 리셋'));
+  AU.light(); fact('RELAY:ok'); render();
+}
+function press(act) {
+  const s = S; if (!s || s.overlay) return;
+  const st = curStep(s); if (!st || st.t !== 'btn:' + act) return;
+  if (act === 'buzzer') { s.buzzer = false; s.ops++; s.log.push(logLine('경보 부저 정지')); fact('btn:buzzer'); }
+  if (act === 'check') {
+    s.flags.checked = true; s.ops++; s.log.push(logLine('상황 확인: 한전 측 정전 (구내 계전기 표시 없음)')); fact('btn:check');
+    after(s, 1500, () => { s.kepco = true; s.log.push(logLine('한전 복전 확인 (인입 22.9kV)')); AU.chime(); fact('kepco'); render(); });
+  }
+  if (act === 'call') {
+    s.flags.called = true; s.ops++; s.log.push(logLine('한전(123) 통화: 배전선로 고장 복구 중')); AU.ring(); fact('btn:call');
+    after(s, 2500, () => { s.kepco = true; s.log.push(logLine('한전 복전 확인')); AU.chime(); fact('kepco'); render(); });
+  }
+  if (act === 'stamp') { s.flags.stamped = true; openJournal(); }
+  render();
+}
+
+/* ───────── 화면 ───────── */
+const BTN = { buzzer: ['🔕 부저 정지', ''], check: ['📋 상황 확인', 'blue'], call: ['📞 한전 123 전화', 'blue'], stamp: ['🖋 운전일지 도장 쾅', 'gold'] };
+function render() {
+  const s = S; if (!s) return;
+  const st = curStep(s);
+  if (st && st.final && !s.finalLogged) { s.finalLogged = true; s.log.push(logLine('복전 완료')); AU.chime(); }
+  $('clock').textContent = clockStr(s);
+  $('stageBtn').textContent = `${s.def.n}. ${s.def.name} ▾`;
+  $('miss').textContent = s.mistakes ? `실수 ${s.mistakes}` : '';
+  $('mute').textContent = save.muted ? '🔇' : '🔊';
+  const h = $('head');
+  const hint = st ? (typeof st.hint === 'function' ? st.hint(s) : st.hint) : '';
+  if (h.textContent !== hint) h.textContent = hint;
+  h.classList.toggle('alarm', !!(st && st.alarm));
+  h.classList.toggle('done', !!(st && st.final));
+  const acts = $('acts');
+  let html;
+  if (st && st.t && st.t.startsWith('btn:')) {
+    const k = st.t.slice(4), b = BTN[k];
+    html = `<button class="btn glow ${b[1]}" id="btn-${k}" data-act="${k}">${b[0]}</button>`;
+  } else if (st && st.t) html = '<div class="tip">👆 빛나는 기기를 탭</div>';
+  else html = '<div class="tip">⏳</div>';
+  if (acts.dataset.h !== html) { acts.innerHTML = html; acts.dataset.h = html; }
+  renderBld(); renderSLD(st); renderToast();
+}
+function renderToast() {
+  const t = $('toast'); const on = S.toast && S.t < S.toastUntil;
+  if (on && t.textContent !== S.toast) t.textContent = S.toast;
+  t.classList.toggle('off', !on);
+}
+function renderBld() {
+  const s = S, L = s.def.loads, em = (L.em || []).some(id => isLive(s, id));
+  document.querySelectorAll('#bld .fl').forEach(el => {
+    const f = el.dataset.f, on = (L[f] || []).some(id => isLive(s, id));
+    el.classList.toggle('on', on); el.classList.toggle('em', !on && em && f !== 'B1');
+  });
+  $('sld').classList.toggle('dark', !litFloors(s).length);
+}
+
+function renderSLD(st) {
+  const s = S, box = $('sld'), W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
+  const rows = s.def.rows, top = 26, bot = 24, rowH = (H - top - bot) / (rows - 1);
+  const sz = Math.max(22, Math.min(40, rowH * .62, W / 6.2));
+  const P = n => [Math.round(n.x * W), Math.round(top + n.y * rowH)];
+  const hh = n => ({ src: sz * .36, lbs: sz * .42, ds: sz * .42, vcb: sz * .32, acb: sz * .29, mccb: sz * .24, tr: sz * .44, mof: sz * .22, la: sz * .2, gen: sz * .36, ats: sz * .3, load: 6 })[n.type] || sz * .3;
+  const C = on => on ? 'var(--live)' : 'var(--dead)';
+  let lines = '', syms = '', hits = '', over = '';
+  const hintId = st && st.t && !st.t.startsWith('btn:') ? st.t : null;
+
+  // 선
+  Object.values(s.n).forEach(n => {
+    const ins = n.type === 'ats' ? [[n.pN, -sz * .22], [n.pE, sz * .22]] : n.p ? [[n.p, 0]] : [];
+    ins.forEach(([pid, dx]) => {
+      const p = s.n[pid], [px, py] = P(p), [cx, cy] = P(n);
+      const sy = py + hh(p), ey = cy - hh(n), ex = cx + dx, on = isLive(s, pid);
+      let d;
+      if (Math.abs(px - ex) < 2) d = `M${px} ${sy}V${ey}`;
+      else { const my = ey - Math.min(rowH * .3, (ey - sy) * .5); d = `M${px} ${sy}V${my}H${ex}V${ey}`; }
+      lines += `<path d="${d}" stroke="${C(on)}" stroke-width="${on ? 3 : 2}" fill="none" ${on ? 'filter="url(#gl)"' : ''}/>`;
+    });
+  });
+
+  Object.values(s.n).forEach(n => {
+    const [X, Y] = P(n), lv = isLive(s, n.id), inLv = n.p ? isLive(s, n.p) : lv;
+    const lamp = (dx, on) => `<circle cx="${X + dx}" cy="${Y}" r="${Math.max(3.5, sz * .11)}" fill="${on ? 'var(--red)' : 'var(--green)'}" stroke="#000" stroke-width="1"/>`;
+    const lab = (dx = sz * .5, dy = 0) => {
+      const anchor = dx < 0 ? 'end' : 'start';
+      return `<text x="${X + dx}" y="${Y + dy - (n.sub ? 2 : -4)}" font-size="${Math.max(10, sz * .3)}" font-weight="700" fill="#dfe7f0" text-anchor="${anchor}">${n.name}</text>` +
+        (n.sub ? `<text x="${X + dx}" y="${Y + dy + 10}" font-size="${Math.max(8.5, sz * .23)}" fill="#8fa0b3" text-anchor="${anchor}">${n.sub}</text>` : '');
+    };
+    const h = hh(n);
+    switch (n.type) {
+      case 'src':
+        syms += `<circle cx="${X}" cy="${Y}" r="${h}" fill="#0b0f14" stroke="${C(lv)}" stroke-width="2"/><text x="${X}" y="${Y + 4}" font-size="${sz * .38}" text-anchor="middle" fill="${lv ? '#ffb020' : '#8fa0b3'}">~</text>` +
+          lab(sz * .5) + `<text x="${X - sz * .5}" y="${Y + 4}" font-size="10" text-anchor="end" fill="${lv ? '#ffb020' : '#ff6a6a'}">${lv ? '22.9kV' : '0kV'}</text>`;
+        break;
+      case 'lbs': case 'ds': {
+        const top = Y - h, bt = Y + h, bx = n.closed ? X : X + h * 1.0, by = n.closed ? top : top + h * .55;
+        syms += `<line x1="${X}" y1="${top}" x2="${X}" y2="${top + 3}" stroke="${C(inLv)}" stroke-width="2.5"/>` +
+          `<circle cx="${X}" cy="${top + 3}" r="2.5" fill="${C(inLv)}"/>` +
+          `<line x1="${X}" y1="${bt}" x2="${bx}" y2="${by + 3}" stroke="${C(lv)}" stroke-width="3" stroke-linecap="round"/>` +
+          `<circle cx="${X}" cy="${bt}" r="2.5" fill="${C(lv)}"/>` +
+          (n.type === 'lbs' ? `<circle cx="${(X + bx) / 2}" cy="${(bt + by) / 2 + 2}" r="3.2" fill="#0b0f14" stroke="${C(lv)}" stroke-width="1.5"/>` : '') +
+          lamp(-sz * .55, n.closed) + lab(sz * .5 + (n.closed ? 0 : h * .6));
+        break;
+      }
+      case 'vcb': case 'acb': case 'mccb': {
+        const a = h * 2;
+        syms += `<rect x="${X - h}" y="${Y - h}" width="${a}" height="${a}" rx="3" fill="${n.closed ? '#c22b2b' : '#1c8a4a'}" stroke="${C(inLv)}" stroke-width="2.5"/>`;
+        if (n.type === 'vcb') syms += `<text x="${X}" y="${Y + 3.5}" font-size="9" text-anchor="middle" fill="#fff" opacity=".7">${n.closed ? 'ON' : 'OFF'}</text>`;
+        if (n.type === 'mccb') syms += `<text x="${X}" y="${Y + h + 13}" font-size="${Math.max(10, sz * .3)}" font-weight="700" text-anchor="middle" fill="${lv ? '#ffe08a' : '#dfe7f0'}">${n.name}</text>`;
+        else syms += lab(sz * .5);
+        if (n.trip) syms += `<text x="${X - h - 4}" y="${Y + 4}" font-size="10" font-weight="800" text-anchor="end" fill="var(--warn)">${n.trip === 'UVR' ? 'UVR 트립' : '트립'}</text>`;
+        break;
+      }
+      case 'tr': {
+        const r = h * .55;
+        syms += `<circle cx="${X}" cy="${Y - r * .62}" r="${r}" fill="none" stroke="${C(lv)}" stroke-width="2.5"/><circle cx="${X}" cy="${Y + r * .62}" r="${r}" fill="none" stroke="${C(lv)}" stroke-width="2.5"/>` + lab(sz * .5);
+        if (n.fault && s.def.coordBad && !s.intro) syms += `<text x="${X - r - 4}" y="${Y + 4}" font-size="15" text-anchor="end">⚡</text>`;
+        if (s.trOk[n.id] && lv) syms += `<text x="${X - r - 4}" y="${Y + 4}" font-size="10" font-weight="700" text-anchor="end" fill="var(--green)">✓380V</text>`;
+        break;
+      }
+      case 'mof':
+        syms += `<rect x="${X - sz * .4}" y="${Y - h}" width="${sz * .8}" height="${h * 2}" rx="2" fill="#0b0f14" stroke="${C(lv)}" stroke-width="2"/><text x="${X}" y="${Y + 3.5}" font-size="9" text-anchor="middle" fill="#8fa0b3">MOF</text>` +
+          `<text x="${X + sz * .5}" y="${Y + 4}" font-size="9" fill="#8fa0b3">한전 계량용</text>`;
+        break;
+      case 'la':
+        syms += `<rect x="${X - 5}" y="${Y - h}" width="10" height="${h * 2}" fill="#0b0f14" stroke="${C(lv)}" stroke-width="1.5"/>` +
+          `<path d="M${X} ${Y + h}V${Y + h + 5}M${X - 7} ${Y + h + 5}H${X + 7}M${X - 4.5} ${Y + h + 8}H${X + 4.5}M${X - 2} ${Y + h + 11}H${X + 2}" stroke="#8fa0b3" stroke-width="1.5"/>` +
+          `<text x="${X + 9}" y="${Y + 3}" font-size="9" fill="#8fa0b3">LA</text>`;
+        break;
+      case 'gen':
+        syms += `<circle cx="${X}" cy="${Y}" r="${h}" fill="#0b0f14" stroke="${C(lv)}" stroke-width="2.5"/><text x="${X}" y="${Y + 5}" font-size="${sz * .42}" font-weight="800" text-anchor="middle" fill="${lv ? '#ffb020' : '#8fa0b3'}">G</text>` +
+          `<text x="${X}" y="${Y - h - 6}" font-size="10" font-weight="700" text-anchor="middle" fill="#dfe7f0">발전기</text>` +
+          `<text x="${X}" y="${Y + h + 12}" font-size="9" text-anchor="middle" fill="${s.gen === 'run' ? (s.t < s.coolEnd ? '#7cc8ff' : 'var(--green)') : '#8fa0b3'}">${s.gen === 'run' ? (s.t < s.coolEnd ? '냉각운전' : '운전 380V') : s.gen === 'start' ? '기동 중…' : '정지'}</text>`;
+        break;
+      case 'ats': {
+        const w = sz * .62;
+        syms += `<rect x="${X - w}" y="${Y - h}" width="${w * 2}" height="${h * 2}" rx="4" fill="#0b0f14" stroke="${C(lv)}" stroke-width="2.5"/>` +
+          `<text x="${X}" y="${Y - 1}" font-size="9" font-weight="800" text-anchor="middle" fill="#dfe7f0">ATS</text>` +
+          `<text x="${X}" y="${Y + 9}" font-size="9" font-weight="800" text-anchor="middle" fill="${n.pos === 'N' ? '#9fd0ff' : '#ffb020'}">${n.pos === 'N' ? '상용' : '비상'}</text>`;
+        break;
+      }
+      case 'load':
+        syms += `<text x="${X}" y="${Y + 4}" font-size="10" font-weight="700" text-anchor="middle" fill="${lv ? '#ffe08a' : '#8fa0b3'}">${lv ? '💡' : '·'} ${n.name}</text>` +
+          `<text x="${X}" y="${Y + 16}" font-size="8.5" text-anchor="middle" fill="#8fa0b3">${n.sub}</text>`;
+        break;
+      case 'relay': {
+        const w = 34, hh2 = 22, any = Object.keys(s.relay).length > 0;
+        syms += `<rect x="${X - w}" y="${Y - hh2}" width="${w * 2}" height="${hh2 * 2}" rx="5" fill="#1a2330" stroke="${any ? 'var(--warn)' : '#3a4656'}" stroke-width="2"/>` +
+          `<text x="${X}" y="${Y - 7}" font-size="10" font-weight="700" text-anchor="middle" fill="#dfe7f0">계전기반</text>` +
+          `<circle cx="${X - 16}" cy="${Y + 8}" r="5" fill="${any ? 'var(--warn)' : '#2a3442'}"/><text x="${X - 8}" y="${Y + 11.5}" font-size="9" fill="#8fa0b3">51G</text>` +
+          `<text x="${X + 13}" y="${Y + 11.5}" font-size="9" fill="${any ? 'var(--warn)' : '#56657a'}">${any ? '동작' : '정상'}</text>`;
+        break;
+      }
+    }
+    if (!['la', 'mof', 'load', 'src'].includes(n.type)) {
+      const hw = n.type === 'relay' ? 40 : Math.min(34, W * .13), hhh = n.type === 'relay' ? 26 : Math.max(22, rowH * .46);
+      hits += `<rect data-id="${n.id}" x="${X - hw}" y="${Y - hhh}" width="${hw * 2}" height="${hhh * 2}" fill="transparent"/>`;
+    }
+    if (n.id === hintId) {
+      const r = n.type === 'relay' ? 44 : h + 10;
+      over += `<circle class="ring" cx="${X}" cy="${Y}" r="${r}"/>`;
+      const ax = n.type === 'relay' ? X + 50 : X + (n.type === 'mccb' ? h + 6 : -h - 12);
+      if (n.type !== 'mccb' && n.type !== 'relay' && !(n.trip || (s.trOk[n.id]))) over += `<text class="arrow" x="${ax}" y="${Y + 6}" font-size="17" text-anchor="end">👉</text>`;
+    }
+  });
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><defs><filter id="gl" filterUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>${lines}${syms}${over}${hits}</svg>`;
+}
+
+/* ───────── 일지 · 메뉴 ───────── */
+function openJournal() {
+  const s = S; s.overlay = 'journal';
+  const d = new Date(), ds = `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.`;
+  $('jmeta').textContent = `${ds} 당직 · 근무 ${s.def.n}: ${s.def.name}`;
+  $('jlog').innerHTML = s.log.map(l => `<li class="${l.bad ? 'bad' : ''}"><em>${l.at}</em><span>${l.text}</span></li>`).join('');
+  const mins = Math.max(1, Math.round((s.clock - s.def.start * 60) / 60));
+  $('jsum').textContent = `조작 ${s.ops}회 · 실수 ${s.mistakes}회 · 복구 ${mins}분`;
+  $('jboss').textContent = s.mistakes === 0 ? '반장님: "오~ 제법인데? 일지 깔끔하네."' : s.mistakes <= 2 ? '반장님: "됐다. 다음엔 순서 지키자."' : '반장님: "…아침에 얘기 좀 하자. (시말서 각)"';
+  const last = s.def.n >= STAGES.length;
+  $('next').textContent = last ? '근무표 보기' : '다음 근무 ▶';
+  $('journal').classList.remove('hidden');
+  const m = $('stampMark'); m.classList.remove('go'); void m.offsetWidth;
+  setTimeout(() => { m.classList.add('go'); AU.stamp(); }, 250);
+  const b = save.best[s.def.n];
+  save.best[s.def.n] = b == null ? s.mistakes : Math.min(b, s.mistakes);
+  save.unlocked = Math.max(save.unlocked, Math.min(STAGES.length, s.def.n + 1));
+  if (last) save.allClear = true;
+  persist();
+}
+function openMenu() {
+  if (S.overlay && S.overlay !== 'journal') return;
+  $('journal').classList.add('hidden');
+  S.overlay = 'menu';
+  $('menuList').innerHTML = STAGES.map(d => {
+    const lock = d.n > save.unlocked, b = save.best[d.n];
+    return `<button data-stage="${d.n}" ${lock ? 'disabled' : ''}>${d.n}. ${d.name} ${lock ? '🔒' : ''}<br><small>${b != null ? `최소 실수 ${b}회` : lock ? '앞 근무를 마치면 열림' : '아직 안 함'}</small></button>`;
+  }).join('') + (save.allClear ? '<div class="tip" style="margin:8px 0">v0.1 근무 끝. 계획정전·변압기 과열 근무는 준비 중.</div>' : '');
+  $('menu').classList.remove('hidden');
+}
+function start(n) {
+  ['phone', 'journal', 'menu'].forEach(id => $(id).classList.add('hidden'));
+  AU.genOn(false);
+  const def = STAGES[n - 1] || STAGES[0];
+  S = newState(def); def.init(S); settle();
+  save.last = def.n; persist();
+  render();
+}
+
+/* ───────── 입력 ───────── */
+document.addEventListener('pointerdown', () => AU.resume(), { passive: true });
+$('sld').addEventListener('click', e => { const el = e.target.closest('[data-id]'); if (el) tapNode(el.dataset.id); });
+$('acts').addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el) { AU.resume(); press(el.dataset.act); } });
+$('phoneOk').addEventListener('click', () => { $('phone').classList.add('hidden'); S.overlay = null; render(); });
+$('retry').addEventListener('click', () => start(S.def.n));
+$('next').addEventListener('click', () => { if (S.def.n >= STAGES.length) openMenu(); else start(S.def.n + 1); });
+$('stageBtn').addEventListener('click', openMenu);
+$('menuClose').addEventListener('click', () => { $('menu').classList.add('hidden'); S.overlay = S.flags.stamped ? null : null; render(); });
+$('menuList').addEventListener('click', e => { const b = e.target.closest('[data-stage]'); if (b && !b.disabled) start(+b.dataset.stage); });
+$('mute').addEventListener('click', () => { save.muted = !save.muted; AU.setMuted(save.muted); persist(); render(); });
+window.addEventListener('resize', () => render());
+document.addEventListener('touchmove', e => { if (!e.target.closest('.paper ol, .paper')) e.preventDefault(); }, { passive: false });
+
+/* ───────── 루프 ───────── */
+function tick(dt) {
+  const s = S; if (!s) return;
+  s.t += dt;
+  const fast = s.gen === 'run' && s.coolEnd && s.t < s.coolEnd; // 냉각운전 5분을 빨리감기
+  s.clock += dt / 1000 * (fast ? 60 : 12);
+  const due = s.timers.filter(x => x.at <= s.t);
+  if (due.length) { s.timers = s.timers.filter(x => x.at > s.t); due.forEach(x => x.fn()); render(); }
+  if (s.buzzer && s.t - s.lastBeep >= 500) { s.lastBeep = s.t; AU.beep(); }
+}
+let last = performance.now(), lastRender = 0;
+function frame(now) {
+  const dt = Math.min(100, now - last); last = now;
+  tick(dt);
+  if (now - lastRender > 250) { lastRender = now; $('clock').textContent = clockStr(S); renderToast(); if (S.coolEnd && Math.abs(S.t - S.coolEnd) < 300) render(); const st = curStep(S); if (st && typeof st.hint === 'function') { const h = st.hint(S); if ($('head').textContent !== h) render(); } }
+  requestAnimationFrame(frame);
+}
+
+/* ───────── 테스트용 ───────── */
+window.__game = {
+  get state() {
+    const s = S, st = curStep(s);
+    const nodes = {}; Object.values(s.n).forEach(n => { nodes[n.id] = { closed: n.closed, live: isLive(s, n.id), trip: n.trip || null, pos: n.pos }; });
+    return { stage: s.def.n, t: Math.round(s.t), clock: clockStr(s), kepco: s.kepco, buzzer: s.buzzer, gen: s.gen, step: st ? st.t : null, hint: $('head').textContent,
+      lit: litFloors(s), mistakes: s.mistakes, overlay: s.overlay, flags: Object.assign({}, s.flags), trOk: Object.assign({}, s.trOk), relay: Object.assign({}, s.relay), nodes, log: s.log.map(l => `${l.at} ${l.text}`) };
+  },
+  tap: id => tapNode(id), press: a => press(a),
+  advance(ms) { let left = ms; while (left > 0) { const d = Math.min(50, left); tick(d); left -= d; } render(); },
+  start: n => start(n), save: () => JSON.parse(JSON.stringify(save))
+};
+
+let first = 1;
+try { const q = new URLSearchParams(location.search).get('stage'); if (q && STAGES[+q - 1]) first = +q; else if (save.last && save.last <= save.unlocked) first = save.last; } catch (e) {}
+start(first);
+AU.resume();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
