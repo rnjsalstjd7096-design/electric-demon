@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#23262e">
+<title>차단기 내려! — 30초 분전반 두더지잡기</title>
+<meta name="description" content="달아오르는 차단기를 불나기 전에 탭해서 내리는 30초 반응 게임. 설명 없이 바로 시작.">
+<style>
+  html,body{margin:0;height:100%;background:#15171c;overflow:hidden;overscroll-behavior:none;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+  body{position:fixed;inset:0;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#fff}
+  #wrap{position:relative;margin:0 auto;width:100%;max-width:480px;height:100%;touch-action:none}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
+  #sa{position:absolute;top:0;left:0;width:0;height:0;padding-top:env(safe-area-inset-top,0px);visibility:hidden}
+  #mute{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;width:44px;height:44px;border:0;border-radius:22px;
+    background:rgba(0,0,0,.35);color:#fff;font-size:20px;line-height:44px;padding:0;cursor:pointer;touch-action:none;z-index:5}
+  #end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,11,16,.72);z-index:4;padding:16px;box-sizing:border-box}
+  #end.on{display:flex}
+  #card{width:100%;max-width:340px;background:#2b2f3a;border:3px solid #4a505f;border-radius:18px;padding:18px 18px 16px;box-sizing:border-box;
+    box-shadow:0 12px 40px rgba(0,0,0,.6);text-align:center;animation:pop .22s ease-out}
+  @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+  #endTitle{font-size:22px;font-weight:800;margin:0 0 6px}
+  #endScore{font-size:56px;font-weight:900;line-height:1;color:#ffd23f;margin:4px 0 2px;text-shadow:0 3px 0 #8a6a00}
+  #endSub{font-size:14px;color:#c9cdd8;margin:0 0 4px}
+  #endBest{font-size:15px;font-weight:700;color:#9fe1ff;margin:0 0 12px}
+  #endBest.new{color:#ffd23f}
+  #fact{font-size:14px;line-height:1.5;background:#1d2029;border-radius:12px;padding:10px 12px;margin:0 0 14px;text-align:left;color:#e8ebf2;word-break:keep-all}
+  #fact b{color:#ffd23f}
+  .btn{display:block;width:100%;border:0;border-radius:14px;font-size:19px;font-weight:800;padding:15px 0;margin:0 0 9px;cursor:pointer;touch-action:manipulation;font-family:inherit}
+  #again{background:#ffd23f;color:#2b2000;box-shadow:0 4px 0 #a98400}
+  #again:active{transform:translateY(2px);box-shadow:0 2px 0 #a98400}
+  #share{background:#3b4252;color:#fff;font-size:16px;padding:12px 0;margin:0;box-shadow:0 4px 0 #1f232c}
+  #share:active{transform:translateY(2px);box-shadow:0 2px 0 #1f232c}
+  #toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);transform:translateX(-50%);background:#ffd23f;color:#2b2000;
+    font-weight:800;font-size:15px;padding:10px 16px;border-radius:20px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:6;white-space:nowrap}
+  #toast.on{opacity:1}
+</style>
+<meta name="description" content="달아오르는 차단기를 불나기 전에 탭해서 내리는 30초 분전반 두더지잡기. 판이 끝나면 전기 상식 한 줄."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/breaker-whack/"><meta property="og:title" content="차단기 내려! — 30초 분전반 두더지잡기"><meta property="og:description" content="달아오르는 차단기를 불나기 전에 탭해서 내리는 30초 분전반 두더지잡기. 판이 끝나면 전기 상식 한 줄."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"></head>
+<body>
+<div id="wrap">
+  <div id="sa"></div>
+  <canvas id="c"></canvas>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  <div id="end">
+    <div id="card">
+      <div id="endTitle">시간 끝!</div>
+      <div id="endScore">0점</div>
+      <div id="endSub">차단기 0개 내림</div>
+      <div id="endBest">최고 0점</div>
+      <div id="fact"></div>
+      <button class="btn" id="again">다시 하기</button>
+      <button class="btn" id="share">결과 복사</button>
+    </div>
+  </div>
+  <div id="toast">복사했어요!</div>
+</div>
+<script>
+'use strict';
+// ───────── 저장 ─────────
+const SAVE_KEY='breaker-whack.save.v1';
+const save={best:0,mute:false,games:0,fi:0};
+try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s&&typeof s==='object')Object.assign(save,s);}catch(e){}
+function writeSave(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
+const URL_='https://rnjsalstjd7096-design.github.io/electric-demon/games/breaker-whack/';
+
+// ───────── 끝 화면 전기 상식 (FACTS.md와 글자 그대로 같음) ─────────
+const FACTS=[
+  '차단기는 과전류를 끊어 전선 화재를 막는 장치예요. 자주 떨어지면 차단기 탓이 아니라 부하·누전부터 의심하세요.',
+  '과부하 = 한 회로에 전기를 너무 많이 쓰는 것. 전열기 두 개를 멀티탭 하나에 꽂으면 그렇게 돼요.',
+  '단락(합선) = 두 선이 직접 붙어 순간 아주 큰 전류가 흐르는 것. 차단기가 즉시 떨어지는 게 정상이에요.',
+  '누전 = 전기가 전선 밖으로 새는 것. 사람 몸으로 흐르면 감전. 누전차단기는 30mA에서 0.03초 안에 끊어요.',
+  '떨어진 차단기를 바로 올리지 마세요. 원인을 모른 채 올리면 또 떨어지거나 더 위험해질 수 있어요.',
+  '올려도 또 떨어지면 플러그를 전부 뽑고 하나씩 꽂아 보세요. 어느 기기 때문인지 금방 나와요.',
+  '누전차단기의 시험 버튼(T)은 한 달에 한 번. 눌러서 철컥 떨어지면 정상이에요.',
+  '차단기 용량을 멋대로 키우면 안 돼요. 전선이 견디는 전류에 맞춘 것이라 전선이 먼저 타요.',
+  '차단기는 전선을 지키고, 누전차단기는 사람을 지켜요. 집 분전반엔 둘 다 있어야 해요.',
+  '분전반에서 타는 냄새·탄 자국이 보이면 메인 차단기를 내리고 전기 기술자를 부르세요. 직접 만지지 마세요.'
+];
+
+// ───────── 캔버스 ─────────
+const wrap=document.getElementById('wrap'),cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const muteBtn=document.getElementById('mute'),endEl=document.getElementById('end'),toastEl=document.getElementById('toast');
+let W=375,H=812,DPR=1,SAFE=0,L=null;
+function resize(){
+  const r=wrap.getBoundingClientRect();W=Math.round(r.width);H=Math.round(r.height);
+  DPR=Math.min(3,window.devicePixelRatio||1);cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  SAFE=document.getElementById('sa').offsetHeight||0;
+  layout();
+}
+function layout(){
+  const hudH=78,px=12,py=SAFE+hudH+6,pw=W-px*2,ph=H-py-14;
+  const cols=3,rows=4,gap=Math.round(Math.min(12,pw*0.03)),pad=Math.round(pw*0.045),bar=28;
+  const cw=(pw-pad*2-gap*(cols-1))/cols,ch=(ph-bar-pad*2-gap*(rows-1))/rows;
+  L={hudH,px,py,pw,ph,cols,rows,gap,pad,bar,cw,ch,cells:[]};
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    L.cells.push({x:px+pad+c*(cw+gap),y:py+bar+pad+r*(ch+gap),w:cw,h:ch});
+  }
+  if(G)G.cells.forEach((b,i)=>Object.assign(b,L.cells[i]));
+}
+window.addEventListener('resize',resize);
+
+// ───────── 난수 ─────────
+let seed=(Date.now()%2147483647)|0;
+function rnd(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
+function rr(a,b){return a+(b-a)*rnd();}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return v<a?a:v>b?b:v;}
+
+// ───────── 소리 (WebAudio 합성) ─────────
+let AC=null,master=null,noiseBuf=null;
+function audioInit(){
+  if(AC){if(AC.state==='suspended')AC.resume();return;}
+  try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    master=AC.createGain();master.gain.value=save.mute?0:0.5;master.connect(AC.destination);
+    noiseBuf=AC.createBuffer(1,AC.sampleRate*0.8,AC.sampleRate);
+    const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  }catch(e){AC=null;}
+}
+function tone(type,f0,f1,dur,vol,delay){
+  if(!AC||save.mute)return;const t=AC.currentTime+(delay||0);
+  const o=AC.createOscillator(),g=AC.createGain();o.type=type;
+  o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+dur);
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.02);
+}
+function noise(dur,freq,q,vol,delay){
+  if(!AC||save.mute)return;const t=AC.currentTime+(delay||0);
+  const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
+  s.buffer=noiseBuf;f.type='bandpass';f.frequency.value=freq;f.Q.value=q;
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+dur+0.02);
+}
+const sfx={
+  click(){noise(0.03,1800,1,0.9);tone('square',260,90,0.07,0.3,0.02);noise(0.06,420,1,0.6,0.035);},        // 철컥
+  up(){tone('triangle',150,320,0.07,0.15);noise(0.03,1200,1,0.3,0.04);},                                   // 복구 (톡)
+  tick(){tone('triangle',220,140,0.05,0.12);},                                                              // 멀쩡한 거 탭
+  sizzle(v){noise(0.07,2800,1.2,v);},                                                                       // 지직
+  warn(){tone('square',1100,1100,0.07,0.13);tone('square',880,880,0.07,0.13,0.09);tone('square',1100,1100,0.07,0.13,0.18);tone('square',880,880,0.07,0.13,0.27);}, // 누전!
+  fire(){noise(0.5,300,0.5,1.0);tone('sine',180,35,0.45,0.6);noise(0.7,4000,0.8,0.35,0.05);tone('sawtooth',90,40,0.5,0.2,0.02);}, // 펑
+  bonus(){tone('triangle',660,660,0.08,0.18);tone('triangle',880,880,0.08,0.18,0.08);tone('triangle',1320,1320,0.14,0.18,0.16);},
+  beep(hi){tone('square',hi?1500:1000,hi?1500:1000,0.06,0.12);},
+  start(){tone('triangle',520,780,0.12,0.15);},
+  timeUp(){tone('sine',1200,1200,0.45,0.25);tone('sine',1200,1200,0.45,0.25,0.5);},
+  burn(){tone('sawtooth',220,55,0.8,0.3);noise(0.8,500,0.6,0.5);}
+};
+function setMute(m){save.mute=m;writeSave();muteBtn.textContent=m?'🔇':'🔊';if(master)master.gain.value=m?0:0.5;}
+setMute(!!save.mute);
+muteBtn.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();audioInit();setMute(!save.mute);});
+document.addEventListener('keydown',e=>{if(e.key==='m'||e.key==='M')setMute(!save.mute);});
+
+// ───────── 게임 ─────────
+const ROUND=30,STEP=1/120,START_CELL=4;
+let G=null;
+function newGame(mode){
+  G={mode,t:0,timeLeft:ROUND,score:0,trips:0,elbHits:0,lives:3,spawnT:0.4,szT:0,lastSec:ROUND+1,
+     shake:0,flash:0,overAt:-1,reason:'',parts:[],floats:[],fact:'',endShown:false,
+     cells:L.cells.map((c,i)=>({i,x:c.x,y:c.y,w:c.w,h:c.h,st:'idle',p:0,dT:0,dDur:1,elb:false,handle:0,fireT:0,soot:false,wob:0,downT:0,restore:1.2,warned:false}))};
+  if(mode==='ready'){const b=G.cells[START_CELL];b.st='heat';b.p=0.5;}
+}
+function diff(){return clamp(G.t/ROUND,0,1);}
+function activeCount(){return G.cells.filter(b=>b.st==='heat'||b.st==='danger').length;}
+function spawn(){
+  const idle=G.cells.filter(b=>b.st==='idle');if(!idle.length)return;
+  const b=idle[Math.floor(rnd()*idle.length)];
+  b.st='heat';b.p=0;b.elb=G.t>5&&rnd()<0.22;b.warned=false;
+}
+function startPlay(fromReady){
+  const keep=fromReady?G.cells[START_CELL]:null;
+  G.mode='play';G.t=0;G.timeLeft=ROUND;G.spawnT=keep?0.9:0.1;
+  if(keep&&keep.st==='heat')keep.p=0.3;
+  sfx.start();
+}
+function tripCell(b){
+  b.st='down';b.downT=0;b.handle=0;b.restore=lerp(1.3,0.9,diff());
+  const pts=b.elb?3:1;G.score+=pts;G.trips++;if(b.elb)G.elbHits++;
+  sfx.click();if(b.elb)sfx.bonus();
+  G.floats.push({x:b.x+b.w/2,y:b.y+b.h*0.35,s:b.elb?'+3 누전 차단!':'+1',t:0,col:b.elb?'#9fe1ff':'#ffd23f'});
+  spark(b.x+b.w/2,b.y+b.h*0.55,b.elb?10:5,'#fff8c2');
+}
+function tapAt(x,y){
+  audioInit();
+  if(G.mode==='over')return;
+  if(G.mode==='ready'){
+    const b=G.cells.find(c=>x>=c.x&&x<c.x+c.w&&y>=c.y&&y<c.y+c.h);
+    startPlay(true);
+    if(b&&b.i===START_CELL)tripCell(b);
+    return;
+  }
+  const b=G.cells.find(c=>x>=c.x-3&&x<c.x+c.w+3&&y>=c.y-3&&y<c.y+c.h+3);
+  if(!b)return;
+  tapCell(b);
+}
+function tapCell(b){
+  if(G.mode!=='play')return;
+  if(b.st==='heat'||b.st==='danger')tripCell(b);
+  else if(b.st==='idle'){b.wob=0.25;sfx.tick();}
+}
+function loseLife(b){
+  G.lives--;G.shake=10;G.flash=0.5;sfx.fire();
+  b.st='fire';b.fireT=0;b.soot=true;b.handle=1;
+  for(let i=0;i<16;i++)smoke(b.x+b.w/2,b.y+b.h*0.3);
+  spark(b.x+b.w/2,b.y+b.h*0.5,18,'#ffb347');
+  G.floats.push({x:b.x+b.w/2,y:b.y+b.h*0.2,s:'펑!',t:0,col:'#ff5a3c'});
+  if(G.lives<=0){G.overAt=G.t+0.9;G.reason='burn';}
+}
+function endGame(){
+  G.mode='over';save.games++;
+  const isNew=G.score>save.best;if(isNew)save.best=G.score;
+  G.fact=FACTS[save.fi%FACTS.length];save.fi=(save.fi+1)%FACTS.length;writeSave();
+  if(G.reason==='burn')sfx.burn();else sfx.timeUp();
+  G.isNew=isNew;
+  setTimeout(showEnd,500);
+}
+function showEnd(){
+  if(!G||G.mode!=='over'||G.endShown)return;G.endShown=true;
+  document.getElementById('endTitle').textContent=G.reason==='burn'?'분전반이 타 버렸다 💥':'시간 끝! ⏱';
+  document.getElementById('endScore').textContent=G.score+'점';
+  document.getElementById('endSub').textContent='차단기 '+G.trips+'개 내림'+(G.elbHits?' · 누전 '+G.elbHits+'번 잡음':'');
+  const be=document.getElementById('endBest');be.textContent=G.isNew?'🏆 새 기록!':'최고 '+save.best+'점';be.className=G.isNew?'new':'';
+  document.getElementById('fact').innerHTML='<b>💡 전기 상식</b> '+G.fact;
+  endEl.classList.add('on');
+}
+function hideEnd(){endEl.classList.remove('on');}
+function restart(){hideEnd();newGame('play');startPlay(false);}
+document.getElementById('again').addEventListener('click',()=>{audioInit();restart();});
+document.getElementById('share').addEventListener('click',async()=>{
+  const txt='⚡ 차단기 내려! 30초에 '+G.score+'점 (차단기 '+G.trips+'개 내림'+(G.elbHits?', 누전 '+G.elbHits+'번':'')+')\n최고 '+save.best+'점\n설치 없이 바로 👉 '+URL_;
+  let ok=false;
+  try{await navigator.clipboard.writeText(txt);ok=true;}catch(e){}
+  if(!ok){try{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();ok=document.execCommand('copy');ta.remove();}catch(e){}}
+  toast(ok?'복사했어요! 붙여넣기 하세요':'복사가 막혀 있어요');
+});
+let toastT=null;
+function toast(s){toastEl.textContent=s;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),1600);}
+
+// ───────── 입력 ─────────
+cv.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  const r=cv.getBoundingClientRect();
+  tapAt((e.clientX-r.left)*(W/r.width),(e.clientY-r.top)*(H/r.height));
+});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('keydown',e=>{
+  if(e.repeat)return;
+  if(G.mode==='ready'&&(e.key===' '||e.key==='Enter')){audioInit();startPlay(true);return;}
+  const k=parseInt(e.key,10);if(k>=1&&k<=9&&G.mode==='play'){const b=G.cells[k-1];if(b)tapCell(b);}
+  if(e.key==='r'&&G.mode==='over')restart();
+});
+
+// ───────── 갱신 ─────────
+function update(dt){
+  G.t+=dt;
+  for(const f of G.floats)f.t+=dt;G.floats=G.floats.filter(f=>f.t<0.8);
+  for(const p of G.parts){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.smoke){p.r+=dt*14;p.vx*=0.98;}else p.vy+=500*dt;}
+  G.parts=G.parts.filter(p=>p.t<p.life);
+  G.shake*=Math.pow(0.001,dt);G.flash*=Math.pow(0.01,dt);
+  for(const b of G.cells){
+    const target=(b.st==='down'||b.st==='fire')?1:0;
+    b.handle+=(target-b.handle)*Math.min(1,dt*28);
+    if(b.wob>0)b.wob-=dt;
+  }
+  if(G.mode==='ready'){const b=G.cells[START_CELL];b.p=0.55+Math.sin(G.t*4)*0.25;return;}
+  if(G.mode==='over')return;
+  const d=diff();
+  const heatDur=lerp(1.5,0.72,d),dangerDur=lerp(1.4,0.72,d),spawnInt=lerp(1.05,0.36,d),maxActive=1+Math.floor(d*3.4);
+  // 시간
+  G.timeLeft-=dt;
+  const sec=Math.ceil(G.timeLeft);
+  if(sec!==G.lastSec){G.lastSec=sec;if(sec<=10&&sec>0)sfx.beep(sec<=3);}
+  if(G.timeLeft<=0&&G.overAt<0){G.timeLeft=0;G.reason='time';G.overAt=G.t;}
+  // 차단기
+  let nDanger=0,nHeat=0,maxP=0;
+  for(const b of G.cells){
+    if(b.st==='heat'){b.p+=dt/(b.elb?heatDur*0.85:heatDur);nHeat++;maxP=Math.max(maxP,b.p);
+      if(b.p>=1){b.p=1;b.st='danger';b.dT=0;b.dDur=b.elb?dangerDur*0.7:dangerDur;if(b.elb)sfx.warn();}
+    }else if(b.st==='danger'){b.dT+=dt;nDanger++;if(b.dT>=b.dDur&&G.overAt<0)loseLife(b);}
+    else if(b.st==='fire'){b.fireT+=dt;
+      if(rnd()<dt*18)smoke(b.x+b.w/2+rr(-b.w*0.3,b.w*0.3),b.y+b.h*0.25);
+      if(rnd()<dt*12)spark(b.x+b.w/2,b.y+b.h*0.45,2,'#ffb347');
+      if(b.fireT>=1.1){b.st='down';b.downT=0;b.restore=1.4;}
+    }else if(b.st==='down'){b.downT+=dt;if(b.downT>=b.restore){b.st='idle';b.p=0;b.elb=false;sfx.up();}}
+  }
+  // 지직 소리
+  G.szT-=dt;
+  if(G.szT<=0){
+    if(nDanger>0){sfx.sizzle(0.22);G.szT=0.11;}
+    else if(nHeat>0){sfx.sizzle(0.06+0.12*maxP);G.szT=0.26;}
+    else G.szT=0.1;
+  }
+  // 생성
+  if(G.overAt<0){
+    G.spawnT-=dt;
+    const act=activeCount();
+    if(act===0&&G.spawnT>0.35)G.spawnT=0.35;
+    if(G.spawnT<=0&&act<maxActive){spawn();G.spawnT=spawnInt*rr(0.7,1.3);}
+  }
+  if(G.overAt>=0&&G.t>=G.overAt)endGame();
+}
+function smoke(x,y){G.parts.push({smoke:true,x:x+rr(-10,10),y,vx:rr(-20,20),vy:rr(-80,-40),t:0,life:rr(1.0,1.8),r:rr(6,12)});}
+function spark(x,y,n,c){for(let i=0;i<n;i++){const a=rr(-Math.PI,0),v=rr(90,260);G.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,t:0,life:rr(0.3,0.6),c,r:rr(1.5,3)});}}
+
+// ───────── 그리기 ─────────
+function rrect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function heatColor(p){ // 회색 → 노랑 → 빨강
+  if(p<0.5){const t=p/0.5;return `rgb(${Math.round(lerp(120,255,t))},${Math.round(lerp(125,210,t))},${Math.round(lerp(135,63,t))})`;}
+  const t=(p-0.5)/0.5;return `rgb(255,${Math.round(lerp(210,59,t))},${Math.round(lerp(63,46,t))})`;
+}
+function drawPanel(){
+  const {px,py,pw,ph,bar}=L;
+  // 분전반 외함
+  ctx.fillStyle='#0b0c10';rrect(px+3,py+5,pw,ph,14);ctx.fill();
+  const g=ctx.createLinearGradient(px,py,px,py+ph);g.addColorStop(0,'#c9ccd3');g.addColorStop(1,'#9ea2ab');
+  ctx.fillStyle=g;rrect(px,py,pw,ph,14);ctx.fill();
+  ctx.strokeStyle='#5c6068';ctx.lineWidth=3;rrect(px,py,pw,ph,14);ctx.stroke();
+  // 안쪽 패널
+  ctx.fillStyle='#3a3e47';rrect(px+8,py+bar,pw-16,ph-bar-8,10);ctx.fill();
+  // 이름표
+  ctx.fillStyle='#e9ebef';rrect(px+pw/2-54,py+6,108,bar-12,4);ctx.fill();
+  ctx.fillStyle='#2b2f3a';ctx.font='bold 12px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('⚡ 분 전 반',px+pw/2,py+bar/2);
+  // 나사
+  ctx.fillStyle='#6b6f78';
+  for(const [sx,sy] of [[px+12,py+12],[px+pw-12,py+12],[px+12,py+ph-12],[px+pw-12,py+ph-12]]){ctx.beginPath();ctx.arc(sx,sy,4,0,7);ctx.fill();}
+}
+function drawBreaker(b){
+  const d=diff();
+  let ox=0,oy=0;
+  if(b.st==='heat'){const a=b.p*b.p*4;ox=rr(-a,a);oy=rr(-a,a);}
+  else if(b.st==='danger'){const a=7;ox=rr(-a,a);oy=rr(-a,a);}
+  else if(b.wob>0){ox=Math.sin(b.wob*60)*3;}
+  const x=b.x+ox,y=b.y+oy,w=b.w,h=b.h;
+  const hot=b.st==='heat'?b.p:b.st==='danger'?1:0;
+  ctx.save();
+  // 글로우
+  if(hot>0.15){ctx.shadowColor=heatColor(hot);ctx.shadowBlur=10+hot*22;}
+  // 몸통
+  const body=b.soot?'#1d1f24':'#4a4f5a';
+  ctx.fillStyle=body;rrect(x,y,w,h,8);ctx.fill();
+  ctx.shadowBlur=0;
+  if(hot>0){ctx.globalAlpha=0.25+hot*0.6;ctx.fillStyle=heatColor(hot);rrect(x,y,w,h,8);ctx.fill();ctx.globalAlpha=1;}
+  ctx.strokeStyle=b.soot?'#000':'#22252c';ctx.lineWidth=2;rrect(x,y,w,h,8);ctx.stroke();
+  // 그을음 얼룩
+  if(b.soot){ctx.fillStyle='rgba(0,0,0,.55)';ctx.beginPath();ctx.ellipse(x+w*0.5,y+h*0.3,w*0.42,h*0.22,0,0,7);ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(x+w*0.35,y+h*0.6,w*0.25,h*0.3,0.4,0,7);ctx.fill();}
+  // 이름표
+  const fs=Math.max(9,Math.round(w*0.11));
+  ctx.fillStyle=b.soot?'#5a5d66':'#e4e6ea';rrect(x+w*0.12,y+h*0.07,w*0.76,h*0.14,3);ctx.fill();
+  ctx.fillStyle='#1d2029';ctx.font='bold '+fs+'px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(b.elb?'ELB 30mA':'MCCB 20A',x+w/2,y+h*0.14);
+  // 토글 홈
+  const sw=w*0.3,sh=h*0.5,sx=x+w/2-sw/2,sy=y+h*0.27;
+  ctx.fillStyle='#15171c';rrect(sx,sy,sw,sh,5);ctx.fill();
+  // ON / OFF 글씨
+  ctx.fillStyle=b.soot?'#777':'#c9cdd8';ctx.font='bold '+Math.max(8,Math.round(w*0.09))+'px system-ui,sans-serif';
+  ctx.fillText('ON',x+w*0.5,sy-h*0.03);ctx.fillText('OFF',x+w*0.5,sy+sh+h*0.045);
+  // 핸들
+  const hh=sh*0.46,hy=sy+2+(sh-hh-4)*b.handle;
+  const hg=ctx.createLinearGradient(sx,hy,sx+sw,hy);hg.addColorStop(0,b.handle>0.5?'#9aa0ab':'#f0f2f5');hg.addColorStop(1,b.handle>0.5?'#6b717c':'#b7bcc6');
+  ctx.fillStyle=hg;rrect(sx+2,hy,sw-4,hh,4);ctx.fill();
+  ctx.fillStyle=b.handle>0.5?'#3f4550':'#ff3b2e';ctx.fillRect(sx+sw*0.3,hy+hh*0.42,sw*0.4,hh*0.16);
+  // ELB 시험 버튼
+  if(b.elb){ctx.fillStyle='#ffd23f';ctx.beginPath();ctx.arc(x+w*0.82,y+h*0.5,Math.max(5,w*0.07),0,7);ctx.fill();
+    ctx.fillStyle='#2b2000';ctx.font='bold '+Math.max(7,Math.round(w*0.08))+'px system-ui,sans-serif';ctx.fillText('T',x+w*0.82,y+h*0.505);}
+  ctx.restore();
+  // 위험 말풍선
+  if(b.st==='danger'){
+    const pulse=1+Math.sin(G.t*22)*0.08,bw=w*0.9*pulse,bh=h*0.2*pulse,bx=x+w/2-bw/2,by=y-bh*0.65;
+    ctx.fillStyle=b.elb?'#2f6bff':'#ff2d2d';rrect(bx,by,bw,bh,6);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold '+Math.max(11,Math.round(w*0.15))+'px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(b.elb?'누전!':'과부하!',x+w/2,by+bh/2);
+  }
+  // 불꽃
+  if(b.st==='fire'){
+    const k=clamp(1-b.fireT/1.1,0,1);
+    for(let i=0;i<4;i++){
+      const fx=x+w*(0.25+i*0.17)+Math.sin(G.t*30+i)*4,base=y+h*0.55,fh=h*(0.35+0.25*k)*(0.7+0.3*Math.sin(G.t*25+i*2));
+      ctx.fillStyle=i%2?'#ff7a1a':'#ffd23f';ctx.globalAlpha=0.8*k+0.2;
+      ctx.beginPath();ctx.moveTo(fx-w*0.1,base);ctx.quadraticCurveTo(fx-w*0.12,base-fh*0.5,fx,base-fh);ctx.quadraticCurveTo(fx+w*0.12,base-fh*0.5,fx+w*0.1,base);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+  // 시작 안내 링
+  if(G.mode==='ready'&&b.i===START_CELL){
+    const r=w*0.62+Math.sin(G.t*5)*5;
+    ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x+w/2,y+h/2,r,0,7);ctx.stroke();
+    ctx.font='bold 17px system-ui,sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('👆',x+w/2+w*0.55,y+h*0.92+Math.sin(G.t*5)*4);
+  }
+}
+function drawHUD(){
+  const y0=SAFE,hh=L.hudH;
+  ctx.fillStyle='#1c1f26';ctx.fillRect(0,y0,W,hh);
+  ctx.textBaseline='middle';
+  if(G.mode==='ready'){
+    ctx.fillStyle='#ffd23f';ctx.font='900 30px system-ui,sans-serif';ctx.textAlign='center';ctx.fillText('⚡ 차단기 내려!',W/2,y0+hh*0.42);
+    ctx.fillStyle='#fff';ctx.font='bold 16px system-ui,sans-serif';ctx.fillText('빛나는 차단기를 탭해서 시작',W/2,y0+hh*0.78);
+    return;
+  }
+  // 점수
+  ctx.textAlign='left';ctx.fillStyle='#ffd23f';ctx.font='900 30px system-ui,sans-serif';ctx.fillText(G.score+'점',16,y0+hh*0.5);
+  // 시간
+  const sec=Math.ceil(G.timeLeft),urgent=sec<=10&&G.mode==='play';
+  ctx.textAlign='center';ctx.fillStyle=urgent?(Math.floor(G.t*4)%2?'#ff5a3c':'#fff'):'#fff';
+  ctx.font='900 '+(urgent?40:34)+'px system-ui,sans-serif';ctx.fillText(String(Math.max(0,sec)),W/2,y0+hh*0.5);
+  ctx.font='bold 11px system-ui,sans-serif';ctx.fillStyle='#9aa0ab';ctx.fillText('초',W/2+(urgent?30:26),y0+hh*0.62);
+  // 생명
+  ctx.textAlign='right';ctx.font='900 26px system-ui,sans-serif';
+  let lx=W-64;
+  for(let i=2;i>=0;i--){ctx.fillStyle=i<G.lives?'#ff3b5c':'#3c404a';ctx.fillText('♥',lx,y0+hh*0.5);lx-=26;}
+}
+function draw(){
+  ctx.save();
+  if(G.shake>0.3)ctx.translate(rr(-G.shake,G.shake),rr(-G.shake,G.shake));
+  ctx.fillStyle='#15171c';ctx.fillRect(-20,-20,W+40,H+40);
+  drawPanel();
+  for(const b of G.cells)if(b.st!=='danger'&&b.st!=='fire')drawBreaker(b);
+  for(const b of G.cells)if(b.st==='danger'||b.st==='fire')drawBreaker(b); // 말풍선·불이 위로
+  // 파티클
+  for(const p of G.parts){
+    const k=1-p.t/p.life;
+    if(p.smoke){ctx.fillStyle=`rgba(90,90,100,${0.55*k})`;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();}
+    else{ctx.fillStyle=p.c;ctx.globalAlpha=k;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();ctx.globalAlpha=1;}
+  }
+  // 떠오르는 글씨
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  for(const f of G.floats){const k=f.t/0.8;ctx.globalAlpha=1-k*k;ctx.fillStyle=f.col;ctx.font='900 '+(f.s.length>3?18:24)+'px system-ui,sans-serif';
+    ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=4;ctx.strokeText(f.s,f.x,f.y-k*42);ctx.fillText(f.s,f.x,f.y-k*42);}
+  ctx.globalAlpha=1;
+  ctx.restore();
+  drawHUD();
+  if(G.flash>0.02){ctx.fillStyle=`rgba(255,40,20,${G.flash*0.5})`;ctx.fillRect(0,0,W,H);}
+}
+
+// ───────── 루프 ─────────
+let acc=0,last=performance.now(),paused=false;
+function simAdvance(realDt){acc+=realDt;let n=0;while(acc>=STEP&&n<60){update(STEP);acc-=STEP;n++;}}
+function frame(now){const dt=Math.min(0.1,(now-last)/1000);last=now;if(!paused)simAdvance(dt);draw();requestAnimationFrame(frame);}
+resize();newGame('ready');requestAnimationFrame(frame);
+document.addEventListener('visibilitychange',()=>{last=performance.now();});
+
+// ───────── 테스트용 ─────────
+window.__game={
+  get state(){return {mode:G.mode,t:G.t,timeLeft:G.timeLeft,score:G.score,trips:G.trips,elbHits:G.elbHits,lives:G.lives,best:save.best,games:save.games,
+    reason:G.reason,fact:G.fact,isNew:!!G.isNew,endShown:G.endShown,active:activeCount(),
+    cells:G.cells.map(b=>({i:b.i,st:b.st,p:+b.p.toFixed(3),dT:+b.dT.toFixed(3),dDur:+b.dDur.toFixed(3),elb:b.elb,soot:b.soot,x:b.x,y:b.y,w:b.w,h:b.h}))};},
+  center(i){const b=G.cells[i];return {x:b.x+b.w/2,y:b.y+b.h/2};},
+  tap(i){tapCell(G.cells[i]);},tapAt,
+  step(sec){const n=Math.round(sec/STEP);for(let i=0;i<n;i++)update(STEP);draw();},
+  pause(p){paused=!!p;last=performance.now();},
+  seed(s){seed=s>>>0||1;},restart,start(){if(G.mode==='ready')startPlay(true);},
+  get audio(){return {ac:AC,master};},
+  facts:FACTS,save,layout:()=>L
+};
+</script>
+</body>
+</html>

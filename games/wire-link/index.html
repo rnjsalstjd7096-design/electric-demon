@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0e1218">
+<title>전선 잇기 퍼즐</title>
+<style>
+:root{--bg:#0e1218;--panel:#161d26;--panel2:#1f2832;--line:#2a3542;--txt:#e6ecf3;--dim:#8793a3;--warm:#ffd060;--acc:#5ec4ff;--ok:#5fd68f;--bad:#ff6b5a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:520px;margin:0 auto;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+#top{height:46px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px}
+#title{flex:1;font-size:17px;font-weight:800;letter-spacing:-.2px}
+#title span{color:var(--warm)}
+#mute{width:40px;height:36px;border-radius:10px;background:var(--panel);font-size:18px}
+#tabs{flex:none;display:flex;gap:6px;margin:2px 14px 0;background:var(--panel);border-radius:12px;padding:4px}
+#tabs button{flex:1;height:36px;border-radius:9px;font-weight:700;font-size:14px;color:var(--dim)}
+#tabs button.on{background:var(--panel2);color:var(--txt)}
+#info{flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 16px 2px;font-size:14px}
+#info b{font-size:15px}
+#info .r{color:var(--dim);font-variant-numeric:tabular-nums}
+#info .r b{color:var(--warm)}
+#boardWrap{flex:1;min-height:200px;position:relative;margin:4px 10px 0}
+#bc{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+#msg{flex:none;min-height:40px;padding:8px 16px 2px;text-align:center;font-size:15px;font-weight:600;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#msg.warn{color:var(--bad)}
+#msg.good{color:var(--ok)}
+#actions{flex:none;display:flex;gap:8px;padding:6px 14px 12px}
+#actions button{flex:1;height:48px;border-radius:13px;background:var(--panel);font-weight:700;font-size:15px}
+#actions button:disabled{opacity:.4}
+#hintBtn.glow{box-shadow:0 0 0 2px var(--acc)}
+.ovl{position:absolute;inset:0;background:#000a;display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:5}
+.ovl.show{display:flex}
+.card{width:100%;background:#151d27;border-radius:18px;padding:18px 16px 14px;border:2px solid #263241;box-shadow:0 10px 40px #000a}
+.card h2{margin:0 0 6px;font-size:24px}
+.card h2 small{display:block;font-size:13px;color:var(--dim);font-weight:500;margin-top:2px}
+.card .time{font-size:34px;font-weight:800;color:var(--warm);margin:4px 0 8px;font-variant-numeric:tabular-nums}
+.card .time small{font-size:13px;color:var(--dim);font-weight:500;margin-left:8px}
+.card .f{font-size:14px;color:#cbd6e2;line-height:1.55;background:#0d141c;border-radius:10px;padding:10px 12px;margin-top:8px}
+.card .f b{color:var(--warm);display:block;margin-bottom:3px}
+.card .btns{display:flex;gap:8px;margin-top:14px}
+.card .btns button{flex:1;height:50px;border-radius:13px;background:var(--panel2);font-weight:800;font-size:16px}
+.card .btns button.pri{background:#2b6a4a}
+.card .note{font-size:12px;color:var(--dim);margin-top:10px;text-align:center}
+.stages{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+.stages button{height:52px;border-radius:12px;background:var(--panel2);font-weight:800;font-size:16px;position:relative}
+.stages button.done{background:#1f4d38;color:#bff0d2}
+.stages button.cur{box-shadow:0 0 0 2px var(--acc)}
+.stages button:disabled{opacity:.3}
+.stages button small{position:absolute;right:5px;top:3px;font-size:10px;font-weight:500}
+#toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);background:#263241;color:var(--txt);padding:9px 16px;border-radius:12px;font-size:14px;font-weight:700;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9;white-space:nowrap}
+#toast.show{opacity:1}
+</style>
+<meta name="description" content="타일을 돌려 전원에서 전구까지 전기가 흐르는 길을 잇는 퍼즐. 15스테이지 + 매일 바뀌는 오늘의 퍼즐."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/wire-link/"><meta property="og:title" content="전선 잇기 퍼즐"><meta property="og:description" content="타일을 돌려 전원에서 전구까지 전기가 흐르는 길을 잇는 퍼즐. 15스테이지 + 매일 바뀌는 오늘의 퍼즐."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"></head>
+<body>
+<div id="app">
+  <div id="top"><div id="title">⚡ <span>전선 잇기</span> 퍼즐</div><button id="mute" aria-label="소리">🔊</button></div>
+  <div id="tabs"><button id="tabStage" class="on">스테이지</button><button id="tabDaily">오늘의 퍼즐</button></div>
+  <div id="info"><b id="infoL"></b><span class="r" id="infoR"></span></div>
+  <div id="boardWrap"><canvas id="bc"></canvas></div>
+  <div id="msg"></div>
+  <div id="actions"><button id="hintBtn">💡 힌트</button><button id="shuffleBtn">🔀 섞기</button><button id="listBtn">≡ 목록</button></div>
+  <div class="ovl" id="clearOvl"><div class="card" id="clearCard"></div></div>
+  <div class="ovl" id="listOvl"><div class="card" id="listCard"></div></div>
+  <div id="toast"></div>
+</div>
+<script>
+'use strict';
+/* ================= 기본 ================= */
+const SAVE_KEY = 'wire-link.save.v1';
+const URL_GAME = 'https://rnjsalstjd7096-design.github.io/electric-demon/games/wire-link/';
+const $ = s => document.querySelector(s);
+const DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];            // 0 북 · 1 동 · 2 남 · 3 서
+const POP = [0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4];
+const rotm = (m, k) => { k &= 3; while (k--) m = ((m << 1) | (m >> 3)) & 15; return m; };
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* ================= 전기 상식 (FACTS.md) ================= */
+const FACTS = [
+  { t:'전기는 길이 이어져야 흐른다', f:'전선이 한 군데만 끊겨 있어도 전류는 0입니다. 전구가 안 켜지면 전구보다 먼저 "어디가 끊겼나"를 봅니다.' },
+  { t:'직렬 연결', f:'전구를 한 줄로(직렬) 이으면 하나만 끊겨도 전부 꺼집니다. 옛날 크리스마스 전구 한 알이 빠지면 줄 전체가 꺼지던 이유입니다.' },
+  { t:'병렬 연결', f:'집의 전등·콘센트는 병렬입니다. 하나를 꺼도 나머지는 그대로이고, 모두 같은 220V를 받습니다.' },
+  { t:'분전반', f:'집에 들어온 전기는 분전반에서 메인 차단기 → 분기 차단기를 거쳐 방마다 나뉩니다. 게임의 전원 칸이 그 분전반입니다.' },
+  { t:'열린 선 끝은 위험', f:'전기가 살아 있는 선 끝을 그냥 두면 감전·합선 위험입니다. 실제 현장에서는 절연 캡이나 테이프로 마감하고 접속함 안에 둡니다.' },
+  { t:'접촉 불량 = 열', f:'느슨하게 물린 접속부는 저항이 커져 그 자리에서 열이 납니다. 전기 화재의 흔한 원인이라, 콘센트·단자의 조임을 점검합니다.' },
+  { t:'전선 굵기', f:'전선이 굵을수록 저항이 작습니다. 가는 선에 큰 전류를 흘리면 뜨거워지므로, 전류 크기에 맞는 굵기(허용전류)를 고릅니다.' },
+  { t:'옴의 법칙', f:'V = I × R. 220V에 22Ω 전열기를 꽂으면 10A가 흐릅니다. 저항이 반이면 전류는 두 배입니다.' },
+  { t:'합선(단락)', f:'전원의 두 선이 저항 거의 없이 바로 맞닿으면 아주 큰 전류가 흘러 차단기가 떨어집니다. 차단기가 자꾸 떨어지면 먼저 원인을 찾아야 합니다.' },
+  { t:'직렬 전구는 어둡다', f:'전구 두 개를 직렬로 이으면 전압을 나눠 가져 각각 어두워집니다. 병렬이면 각각 제 밝기로 켜집니다.' },
+  { t:'전선 색', f:'KEC 기준 전선 색은 L1 갈색 · L2 흑색 · L3 회색 · 중성선 청색 · 보호도체(접지) 녹황색입니다.' },
+  { t:'전선 접속', f:'전선을 이을 때는 접속부의 저항이 커지지 않게, 전선의 세기가 20% 넘게 줄지 않게, 그리고 원래 피복만큼 절연이 되도록 합니다(KEC 123).' },
+  { t:'전압 강하', f:'선이 길고 가늘면 끝으로 갈수록 전압이 떨어집니다. 저압 수용가에서 조명은 3%, 그 밖의 부하는 5% 이내가 기준입니다(KEC 232.3.9).' },
+  { t:'스위치는 전압선에', f:'전등 스위치는 중성선이 아니라 전압선(L) 쪽에 넣습니다. 꺼 놓았을 때 등기구에 전압이 남지 않게 하려는 것입니다.' },
+  { t:'누전차단기', f:'사람 보호용 누전차단기는 30mA 이하 누설을 0.03초 안에 끊습니다(KEC 211.2.4). 분전반의 시험 버튼을 한 달에 한 번 눌러 보세요.' },
+  { t:'도체와 절연체', f:'전선 속 구리는 저항이 아주 작아 전기를 잘 흘리고, 겉의 피복(PVC·XLPE)은 절연체라 전기를 막습니다. 피복이 벗겨진 선이 위험한 이유입니다.' },
+  { t:'직렬 구간의 전류는 같다', f:'한 줄로 이어진 회로에서는 어느 지점을 재도 전류가 같습니다. 전구 앞이든 뒤든 같은 전류가 흐릅니다.' },
+  { t:'접지', f:'접지선(녹황색)은 기기의 금속 외함을 땅과 이어 둡니다. 누전이 생겨도 사람 대신 그 선으로 전기가 흘러 차단기가 먼저 끊도록 하기 위해서입니다.' },
+];
+
+/* ================= 스테이지 설정 ================= */
+const STAGES = [
+  { w:4, h:4, cells:4,  bulbs:1, decoy:0,    seed:101 },
+  { w:4, h:4, cells:6,  bulbs:1, decoy:0,    seed:102 },
+  { w:4, h:4, cells:7,  bulbs:2, decoy:0,    seed:103 },
+  { w:4, h:4, cells:8,  bulbs:2, decoy:.2,   seed:104 },
+  { w:5, h:5, cells:9,  bulbs:2, decoy:.15,  seed:105 },
+  { w:5, h:5, cells:11, bulbs:2, decoy:.25,  seed:106 },
+  { w:5, h:5, cells:12, bulbs:3, decoy:.25,  seed:107 },
+  { w:5, h:5, cells:14, bulbs:3, decoy:.3,   seed:108 },
+  { w:5, h:5, cells:15, bulbs:3, decoy:.35,  seed:109 },
+  { w:6, h:6, cells:14, bulbs:3, decoy:.3,   seed:110 },
+  { w:6, h:6, cells:17, bulbs:3, decoy:.35,  seed:111 },
+  { w:6, h:6, cells:19, bulbs:4, decoy:.35,  seed:112 },
+  { w:6, h:6, cells:21, bulbs:4, decoy:.4,   seed:113 },
+  { w:6, h:6, cells:23, bulbs:4, decoy:.4,   seed:114 },
+  { w:6, h:6, cells:26, bulbs:5, decoy:.45,  seed:115 },
+];
+const DAILY_CFG = { w:6, h:6, cells:16, bulbs:3, decoy:.35 };
+
+/* ================= 퍼즐 생성 ================= */
+// 타일: { k:'src'|'wire'|'bulb'|'' , base:열린 변 비트(북1 동2 남4 서8), rot:0~3, sol:정답 rot(장식선은 -1), depth:전원에서 거리 }
+function grow(rnd, W, H, cells) {
+  const adj = new Int8Array(W * H), inT = new Uint8Array(W * H);
+  const src = Math.floor(rnd() * W * H); inT[src] = 1; let last = src, size = 1; const members = [src];
+  while (size < cells) {
+    const cand = [];
+    const tryFrom = c => { const x = c % W, y = (c / W) | 0; for (let d = 0; d < 4; d++) { const nx = x + DX[d], ny = y + DY[d]; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const n = ny * W + nx; if (!inT[n]) cand.push([c, n, d]); } };
+    if (rnd() < .7) tryFrom(last);
+    if (!cand.length) for (const c of members) tryFrom(c);
+    if (!cand.length) return null;
+    const [c, n, d] = cand[Math.floor(rnd() * cand.length)];
+    adj[c] |= 1 << d; adj[n] |= 1 << ((d + 2) % 4); inT[n] = 1; members.push(n); last = n; size++;
+  }
+  return { adj, src, members };
+}
+function baseOf(m) { // 열린 변 → (기준 모양, 회전수)
+  for (const b of [1, 5, 3, 7, 15]) for (let r = 0; r < 4; r++) if (rotm(b, r) === m) return [b, r];
+  return [m, 0];
+}
+function genPuzzle(cfg, seed) {
+  for (let a = 0; a < 400; a++) {
+    const rnd = mulberry32((seed * 7919 + a * 104729) | 0);
+    const W = cfg.w, H = cfg.h, t = grow(rnd, W, H, cfg.cells);
+    if (!t) continue;
+    const leaves = t.members.filter(c => c !== t.src && POP[t.adj[c]] === 1);
+    if (leaves.length !== cfg.bulbs) continue;
+    // 전원에서 거리
+    const depth = new Int16Array(W * H).fill(-1); depth[t.src] = 0; const q = [t.src];
+    while (q.length) { const c = q.shift(), x = c % W, y = (c / W) | 0; for (let d = 0; d < 4; d++) if (t.adj[c] & (1 << d)) { const n = (y + DY[d]) * W + x + DX[d]; if (depth[n] < 0) { depth[n] = depth[c] + 1; q.push(n); } } }
+    const tiles = [];
+    for (let c = 0; c < W * H; c++) {
+      const m = t.adj[c];
+      if (c === t.src) tiles.push({ k:'src', base:m, rot:0, sol:0, depth:0 });
+      else if (m && POP[m] === 1) { const [b, r] = baseOf(m); tiles.push({ k:'bulb', base:b, rot:r, sol:r, depth:depth[c] }); }
+      else if (m) { const [b, r] = baseOf(m); tiles.push({ k:'wire', base:b, rot:r, sol:r, depth:depth[c] }); }
+      else if (rnd() < cfg.decoy) { const b = [5, 5, 3, 3, 3, 7][Math.floor(rnd() * 6)]; tiles.push({ k:'wire', base:b, rot:0, sol:-1, depth:-1 }); }
+      else tiles.push({ k:'', base:0, rot:0, sol:-1, depth:-1 });
+    }
+    // 섞기 — 정답 타일의 60% 이상이 틀린 방향이 되도록
+    const P = { w:W, h:H, tiles, src:t.src, bulbs:cfg.bulbs };
+    const movable = tiles.filter(tl => tl.sol >= 0 && tl.k !== 'src' && tl.base !== 15);
+    let ok = false;
+    for (let k = 0; k < 30 && !ok; k++) {
+      for (const tl of tiles) if (tl.k === 'wire' || tl.k === 'bulb') tl.rot = Math.floor(rnd() * 4);
+      const wrong = movable.filter(tl => maskOf(tl) !== rotm(tl.base, tl.sol)).length;
+      ok = wrong >= Math.ceil(movable.length * .6) && !isSolved(P);
+    }
+    if (!ok) continue;
+    return P;
+  }
+  return null;
+}
+const maskOf = tl => tl.k ? rotm(tl.base, tl.rot) : 0;
+function flow(P) { // 전원에서 흐르는 곳 계산
+  const W = P.w, H = P.h, dist = new Int16Array(W * H).fill(-1), open = [];
+  dist[P.src] = 0; const q = [P.src]; let lit = 0;
+  while (q.length) {
+    const c = q.shift(), x = c % W, y = (c / W) | 0, m = maskOf(P.tiles[c]);
+    if (P.tiles[c].k === 'bulb') lit++;
+    for (let d = 0; d < 4; d++) if (m & (1 << d)) {
+      const nx = x + DX[d], ny = y + DY[d];
+      if (nx < 0 || ny < 0 || nx >= W || ny >= H) { open.push([c, d]); continue; }
+      const n = ny * W + nx;
+      if (maskOf(P.tiles[n]) & (1 << ((d + 2) % 4))) { if (dist[n] < 0) { dist[n] = dist[c] + 1; q.push(n); } }
+      else open.push([c, d]);
+    }
+  }
+  return { dist, open, lit };
+}
+function isSolved(P) { const f = flow(P); return f.lit === P.bulbs && f.open.length === 0; }
+
+/* ================= 소리 ================= */
+let AC = null, muted = false;
+function ac() {
+  if (muted) return null;
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(f, d, type, vol, to, at) {
+  const a = ac(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain(), t = a.currentTime + (at || 0);
+  o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+  if (to) o.frequency.exponentialRampToValueAtTime(to, t + d);
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol || .06, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + d + .03);
+}
+function click(vol) {
+  const a = ac(); if (!a) return;
+  const n = Math.floor(a.sampleRate * .02), buf = a.createBuffer(1, n, a.sampleRate), ch = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / n) * (1 - i / n);
+  const s = a.createBufferSource(), g = a.createGain(); s.buffer = buf; g.gain.value = vol || .12;
+  const f = a.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 2200; f.Q.value = 1.2;
+  s.connect(f); f.connect(g); g.connect(a.destination); s.start();
+}
+const SFX = {
+  tick() { click(.18); tone(1500, .035, 'triangle', .035); },
+  fixed() { tone(180, .08, 'square', .03); },
+  seg(i) { tone(520 + i * 40, .06, 'sine', .022); },
+  bulb() { tone(880, .22, 'sine', .07, 1320); tone(1760, .18, 'sine', .03, 2200, .02); },
+  clear() { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .22, 'triangle', .07, 0, i * .11)); tone(1568, .5, 'triangle', .05, 0, .6); },
+  hint() { tone(660, .09, 'sine', .05); tone(990, .14, 'sine', .05, 0, .09); },
+  open() { tone(240, .12, 'sawtooth', .025, 160); },
+};
+
+/* ================= 상태 ================= */
+const bc = $('#bc'), ctx = bc.getContext('2d');
+let mode = 'stage';          // 'stage' | 'daily'
+let cur = 0, cleared = 0, P = null, F = null;
+let hintsLeft = 1, hintUsed = 0, hintedCell = -1, hintT = 0, guideCell = -1;
+let litAt = null, bulbPlayed = null, segPlayed = null, prevLit = null;
+let solvedAt = 0, clearShown = false, lastTapT = 0, puzzleT = 0;
+let dailyDate = '', dailyStart = 0, dailyDone = null, dailyLog = {};
+let cell = 0, ox = 0, oy = 0, dpr = 1;
+let toastT = 0;
+let factDaily = null;
+
+function kstDate() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
+function kstLabel(s) { const [, m, d] = s.split('-'); return `${+m}월 ${+d}일`; }
+function fmtTime(ms) { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+
+function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.v === 1) return s; } catch (e) {} return null; }
+function save() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v:1, cleared, stage:cur, muted, daily:dailyDone, log:dailyLog })); } catch (e) {}
+}
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); toastT = performance.now() + 1600; }
+
+/* ================= 퍼즐 불러오기 ================= */
+function initRuntime() {
+  const n = P.w * P.h;
+  litAt = new Float64Array(n).fill(Infinity); bulbPlayed = new Uint8Array(n); segPlayed = new Uint8Array(n); prevLit = new Uint8Array(n);
+  hintsLeft = 1; hintUsed = 0; hintedCell = -1; guideCell = -1; solvedAt = 0; clearShown = false; lastTapT = performance.now(); puzzleT = performance.now();
+  $('#clearOvl').classList.remove('show'); $('#listOvl').classList.remove('show');
+  layout(); recompute(true);
+}
+function loadStage(i) {
+  mode = 'stage'; cur = Math.max(0, Math.min(STAGES.length - 1, i));
+  P = genPuzzle(STAGES[cur], STAGES[cur].seed);
+  initRuntime(); updateTabs(); save();
+}
+function loadDaily() {
+  mode = 'daily'; dailyDate = kstDate();
+  P = genPuzzle(DAILY_CFG, parseInt(dailyDate.replace(/-/g, ''), 10));
+  const rnd = mulberry32(parseInt(dailyDate.replace(/-/g, ''), 10) ^ 0x5bd1e995);
+  factDaily = FACTS[Math.floor(rnd() * FACTS.length)];
+  dailyStart = 0;
+  if (dailyDone && dailyDone.date === dailyDate) { for (const tl of P.tiles) if (tl.sol >= 0) tl.rot = tl.sol; }
+  initRuntime(); updateTabs();
+  if (dailyDone && dailyDone.date === dailyDate) { clearShown = true; showDailyClear(); }
+}
+function updateTabs() {
+  $('#tabStage').classList.toggle('on', mode === 'stage'); $('#tabDaily').classList.toggle('on', mode === 'daily');
+  $('#shuffleBtn').style.display = mode === 'stage' ? '' : 'none';
+  $('#listBtn').textContent = mode === 'stage' ? '≡ 목록' : '📋 결과';
+}
+
+/* ================= 판정 · 애니메이션 ================= */
+function recompute(first) {
+  F = flow(P);
+  const now = performance.now(), n = P.w * P.h;
+  let d0 = Infinity;
+  for (let c = 0; c < n; c++) if (F.dist[c] >= 0 && !prevLit[c]) d0 = Math.min(d0, F.dist[c]);
+  for (let c = 0; c < n; c++) {
+    if (F.dist[c] < 0) { litAt[c] = Infinity; bulbPlayed[c] = 0; segPlayed[c] = 0; prevLit[c] = 0; }
+    else if (!prevLit[c]) { litAt[c] = first ? now : now + (F.dist[c] - d0) * 75 + 40; prevLit[c] = 1; }
+  }
+  if (F.lit === P.bulbs && F.open.length === 0) { let mx = 0; for (let c = 0; c < n; c++) if (litAt[c] < Infinity) mx = Math.max(mx, litAt[c]); solvedAt = mx + 250; }
+  else solvedAt = 0;
+  if (!first && F.open.length && F.lit < P.bulbs) { /* 열린 끝 안내는 메시지로 */ }
+}
+function tapCell(c) {
+  const tl = P.tiles[c]; if (!tl || clearShown) return;
+  lastTapT = performance.now(); guideCell = -1;
+  if (mode === 'daily' && !dailyStart) dailyStart = performance.now();
+  if (tl.k === 'src') { SFX.fixed(); tl.shake = performance.now(); toast('전원(분전반)은 고정이에요'); return; }
+  if (!tl.k) return;
+  tl.rot = (tl.rot + 1) & 3; tl.anim = performance.now(); hintedCell = -1;
+  SFX.tick(); recompute(false);
+}
+function hintTarget() {
+  let best = -1, bd = 1e9;
+  for (let c = 0; c < P.w * P.h; c++) { const tl = P.tiles[c]; if (tl.sol < 0 || tl.k === 'src') continue; if (maskOf(tl) === rotm(tl.base, tl.sol)) continue; if (tl.depth < bd) { bd = tl.depth; best = c; } }
+  return best;
+}
+function useHint() {
+  if (clearShown || hintsLeft <= 0) return;
+  const c = hintTarget(); if (c < 0) return;
+  if (mode === 'daily' && !dailyStart) dailyStart = performance.now();
+  hintsLeft--; hintUsed++; const tl = P.tiles[c]; tl.rot = tl.sol; tl.anim = performance.now(); hintedCell = c; hintT = performance.now(); lastTapT = hintT;
+  SFX.hint(); recompute(false); $('#hintBtn').textContent = '💡 힌트 0'; $('#hintBtn').disabled = true;
+}
+function shuffle() {
+  if (mode !== 'stage') return;
+  const rnd = mulberry32((Date.now() & 0xffffff) ^ 0x9e3779b9);
+  for (const tl of P.tiles) if (tl.k === 'wire' || tl.k === 'bulb') tl.rot = Math.floor(rnd() * 4);
+  if (isSolved(P)) { const tl = P.tiles.find(t => t.sol >= 0 && t.k !== 'src' && t.base !== 15); if (tl) tl.rot = (tl.sol + 1) & 3; }
+  for (let c = 0; c < P.w * P.h; c++) prevLit[c] = 0;
+  hintedCell = -1; clearShown = false; solvedAt = 0; SFX.tick(); recompute(true);
+}
+
+/* ================= 클리어 ================= */
+function onSolved() {
+  clearShown = true; SFX.clear();
+  if (mode === 'stage') {
+    if (cur + 1 > cleared) cleared = cur + 1;
+    save();
+    const fact = FACTS[cur % FACTS.length], last = cur === STAGES.length - 1;
+    $('#clearCard').innerHTML = `<h2>⚡ 불이 들어왔다!<small>${cur + 1}단계 클리어 · 전구 ${P.bulbs}개</small></h2>
+      <div class="f"><b>${fact.t}</b>${fact.f}</div>
+      <div class="btns">${last ? '<button id="goDaily" class="pri">오늘의 퍼즐 해 보기</button>' : '<button id="goNext" class="pri">다음 단계 ▶</button>'}<button id="goRetry">다시</button></div>
+      ${last ? '<div class="note">15단계를 모두 풀었어요. 매일 바뀌는 오늘의 퍼즐도 있어요.</div>' : ''}`;
+    $('#clearOvl').classList.add('show');
+    const nx = $('#goNext'); if (nx) nx.onclick = () => loadStage(cur + 1);
+    const gd = $('#goDaily'); if (gd) gd.onclick = () => loadDaily();
+    $('#goRetry').onclick = () => { $('#clearOvl').classList.remove('show'); shuffle(); };
+  } else {
+    const ms = dailyStart ? performance.now() - dailyStart : 0;
+    dailyDone = { date:dailyDate, ms:Math.round(ms), hint:hintUsed };
+    dailyLog[dailyDate] = Math.round(ms);
+    const keys = Object.keys(dailyLog).sort(); while (keys.length > 60) delete dailyLog[keys.shift()];
+    save(); showDailyClear();
+  }
+}
+function shareText() {
+  return `전선 잇기 오늘의 퍼즐 ${fmtTime(dailyDone.ms)} ⚡\n${kstLabel(dailyDate)} · 전구 ${P.bulbs}개 · 힌트 ${dailyDone.hint}회\n${URL_GAME}`;
+}
+function showDailyClear() {
+  const n = Object.keys(dailyLog).length;
+  $('#clearCard').innerHTML = `<h2>오늘의 퍼즐 완료<small>${kstLabel(dailyDate)} · 내일 한국 시간 0시에 새 퍼즐</small></h2>
+    <div class="time">${fmtTime(dailyDone.ms)}<small>힌트 ${dailyDone.hint}회 · 지금까지 ${n}판</small></div>
+    <div class="f"><b>${factDaily.t}</b>${factDaily.f}</div>
+    <div class="btns"><button id="goCopy" class="pri">📋 결과 복사</button><button id="goStage">스테이지로</button></div>`;
+  $('#clearOvl').classList.add('show');
+  $('#goCopy').onclick = copyResult;
+  $('#goStage').onclick = () => { $('#clearOvl').classList.remove('show'); loadStage(Math.min(cleared, STAGES.length - 1)); };
+}
+function copyResult() {
+  const t = shareText();
+  const ok = () => toast('결과를 복사했어요 ⚡');
+  const fb = () => { try { const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = 0; document.body.appendChild(ta); ta.select(); const r = document.execCommand('copy'); ta.remove(); r ? ok() : toast('복사가 막혀 있어요'); } catch (e) { toast('복사가 막혀 있어요'); } };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, fb); else fb();
+}
+function openList() {
+  if (mode === 'daily') { if (dailyDone && dailyDone.date === dailyDate) { showDailyClear(); } else toast('오늘의 퍼즐을 먼저 풀어 보세요'); return; }
+  let b = '';
+  for (let i = 0; i < STAGES.length; i++) { const s = STAGES[i]; b += `<button data-i="${i}" class="${i < cleared ? 'done' : ''} ${i === cur ? 'cur' : ''}" ${i > cleared ? 'disabled' : ''}>${i < cleared ? '✓' : ''}${i + 1}<small>${s.w}×${s.h}</small></button>`; }
+  $('#listCard').innerHTML = `<h2>스테이지<small>클리어 ${cleared}/${STAGES.length} · 탭해서 이동</small></h2><div class="stages">${b}</div><div class="btns"><button id="listClose">닫기</button></div>`;
+  $('#listOvl').classList.add('show');
+  for (const el of document.querySelectorAll('.stages button')) el.onclick = () => loadStage(+el.dataset.i);
+  $('#listClose').onclick = () => $('#listOvl').classList.remove('show');
+}
+
+/* ================= 그리기 ================= */
+function layout() {
+  const r = bc.parentElement.getBoundingClientRect(); dpr = Math.min(2.5, window.devicePixelRatio || 1);
+  bc.width = Math.round(r.width * dpr); bc.height = Math.round(r.height * dpr);
+  if (!P) return;
+  const pad = 6; cell = Math.floor(Math.min((r.width - pad * 2) / P.w, (r.height - pad * 2) / P.h));
+  ox = (r.width - cell * P.w) / 2; oy = (r.height - cell * P.h) / 2;
+}
+function cellAt(x, y) { const c = Math.floor((x - ox) / cell), r = Math.floor((y - oy) / cell); if (c < 0 || r < 0 || c >= P.w || r >= P.h) return -1; return r * P.w + c; }
+function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+const C = { cellBg:'#161d26', cellLine:'#222c38', wire:'#4a5666', wireLit:'#ffd060', glow:'rgba(255,200,80,.55)', bulbOff:'#2a3340', bulbOn:'#fff3b0', src:'#223047', srcLine:'#5ec4ff', bad:'#ff6b5a' };
+function draw(now) {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, bc.width, bc.height);
+  if (!P) return;
+  const s = cell, wW = Math.max(5, s * .2), half = s / 2;
+  for (let c = 0; c < P.w * P.h; c++) {
+    const x = ox + (c % P.w) * s, y = oy + ((c / P.w) | 0) * s, tl = P.tiles[c];
+    ctx.fillStyle = C.cellBg; rr(ctx, x + 2, y + 2, s - 4, s - 4, 8); ctx.fill(); ctx.strokeStyle = C.cellLine; ctx.lineWidth = 1; ctx.stroke();
+    if (!tl.k) continue;
+    const lit = litAt[c] <= now;
+    if (lit && !segPlayed[c] && c !== P.src) { segPlayed[c] = 1; if (tl.k !== 'bulb') SFX.seg(Math.min(12, F.dist[c])); }
+    ctx.save(); ctx.translate(x + half, y + half);
+    if (tl.shake && now - tl.shake < 250) ctx.translate(Math.sin((now - tl.shake) / 12) * 3, 0);
+    let ang = tl.rot * Math.PI / 2;
+    if (tl.anim) { const t = (now - tl.anim) / 140; if (t < 1) ang -= (1 - t) * (1 - t) * Math.PI / 2; else tl.anim = 0; }
+    ctx.rotate(ang);
+    const col = lit ? C.wireLit : C.wire;
+    ctx.lineCap = 'round'; ctx.lineWidth = wW; ctx.strokeStyle = col;
+    if (lit) { ctx.shadowColor = C.glow; ctx.shadowBlur = s * .22; }
+    const m = tl.base, stub = half;
+    for (let d = 0; d < 4; d++) if (m & (1 << d)) { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(DX[d] * stub, DY[d] * stub); ctx.stroke(); }
+    if (POP[m] >= 2 && tl.k === 'wire' && m !== 5) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, wW * .7, 0, 7); ctx.fill(); }
+    ctx.shadowBlur = 0;
+    if (tl.k === 'src') {
+      const b = s * .3; ctx.fillStyle = C.src; rr(ctx, -b, -b, b * 2, b * 2, 5); ctx.fill(); ctx.strokeStyle = C.srcLine; ctx.lineWidth = 2; ctx.stroke();
+      ctx.rotate(-ang); ctx.fillStyle = C.wireLit; ctx.font = `bold ${Math.round(s * .36)}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('⚡', 0, 1);
+    } else if (tl.k === 'bulb') {
+      const r = s * .23;
+      if (lit) { ctx.shadowColor = 'rgba(255,230,120,.9)'; ctx.shadowBlur = s * .4; ctx.fillStyle = C.bulbOn; } else ctx.fillStyle = C.bulbOff;
+      ctx.beginPath(); ctx.arc(0, r * .15, r, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.strokeStyle = lit ? '#ffe28a' : '#56657a'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = lit ? '#b98a1e' : '#56657a'; rr(ctx, -r * .45, -r * .95 - 1, r * .9, r * .5, 2); ctx.fill();
+      ctx.strokeStyle = lit ? '#d9a93a' : '#56657a'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-r * .3, -r * .15); ctx.lineTo(-r * .3, r * .3); ctx.lineTo(-r * .1, r * .1); ctx.lineTo(r * .1, r * .3); ctx.lineTo(r * .3, r * .1); ctx.lineTo(r * .3, -r * .15); ctx.stroke();
+      if (lit && !bulbPlayed[c]) { bulbPlayed[c] = 1; SFX.bulb(); }
+    }
+    ctx.restore();
+  }
+  // 열린 끝(전기가 흐르는데 안 이어진 끝)
+  if (F) for (const [c, d] of F.open) {
+    if (litAt[c] > now) continue;
+    const x = ox + (c % P.w) * s + half + DX[d] * (half - 5), y = oy + ((c / P.w) | 0) * s + half + DY[d] * (half - 5);
+    const f = .6 + .4 * Math.sin(now / 90 + c);
+    ctx.strokeStyle = `rgba(255,107,90,${f})`; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x - 5, y - 5); ctx.lineTo(x + 5, y + 5); ctx.moveTo(x + 5, y - 5); ctx.lineTo(x - 5, y + 5); ctx.stroke();
+  }
+  // 힌트 · 안내 테두리
+  const ring = (c, col) => { const x = ox + (c % P.w) * s, y = oy + ((c / P.w) | 0) * s, p = (now / 900) % 1; ctx.strokeStyle = col; ctx.globalAlpha = 1 - p; ctx.lineWidth = 3; rr(ctx, x + 2 - p * 6, y + 2 - p * 6, s - 4 + p * 12, s - 4 + p * 12, 10); ctx.stroke(); ctx.globalAlpha = 1; };
+  if (hintedCell >= 0 && now - hintT < 1800) ring(hintedCell, '#5ec4ff');
+  if (guideCell >= 0) ring(guideCell, '#5ec4ff');
+}
+
+/* ================= 프레임 ================= */
+let lastInfo = '';
+function frame(now) {
+  if (P && !clearShown) {
+    if (solvedAt && now >= solvedAt) onSolved();
+    // 안내: 1단계는 4초, 그 뒤 단계는 25초 동안 아무 탭도 없으면 다음에 돌릴 타일을 반짝임
+    const idle = now - lastTapT, lim = (mode === 'stage' && cur === 0) ? 4000 : 25000;
+    guideCell = (idle > lim && !solvedAt) ? hintTarget() : -1;
+  }
+  draw(now);
+  // 정보줄 · 메시지
+  if (P) {
+    let L, R, M = '', cls = '';
+    if (mode === 'stage') { L = `${cur + 1}단계 <span style="color:var(--dim);font-weight:500">· ${P.w}×${P.h}</span>`; }
+    else { L = `오늘의 퍼즐 <span style="color:var(--dim);font-weight:500">· ${kstLabel(dailyDate)}</span>`; }
+    const litNow = F ? P.tiles.reduce((a, tl, c) => a + (tl.k === 'bulb' && litAt[c] <= now ? 1 : 0), 0) : 0;
+    R = `전구 <b>${litNow}</b>/${P.bulbs}`;
+    if (mode === 'daily') { const ms = dailyDone && dailyDone.date === dailyDate ? dailyDone.ms : (dailyStart ? now - dailyStart : 0); R = `⏱ <b>${fmtTime(ms)}</b> · ${R}`; }
+    if (clearShown) { M = '클리어!'; cls = 'good'; }
+    else if (mode === 'daily' && !dailyStart) M = '타일을 탭하면 시간이 시작돼요';
+    else if (litNow === 0) M = mode === 'stage' && cur === 0 ? '타일을 탭하면 90° 돌아가요' : '⚡ 전원에서부터 선을 이어 보세요';
+    else if (litNow < P.bulbs) M = `전구 ${P.bulbs - litNow}개 더 켜 보세요`;
+    else if (F && F.open.length) { M = '⚠ 전기가 흐르는 선 끝(✕)이 열려 있어요'; cls = 'warn'; }
+    else M = '잠시만요…';
+    const key = L + '|' + R + '|' + M + cls;
+    if (key !== lastInfo) { lastInfo = key; $('#infoL').innerHTML = L; $('#infoR').innerHTML = R; $('#msg').textContent = M; $('#msg').className = cls; }
+    const hb = $('#hintBtn'); const ht = hintsLeft > 0 ? `💡 힌트 ${hintsLeft}` : '💡 힌트 0'; if (hb.textContent !== ht) hb.textContent = ht; hb.disabled = hintsLeft <= 0 || clearShown;
+  }
+  if (toastT && now > toastT) { $('#toast').classList.remove('show'); toastT = 0; }
+  requestAnimationFrame(frame);
+}
+
+/* ================= 입력 ================= */
+bc.addEventListener('pointerdown', e => { e.preventDefault(); const r = bc.getBoundingClientRect(); const c = cellAt(e.clientX - r.left, e.clientY - r.top); if (c >= 0) tapCell(c); });
+for (const o of document.querySelectorAll('.ovl')) o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); });
+$('#hintBtn').onclick = useHint;
+$('#shuffleBtn').onclick = shuffle;
+$('#listBtn').onclick = openList;
+$('#tabStage').onclick = () => { if (mode !== 'stage') loadStage(Math.min(cleared, STAGES.length - 1)); };
+$('#tabDaily').onclick = () => { if (mode !== 'daily') loadDaily(); };
+$('#mute').onclick = () => { muted = !muted; $('#mute').textContent = muted ? '🔇' : '🔊'; save(); if (!muted) ac(); };
+addEventListener('resize', layout);
+if (window.ResizeObserver) new ResizeObserver(layout).observe($('#boardWrap'));
+
+/* ================= 테스트용 ================= */
+window.__game = {
+  state: () => ({ mode, stage:cur + 1, cleared, w:P.w, h:P.h, bulbs:P.bulbs, lit:F ? F.lit : 0, open:F ? F.open.length : 0, solved:solvedAt > 0, clearShown, hintsLeft, dailyDate, dailyDone, muted,
+    tiles:P.tiles.map(t => ({ k:t.k, base:t.base, rot:t.rot, sol:t.sol })) }),
+  cellCenter: c => { const b = bc.getBoundingClientRect(); return { x:b.left + ox + (c % P.w + .5) * cell, y:b.top + oy + (((c / P.w) | 0) + .5) * cell }; },
+  wrong: () => { const out = []; for (let c = 0; c < P.w * P.h; c++) { const t = P.tiles[c]; if (t.sol >= 0 && t.k !== 'src' && maskOf(t) !== rotm(t.base, t.sol)) out.push({ c, taps:((t.sol - t.rot) & 3) }); } return out; },
+  tap: c => tapCell(c), hint: useHint, audio: () => ac(), goto: i => loadStage(i - 1), daily: loadDaily, shuffle, gen: (cfg, seed) => genPuzzle(cfg, seed), stages: STAGES.length, share: () => dailyDone ? shareText() : '',
+};
+
+/* ================= 시작 ================= */
+const sv = load();
+if (sv) {
+  cleared = Math.max(0, Math.min(STAGES.length, sv.cleared | 0)); muted = !!sv.muted;
+  cur = Math.max(0, Math.min(cleared, sv.stage | 0, STAGES.length - 1));
+  dailyDone = (sv.daily && typeof sv.daily === 'object' && sv.daily.date) ? sv.daily : null;
+  dailyLog = (sv.log && typeof sv.log === 'object') ? sv.log : {};
+}
+$('#mute').textContent = muted ? '🔇' : '🔊';
+loadStage(cur);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

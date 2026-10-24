@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="description" content="60초 안에 전기 상식 OX 문제를 최대한 많이! 전기기사·기능사 수험생과 실무자를 위한 전선 색상·누전차단기·접지·역률·변압기·차단기 퀴즈. 설치 없이 바로 플레이.">
+<meta name="theme-color" content="#0e1424">
+<title>60초 전기 OX — 전기 상식 퀴즈</title>
+<style>
+  :root{--bg:#0e1424;--card:#182038;--line:#2a3554;--txt:#f1f4ff;--sub:#9aa6c8;--yel:#ffd43b;--o:#2f80ff;--o2:#5aa0ff;--x:#ff4d5e;--x2:#ff7a86;--ok:#35d07f;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:var(--bg);color:var(--txt);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;overscroll-behavior:none}
+  body{overflow:hidden}
+  #app{position:relative;margin:0 auto;width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+  header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 4px}
+  .brand{font-weight:800;font-size:17px;letter-spacing:-.2px}
+  .brand small{color:var(--sub);font-weight:500;font-size:12px;margin-left:6px}
+  .iconbtn{width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#fff;font-size:20px;line-height:42px;cursor:pointer;touch-action:manipulation}
+  section{flex:1;display:none;flex-direction:column;min-height:0}
+  section.on{display:flex}
+  /* 시작 화면 */
+  #scr-start{align-items:center;justify-content:center;text-align:center;padding:16px 22px 28px}
+  .logo{font-size:64px;line-height:1;filter:drop-shadow(0 0 18px rgba(255,212,59,.45));animation:bob 2.2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  h1{font-size:34px;font-weight:900;margin:12px 0 6px;letter-spacing:-.5px}
+  h1 em{color:var(--yel);font-style:normal}
+  .lead{color:var(--sub);font-size:15px;line-height:1.5}
+  .how{display:flex;gap:10px;justify-content:center;margin:22px 0 8px;width:100%}
+  .how div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 6px;font-size:13px;color:var(--sub);line-height:1.4}
+  .how b{display:block;font-size:22px;color:var(--txt);margin-bottom:4px}
+  .best{margin-top:14px;font-size:15px;color:var(--sub)}
+  .best strong{color:var(--yel);font-size:20px}
+  .bigbtn{margin-top:22px;width:100%;max-width:340px;height:68px;border:0;border-radius:20px;background:linear-gradient(180deg,#ffe066,#ffc400);color:#2b2000;font-size:24px;font-weight:900;cursor:pointer;box-shadow:0 8px 0 #b78a00,0 14px 30px rgba(255,196,0,.3);touch-action:manipulation;animation:pulse 1.6s ease-in-out infinite}
+  .bigbtn:active{transform:translateY(5px);box-shadow:0 3px 0 #b78a00}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+  .fine{margin-top:16px;font-size:12px;color:#6c7799;line-height:1.5;word-break:keep-all}
+  .fine a{color:#8fb3ff}
+  /* 플레이 화면 */
+  #scr-play{padding:0 14px 14px}
+  .hud{display:flex;align-items:flex-end;justify-content:space-between;padding:4px 2px 6px}
+  .timer{font-size:54px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+  .timer.hot{color:var(--x2);animation:hot .5s ease-in-out infinite}
+  @keyframes hot{50%{transform:scale(1.08)}}
+  .timer small{font-size:16px;color:var(--sub);font-weight:600;margin-left:4px}
+  .score{text-align:right;font-size:15px;color:var(--sub)}
+  .score b{display:block;font-size:34px;color:var(--yel);line-height:1;font-variant-numeric:tabular-nums}
+  .bar{height:8px;border-radius:4px;background:#232c48;overflow:hidden;margin:2px 0 12px}
+  .bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--yel),#ff9f1a);transform-origin:left;transition:background .3s}
+  .bar.hot i{background:var(--x)}
+  .qwrap{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;position:relative}
+  .qnum{color:var(--sub);font-size:13px;margin:0 0 8px 4px}
+  .qcard{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:22px 20px;min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:23px;font-weight:700;line-height:1.45;word-break:keep-all;position:relative;transition:border-color .15s,background .15s}
+  .qcard.good{border-color:var(--ok);background:#15302a}
+  .qcard.bad{border-color:var(--x);background:#3a1c26;animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}15%{transform:translateX(-12px)}30%{transform:translateX(10px)}45%{transform:translateX(-8px)}60%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+  .verdict{position:absolute;left:0;right:0;bottom:-34px;text-align:center;font-size:16px;font-weight:800;opacity:0;transition:opacity .12s}
+  .verdict.show{opacity:1}
+  .verdict.good{color:var(--ok)}.verdict.bad{color:var(--x2)}
+  .plus{position:absolute;right:14px;top:-10px;font-size:28px;font-weight:900;color:var(--ok);opacity:0;pointer-events:none}
+  .plus.go{animation:fly .6s ease-out}
+  @keyframes fly{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-46px)}}
+  .ox{display:flex;gap:14px;height:min(38vh,300px);margin-top:44px}
+  .ox button{flex:1;border:0;border-radius:26px;color:#fff;font-size:96px;font-weight:900;line-height:1;cursor:pointer;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:transform .08s,filter .08s}
+  .ox button span{font-size:15px;font-weight:700;opacity:.85}
+  .ox .o{background:linear-gradient(180deg,var(--o2),var(--o));box-shadow:0 8px 0 #1b4fb0}
+  .ox .x{background:linear-gradient(180deg,var(--x2),var(--x));box-shadow:0 8px 0 #b02c3a}
+  .ox button:active,.ox button.press{transform:translateY(6px);filter:brightness(.92);box-shadow:none}
+  .ox button:disabled{filter:saturate(.55) brightness(.75)}
+  /* 결과 화면 */
+  #scr-end{overflow-y:auto;overflow-x:hidden;padding:4px 16px 28px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+  .result{text-align:center;padding:10px 0 6px}
+  .result .big{font-size:52px;font-weight:900;color:var(--yel);line-height:1.05}
+  .result .big small{font-size:20px;color:var(--txt);font-weight:700}
+  .result .sub{color:var(--sub);margin-top:6px;font-size:15px}
+  .result .new{display:inline-block;margin-top:8px;background:var(--yel);color:#2b2000;font-weight:900;border-radius:999px;padding:4px 12px;font-size:13px}
+  .grade{margin-top:6px;font-size:17px;font-weight:700}
+  .acts{display:flex;gap:10px;margin:16px 0 6px}
+  .acts button{flex:1;height:56px;border:0;border-radius:16px;font-size:17px;font-weight:800;cursor:pointer;touch-action:manipulation}
+  .acts .again{background:linear-gradient(180deg,#ffe066,#ffc400);color:#2b2000;box-shadow:0 5px 0 #b78a00}
+  .acts .share{background:var(--card);color:var(--txt);border:1px solid var(--line)}
+  .acts button:active{transform:translateY(3px);box-shadow:none}
+  h2{font-size:17px;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+  h2 .cnt{background:var(--x);color:#fff;border-radius:999px;font-size:12px;padding:2px 8px}
+  h2 .cnt.ok{background:var(--ok);color:#06301a}
+  .wrong{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--x);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+  .wrong .q{font-weight:700;font-size:15.5px;line-height:1.45;word-break:keep-all}
+  .wrong .a{margin-top:6px;font-size:14px;color:var(--sub)}
+  .wrong .a b{color:var(--txt);font-size:15px}
+  .wrong .a b.O{color:var(--o2)}.wrong .a b.X{color:var(--x2)}
+  .wrong .e{margin-top:6px;font-size:14px;line-height:1.5;color:#dbe2ff;word-break:keep-all}
+  .wrong .more{margin-top:6px;font-size:13px}
+  .wrong .more a{color:#8fb3ff;text-decoration:none}
+  .allok{background:#15302a;border:1px solid #2a6b4e;border-radius:14px;padding:16px;text-align:center;color:#c6f5dc;line-height:1.5}
+  .foot{margin-top:18px;text-align:center;font-size:12px;color:#6c7799;line-height:1.6}
+  .foot a{color:#8fb3ff}
+  .toast{position:absolute;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#fff;color:#111;padding:10px 16px;border-radius:999px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;z-index:9}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .flash{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:5}
+  .flash.go{animation:fl .35s ease-out}
+  @keyframes fl{0%{opacity:.55}100%{opacity:0}}
+  @media (max-height:640px){.timer{font-size:44px}.qcard{font-size:20px;min-height:120px;padding:16px}.ox{height:min(34vh,240px);margin-top:36px}.ox button{font-size:76px}.logo{font-size:48px}h1{font-size:28px}}
+</style>
+<meta name="description" content="60초 안에 전기 상식 OX를 몇 개 맞힐까? KEC 전선 색상·누전차단기·전압 구분 123문제, 틀린 문제는 해설과 함께."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/elec-ox/"><meta property="og:title" content="60초 전기 OX — 전기 상식 퀴즈"><meta property="og:description" content="60초 안에 전기 상식 OX를 몇 개 맞힐까? KEC 전선 색상·누전차단기·전압 구분 123문제, 틀린 문제는 해설과 함께."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"></head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">⚡ 60초 전기 OX <small id="ver">v0.1</small></div>
+    <button class="iconbtn" id="mute" aria-label="소리 켬/끔">🔊</button>
+  </header>
+
+  <section id="scr-start" class="on">
+    <div class="logo">⚡</div>
+    <h1><em>60초</em> 전기 OX</h1>
+    <p class="lead">전기기사·기능사·실무자라면 "아 맞다" 할 문제들.<br>60초 안에 몇 개나 맞힐 수 있을까?</p>
+    <div class="how">
+      <div><b>O</b>맞으면 왼쪽</div>
+      <div><b>X</b>틀리면 오른쪽</div>
+      <div><b>60s</b>한 판 1분</div>
+    </div>
+    <div class="best">내 최고 기록 <strong id="bestStart">0</strong>개</div>
+    <button class="bigbtn" id="startBtn">▶ 시작</button>
+    <p class="fine">전선 색상 · 누전차단기 · 접지 · 역률 · 변압기 · 차단기 · 전기안전<br>문제·해설 출처는 <a href="https://blog.naver.com/mms7096" target="_blank" rel="noopener">전기견문록</a></p>
+  </section>
+
+  <section id="scr-play">
+    <div class="hud">
+      <div class="timer" id="timer">60<small>초</small></div>
+      <div class="score">점수<b id="score">0</b></div>
+    </div>
+    <div class="bar" id="bar"><i id="barFill"></i></div>
+    <div class="qwrap">
+      <div class="qnum" id="qnum">문제 1</div>
+      <div class="qcard" id="qcard"><span id="qtext"></span><div class="plus" id="plus">+1</div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </div>
+    <div class="ox">
+      <button class="o" id="btnO" aria-label="O 맞다">O<span>맞다</span></button>
+      <button class="x" id="btnX" aria-label="X 틀리다">X<span>틀리다</span></button>
+    </div>
+  </section>
+
+  <section id="scr-end">
+    <div class="result">
+      <div class="sub">60초 종료!</div>
+      <div class="big"><span id="rScore">0</span><small> / <span id="rTotal">0</span>문제</small></div>
+      <div class="grade" id="grade"></div>
+      <div class="sub">최고 기록 <b id="rBest">0</b>개 <span id="newBest" class="new" hidden>🏆 신기록!</span></div>
+    </div>
+    <div class="acts">
+      <button class="again" id="againBtn">🔁 다시 하기</button>
+      <button class="share" id="shareBtn">📋 결과 복사</button>
+    </div>
+    <h2 id="wrongTitle">틀린 문제 <span class="cnt" id="wrongCnt">0</span></h2>
+    <div id="wrongList"></div>
+    <p class="foot">문제·해설은 KEC(한국전기설비규정)와 실무 기준으로 정리했습니다.<br>더 자세한 설명은 <a href="https://blog.naver.com/mms7096" target="_blank" rel="noopener">전기견문록 블로그</a>에서.</p>
+  </section>
+
+  <div class="flash" id="flash"></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+'use strict';
+// ───────── 문제 데이터 (수정하면 FACTS.md도 함께) ─────────
+// q: 문장, a: 정답('O' 맞다 / 'X' 틀리다), e: 한 줄 해설. 순서(번호)는 저장과 연결되므로 새 문제는 맨 뒤에 추가.
+const Q=[
+// 전선 색상 (KEC 121.2)
+{q:"KEC에서 L1상 전선 색은 갈색이다.",a:"O",e:"KEC 121.2: L1 갈색, L2 흑색, L3 회색, N 청색, 보호도체 녹색-노란색."},
+{q:"KEC에서 L2상 전선 색은 적색이다.",a:"X",e:"L2는 흑색(검정)이다. 적색은 옛 규정 색상."},
+{q:"KEC에서 L3상 전선 색은 회색이다.",a:"O",e:"L3는 회색. 갈색·흑색·회색 순서로 L1·L2·L3를 기억하자."},
+{q:"KEC에서 중성선(N) 색은 흰색이다.",a:"X",e:"중성선(N)은 청색(파란색)이다."},
+{q:"보호도체(PE)는 녹색-노란색 줄무늬 전선을 쓴다.",a:"O",e:"보호도체(접지선)는 녹색-노란색. 다른 용도로 쓰면 안 된다."},
+{q:"보호도체(PE) 색상으로 흑색을 써도 된다.",a:"X",e:"보호도체는 녹색-노란색만. 흑색은 L2상 색이다."},
+{q:"나전선처럼 색을 칠할 수 없을 때는 단자나 접속부에 색 테이프 등으로 상을 표시할 수 있다.",a:"O",e:"KEC 121.2: 종단부에 반영구적인 도색·밴드·색 테이프로 식별 가능."},
+// 누전차단기
+{q:"인체 감전 보호용 누전차단기는 정격감도전류 30mA 이하, 동작시간 0.03초 이하여야 한다.",a:"O",e:"KEC 211.2.4: 30mA 이하·0.03초 이하 전류동작형. 가장 많이 나오는 숫자."},
+{q:"욕실처럼 몸이 젖는 장소의 콘센트는 30mA 누전차단기면 충분하다.",a:"X",e:"KEC 234.5: 욕실 등은 15mA 이하·0.03초 이하(또는 3kVA 이하 절연변압기)."},
+{q:"누전차단기는 들어가는 전류와 나오는 전류의 차이(누설전류)를 감지해 동작한다.",a:"O",e:"영상변류기(ZCT)로 왕복 전류의 차이를 감지. 차이 = 어딘가로 새는 전류."},
+{q:"누전차단기 시험(T) 버튼은 한 달에 한 번 정도 눌러 점검하는 것이 권장된다.",a:"O",e:"월 1회 시험 버튼 점검 권장. 눌렀을 때 떨어지지 않으면 교체."},
+{q:"누전차단기가 자꾸 떨어지면 레버를 테이프로 고정해 두면 된다.",a:"X",e:"떨어지는 건 어딘가 누전·과부하가 있다는 신호. 원인을 찾아야 한다."},
+{q:"누전차단기가 있으면 감전 사고를 100% 막아 준다.",a:"X",e:"두 전선 사이(선간)에 몸이 닿는 감전은 누설이 아니라 감지 못 한다."},
+{q:"누전차단기 정격감도전류 30mA는 30A와 같은 값이다.",a:"X",e:"1A = 1,000mA. 30mA는 0.03A로, 사람을 보호하려 아주 작게 잡은 값."},
+{q:"젖은 손으로 플러그를 꽂아도 220V 정도면 괜찮다.",a:"X",e:"젖은 피부는 저항이 크게 낮아져 같은 전압에서도 더 큰 전류가 흐른다."},
+// 접지
+{q:"접지의 목적 중 하나는 누전 시 기기 외함의 전압 상승을 억제해 감전을 막는 것이다.",a:"O",e:"보호접지: 외함과 대지 사이 전위차를 낮추고 차단기가 동작하게 한다."},
+{q:"KEC에서도 접지는 1종·2종·3종·특별3종으로 구분한다.",a:"X",e:"KEC(2021~)는 종별 접지를 없애고 계통접지·보호접지·피뢰시스템접지로 구분."},
+{q:"접지저항 값은 클수록 좋다.",a:"X",e:"접지저항은 작을수록 고장전류가 잘 흘러 외함 전압이 낮아진다."},
+{q:"TN, TT, IT는 계통접지(접지계통) 방식의 이름이다.",a:"O",e:"KEC 203: 첫 글자는 전원 측 접지, 둘째 글자는 설비 노출도전부의 접지 방식."},
+{q:"TT 계통은 전원 측 한 점을 접지하고, 설비 외함은 그와 독립된 접지극에 접속한다.",a:"O",e:"KEC 203.3 TT 계통. 국내 저압 수용가에 흔한 방식."},
+{q:"보호도체(PE)와 중성선(N)을 하나로 겸용한 도체를 PEN 도체라 한다.",a:"O",e:"TN-C 계통에서 쓰는 겸용 도체. PE + N = PEN."},
+{q:"보호도체(접지선) 중간에 퓨즈를 넣어 보호한다.",a:"X",e:"보호도체 회로에는 개폐장치·과전류차단기를 넣지 않는다(KEC 142.3). 끊기면 접지가 없어진다."},
+{q:"사용전압 220V 저압 전로의 절연저항은 0.5MΩ 이상이면 된다.",a:"X",e:"KEC 132: 500V 이하 전로는 DC 500V로 측정해 1.0MΩ 이상. 0.5MΩ은 SELV·PELV 기준."},
+{q:"절연저항 측정에는 클램프미터를 쓴다.",a:"X",e:"절연저항은 절연저항계(메거)로 측정. 클램프미터는 전류 측정용."},
+{q:"등전위본딩은 손이 닿을 수 있는 도전부들을 전기적으로 연결해 전위차를 없애는 것이다.",a:"O",e:"KEC 143: 동시에 닿을 수 있는 금속 부분 사이의 전위차를 없애 감전을 막는다."},
+{q:"중성선(N)은 접지돼 있으니 맨손으로 만져도 절대 안전하다.",a:"X",e:"부하 전류가 흐르고 결선 오류·단선 시 전압이 걸릴 수 있다. 활선으로 취급."},
+// 전압 구분 (KEC 111.1)
+{q:"KEC에서 교류 1,000V 이하는 저압이다.",a:"O",e:"KEC 111.1: 저압 = 교류 1kV 이하, 직류 1.5kV 이하."},
+{q:"KEC에서 직류는 1,500V 이하까지 저압이다.",a:"O",e:"직류는 교류보다 기준이 높다. 직류 1.5kV 이하 = 저압."},
+{q:"교류 7,000V를 넘으면 특고압이다.",a:"O",e:"고압 = 1kV 초과 7kV 이하, 특고압 = 7kV 초과."},
+{q:"KEC에서 교류 600V 이하만 저압이다.",a:"X",e:"600V는 옛 기준. KEC는 교류 1,000V 이하를 저압으로 본다."},
+{q:"교류 3,300V는 고압이다.",a:"O",e:"1kV 초과 7kV 이하 = 고압. 3.3kV·6.6kV가 여기 속한다."},
+{q:"한전 배전선로 22.9kV는 고압이다.",a:"X",e:"7kV를 넘으므로 특고압. 22.9kV는 특고압 배전전압."},
+{q:"우리나라 일반 가정 콘센트 전압은 220V, 주파수는 60Hz다.",a:"O",e:"단상 220V 60Hz. 일본은 100V, 유럽은 230V 50Hz."},
+{q:"우리나라 전력 계통 주파수는 50Hz다.",a:"X",e:"우리나라는 60Hz. 50Hz는 유럽·중국·일본 일부."},
+{q:"한전 22.9kV 배전은 3상 3선식 비접지 방식이다.",a:"X",e:"22.9kV-Y 다중접지 3상 4선식이다. 중성선이 함께 간다."},
+{q:"154kV는 배전전압이다.",a:"X",e:"154kV·345kV·765kV는 송전전압. 배전은 22.9kV와 저압."},
+{q:"3상 4선식 220/380V에서 380V는 선간전압, 220V는 상전압이다.",a:"O",e:"Y결선: 선간 = 상전압 × √3. 220 × 1.732 ≈ 380V."},
+{q:"Y결선에서 선간전압은 상전압의 √3배다.",a:"O",e:"선간전압 = √3 × 상전압. Δ결선은 선간 = 상전압."},
+// 역률
+{q:"역률은 피상전력에 대한 유효전력의 비다.",a:"O",e:"역률 = P(kW) ÷ S(kVA) = cosθ."},
+{q:"역률이 1에 가까울수록 같은 유효전력을 보내는 데 필요한 전류가 작아진다.",a:"O",e:"I = P ÷ (V × cosθ). 역률이 높으면 전류·손실·설비 용량이 줄어든다."},
+{q:"유도전동기 역률 개선용 콘덴서는 부하에 직렬로 연결한다.",a:"X",e:"진상용 콘덴서는 부하에 병렬로 연결해 지상 무효전력을 상쇄한다."},
+{q:"역률 개선용 콘덴서를 너무 많이 넣으면 진상 역률이 되어 오히려 좋지 않다.",a:"O",e:"과보상 → 진상 역률, 전압 상승·손실 증가. 한전도 진상 역률에 요금을 더 받는다."},
+{q:"역률이 낮으면 같은 일을 하는 데 더 많은 전류가 흘러 선로 손실이 늘어난다.",a:"O",e:"손실은 I²R. 전류가 커지면 손실은 제곱으로 늘어난다."},
+{q:"유효전력의 단위는 var이다.",a:"X",e:"유효전력은 W(와트). var는 무효전력, VA는 피상전력 단위."},
+{q:"피상전력의 단위는 W(와트)다.",a:"X",e:"피상전력 S = V × I 의 단위는 VA. 변압기·발전기 용량은 kVA로 표시한다."},
+{q:"전열기처럼 순수 저항 부하의 역률은 1이다.",a:"O",e:"전압과 전류의 위상이 같아 cosθ = 1. 무효전력이 없다."},
+{q:"역률이 낮아도 전기요금에는 아무 영향이 없다.",a:"X",e:"한전은 지상역률 90% 기준으로 미달 시 기본요금을 추가, 초과 시 감액한다."},
+// 변압기
+{q:"변압기는 전자기 유도로 교류 전압을 바꾸는 기기다.",a:"O",e:"1차 코일의 변화하는 자속이 2차 코일에 전압을 유도한다."},
+{q:"변압기는 직류 전압도 그대로 변성할 수 있다.",a:"X",e:"직류는 자속이 변하지 않아 유도가 안 된다. 직류를 넣으면 코일이 과열된다."},
+{q:"이상 변압기에서 1차·2차 전압의 비는 권수비와 같다.",a:"O",e:"V1/V2 = N1/N2 = a. 전류는 반대로 I1/I2 = N2/N1."},
+{q:"변압기로 전압을 1/2로 낮추면 전류도 1/2로 줄어든다.",a:"X",e:"전력이 같으므로 전압이 1/2이면 전류는 약 2배가 된다."},
+{q:"변압기 용량의 단위는 kW다.",a:"X",e:"변압기 용량은 피상전력 kVA. 부하 역률에 따라 쓸 수 있는 kW가 달라진다."},
+{q:"변압기 철심을 얇은 강판을 겹쳐 만드는 이유는 와전류(맴돌이전류) 손실을 줄이기 위해서다.",a:"O",e:"성층 철심. 얇을수록 와전류 경로가 끊겨 철손이 줄어든다."},
+{q:"변압기의 철손(무부하손)은 부하가 없으면 0이다.",a:"X",e:"철손은 전압만 걸려 있으면 부하와 상관없이 늘 발생한다."},
+{q:"변압기의 동손은 부하 전류의 제곱에 비례한다.",a:"O",e:"동손 = I²R. 부하가 2배면 동손은 4배."},
+{q:"변압기 %임피던스가 작을수록 2차측 단락전류는 작아진다.",a:"X",e:"단락전류 = 정격전류 × 100/%Z. %Z가 작으면 단락전류는 커진다."},
+{q:"변압기 2차측 중성점 접지는 고저압 혼촉 시 저압측 전압 상승을 막기 위한 것이다.",a:"O",e:"KEC 142.5·322.1: 혼촉 시 저압 전로에 고압이 그대로 걸리는 것을 막는다."},
+{q:"유입변압기의 절연유는 절연과 냉각 두 가지 역할을 한다.",a:"O",e:"절연유는 권선 사이를 절연하고 열을 외부로 옮긴다."},
+{q:"Δ-Δ 결선 변압기는 한 대가 고장 나도 V결선으로 운전할 수 있다.",a:"O",e:"남은 두 대로 V결선 운전 가능. 단 출력은 줄어든다."},
+{q:"V결선의 출력은 Δ결선 출력의 약 2/3(66.7%)다.",a:"X",e:"V결선 출력 = Δ결선의 1/√3 ≈ 57.7%. 이용률은 86.6%."},
+{q:"부흐홀츠 계전기는 유입변압기 내부 고장을 검출한다.",a:"O",e:"내부 고장 시 생기는 가스·유류의 흐름을 감지. 콘서베이터와 본체 사이에 설치."},
+{q:"몰드변압기는 절연유를 사용한다.",a:"X",e:"몰드변압기는 권선을 에폭시 수지로 굳힌 건식. 기름이 없어 화재에 유리."},
+// 차단기·개폐기
+{q:"MCCB는 배선용차단기, ELB는 누전차단기다.",a:"O",e:"MCCB(Molded Case Circuit Breaker), ELB·ELCB(Earth Leakage Circuit Breaker)."},
+{q:"ACB(기중차단기)는 주로 특고압 수전용으로 쓴다.",a:"X",e:"ACB는 공기 중에서 소호하는 저압 대용량 차단기. 특고압은 VCB·GCB."},
+{q:"VCB(진공차단기)는 고압·특고압 회로에 쓴다.",a:"O",e:"진공 속에서 아크를 끊는다. 22.9kV 수전 설비의 주차단기로 흔하다."},
+{q:"GCB(가스차단기)의 소호 매질은 질소(N₂)다.",a:"X",e:"GCB는 SF₆(육불화황) 가스로 아크를 끊는다."},
+{q:"OCB는 기중차단기다.",a:"X",e:"OCB(Oil Circuit Breaker)는 유입차단기. 기중차단기는 ACB. 지금은 거의 VCB로 대체."},
+{q:"차단기(CB)는 부하전류뿐 아니라 단락(고장)전류도 끊을 수 있다.",a:"O",e:"차단기의 핵심 능력은 정격차단전류. 고장전류를 끊는 것이 본업."},
+{q:"단로기(DS)는 부하전류가 흐르는 상태에서 열어도 된다.",a:"X",e:"단로기는 소호 장치가 없어 무부하 상태에서만 개폐. 부하 중 열면 아크 사고."},
+{q:"LBS(부하개폐기)는 부하전류는 끊을 수 있지만 단락전류는 끊지 못한다.",a:"O",e:"그래서 LBS에는 전력퓨즈(PF)를 함께 달아 단락을 보호한다."},
+{q:"수변전실 정전 작업 시 차단기(CB)를 먼저 열고 그다음 단로기(DS)를 연다.",a:"O",e:"끊을 때는 CB → DS. 전류를 끊는 건 차단기, 단로기는 무부하에서."},
+{q:"복전(전원 투입) 시에는 차단기(CB)를 먼저 넣고 단로기(DS)를 나중에 넣는다.",a:"X",e:"넣을 때는 DS → CB. 단로기를 먼저 넣고 차단기로 전류를 통한다."},
+{q:"COS(컷아웃스위치)는 변압기 1차측 보호에 쓰는 퓨즈 개폐기다.",a:"O",e:"주상변압기 1차측에 달린 퓨즈 홀더. 과전류 시 퓨즈가 끊어진다."},
+{q:"전력퓨즈(PF)는 동작 후 리셋해서 다시 쓸 수 있다.",a:"X",e:"퓨즈는 한 번 끊어지면 교체해야 한다. 재투입은 차단기만."},
+{q:"과전류계전기(OCR)는 전류가 설정값을 넘으면 차단기에 트립 신호를 보낸다.",a:"O",e:"CT로 전류를 받아 판단 → 차단기 트립 코일에 신호. 계전기는 직접 전류를 끊지 않는다."},
+{q:"배선용차단기(MCCB)는 누전을 감지해 차단한다.",a:"X",e:"MCCB는 과부하·단락 보호. 누전은 누전차단기(ELB)가 감지한다."},
+{q:"배선용차단기는 과부하와 단락을 보호한다.",a:"O",e:"열동(과부하)·전자(단락) 트립 장치가 들어 있다."},
+{q:"ATS는 상용전원이 끊기면 비상(발전기) 전원으로 자동 전환하는 개폐기다.",a:"O",e:"ATS(Automatic Transfer Switch). 정전 → 발전기 기동 → 자동 절체."},
+{q:"피뢰기(LA)는 낙뢰 등 이상전압을 대지로 방전시켜 기기를 보호한다.",a:"O",e:"이상전압이 오면 방전하고, 지나가면 속류를 스스로 끊는다."},
+{q:"CT(변류기) 2차측은 사용하지 않을 때 개방해 두어야 안전하다.",a:"X",e:"CT 2차 개방은 고전압 발생·소손 위험. 쓰지 않을 때는 반드시 단락."},
+{q:"PT(계기용변압기) 2차측은 단락해 두어야 안전하다.",a:"X",e:"PT 2차 단락은 큰 전류로 소손. PT는 개방, CT는 단락이 기본."},
+{q:"CT 2차 정격 전류는 보통 5A다.",a:"O",e:"예: 200/5A. 1차 200A가 흐르면 2차에 5A. (1A 규격도 있음)"},
+{q:"PT 2차 정격 전압은 보통 110V다.",a:"O",e:"예: 22,900/110V. 계기·계전기는 110V를 받아 동작한다."},
+{q:"SPD(서지보호장치)는 낙뢰 등 서지 과전압으로부터 기기를 보호한다.",a:"O",e:"KEC 153·전기설비기술기준: 저압 설비 보호용 SPD. 서지를 대지로 흘린다."},
+{q:"피뢰침은 낙뢰가 건물에 떨어지지 않게 막아 주는 장치다.",a:"X",e:"피뢰침은 낙뢰를 자신에게 끌어 접지로 흘려보내는 길이다. 막는 것이 아니다."},
+// 전동기·제어
+{q:"유도전동기를 직입 기동하면 기동전류가 정격의 수 배(약 5~7배)까지 흐른다.",a:"O",e:"그래서 큰 전동기는 Y-Δ·리액터·인버터 등으로 기동전류를 줄인다."},
+{q:"Y-Δ 기동은 기동전류를 직입 기동의 1/2로 줄인다.",a:"X",e:"Y-Δ 기동 시 기동전류·토크 모두 1/3이 된다."},
+{q:"3상 유도전동기의 회전 방향을 바꾸려면 세 선을 모두 바꿔 연결해야 한다.",a:"X",e:"세 선 중 두 선만 바꾸면 역회전. 세 선을 다 바꾸면 방향이 그대로."},
+{q:"4극 유도전동기의 60Hz 동기속도는 1,800rpm이다.",a:"O",e:"Ns = 120f/P = 120×60/4 = 1,800rpm. 실제 속도는 슬립만큼 느리다."},
+{q:"EOCR은 전동기의 과전류(과부하)를 감지하는 전자식 계전기다.",a:"O",e:"EOCR(Electronic Over Current Relay). 열동계전기(THR)의 전자식 버전."},
+{q:"전자접촉기(MC)는 전동기 등 부하를 자주 개폐하는 데 쓴다.",a:"O",e:"코일에 전압을 주면 접점이 붙는다. 열동계전기와 합치면 전자개폐기."},
+{q:"열동계전기(THR)는 전동기 과부하를 보호한다.",a:"O",e:"바이메탈이 열로 휘어 접점을 열고 MC를 떨어뜨린다."},
+// 전선·배선
+{q:"전선은 굵기(단면적)가 클수록 허용전류가 크다.",a:"O",e:"굵으면 저항이 작아 발열이 적다. 전선 선정의 기본."},
+{q:"주위 온도가 높아지면 전선의 허용전류는 커진다.",a:"X",e:"주위 온도가 높으면 열을 못 버려 허용전류를 줄여야 한다(온도 보정)."},
+{q:"전선을 둥글게 감아 둔(릴) 상태로 큰 전류를 흘리면 열이 쌓여 위험하다.",a:"O",e:"감긴 전선은 방열이 안 되고 유도 열도 생긴다. 다 풀어서 사용."},
+{q:"KEC에서 저압 옥내배선용 구리 전선의 최소 굵기는 1.5㎟다.",a:"X",e:"KEC 231.3.1: 단면적 2.5㎟ 이상의 연동선(예외 있음)."},
+{q:"전선을 접속할 때 전기저항이 늘어나지 않도록 해야 한다.",a:"O",e:"KEC 123: 접속부 저항 증가 금지. 접속 불량은 발열·화재의 주범."},
+{q:"전선 접속 시 인장강도는 50%까지 줄어도 된다.",a:"X",e:"KEC 123: 전선의 세기를 20% 이상 감소시키지 않아야 한다."},
+{q:"절연전선을 접속한 부분은 원래 피복과 같은 수준 이상으로 절연해야 한다.",a:"O",e:"KEC 123: 절연물과 동등 이상의 절연 효력이 있는 것으로 피복."},
+{q:"코드 피복이 벗겨진 전선은 테이프로 감으면 계속 써도 된다.",a:"X",e:"임시 조치일 뿐. 벗겨진 코드는 교체가 원칙."},
+{q:"플러그를 뽑을 때 전선을 잡고 당겨도 된다.",a:"X",e:"전선 속 심선이 끊어지거나 단자가 벌어진다. 플러그 몸체를 잡고 뽑는다."},
+{q:"콘센트에 쌓인 먼지와 습기는 트래킹 현상으로 화재를 일으킬 수 있다.",a:"O",e:"먼지+습기가 미세한 전류 길을 만들어 탄화 → 발화. 콘센트 청소가 예방."},
+{q:"멀티탭은 정격 용량(예: 16A·3,500W)을 넘겨 쓰면 과열·화재 위험이 있다.",a:"O",e:"전열기 두 개만 꽂아도 넘기기 쉽다. 정격을 꼭 확인."},
+{q:"접지형 콘센트의 접지극은 기기 외함을 접지해 감전을 막는다.",a:"O",e:"외함에 누전되면 접지로 흘러 누전차단기가 동작한다."},
+// 전기안전
+{q:"감전의 위험을 결정하는 것은 전압보다 몸에 흐르는 전류와 그 시간이다.",a:"O",e:"위험도 = 전류 × 시간 × 경로. 그래서 누전차단기가 mA·초 단위."},
+{q:"사람이 전기를 느끼기 시작하는 최소 감지전류는 교류 약 1A 정도다.",a:"X",e:"약 1mA. 1A의 1/1000이다. 수십 mA면 이미 치명적일 수 있다."},
+{q:"전기 화재(C급)에는 물 소화기가 가장 적합하다.",a:"X",e:"전기 화재는 이산화탄소·분말 소화기. 물은 감전·확산 위험."},
+{q:"감전된 사람을 보면 먼저 손으로 끌어내야 한다.",a:"X",e:"전원 차단이 먼저. 못 끊으면 마른 나무·절연물로 떼어 낸다."},
+{q:"전기 작업 전에는 검전기로 전기가 없는지 확인한다.",a:"O",e:"차단 → 검전 → 접지(필요시) → 작업. 눈으로는 활선을 알 수 없다."},
+{q:"차단기를 내렸으면 검전기로 다시 확인하지 않아도 된다.",a:"X",e:"오결선·역송전·다른 회로 가능성. 작업 전 검전은 생략 금지."},
+{q:"정전 작업 시 차단기를 내린 뒤 '작업 중' 표지와 잠금장치(LOTO)를 한다.",a:"O",e:"다른 사람이 모르고 투입하는 사고를 막는다. 산업안전보건 기준."},
+{q:"활선 작업용 절연장갑은 사용 전압 등급에 맞는 것을 써야 한다.",a:"O",e:"절연장갑은 등급(class)별 사용 전압이 다르다. 사용 전 공기 누설 점검."},
+{q:"길에 끊어져 늘어진 전선은 한전(국번 없이 123)에 신고한다.",a:"O",e:"살아 있다고 생각하고 가까이 가지 말 것. 한전 고장 신고 123."},
+// 기초 이론
+{q:"옴의 법칙에서 전압은 전류 나누기 저항이다.",a:"X",e:"V = I × R. 전압 = 전류 × 저항."},
+{q:"저항 두 개를 병렬로 연결하면 합성저항은 더 커진다.",a:"X",e:"병렬은 길이 늘어나 합성저항이 가장 작은 저항보다도 작아진다."},
+{q:"220V, 1,100W 전열기에 흐르는 전류는 약 5A다.",a:"O",e:"I = P ÷ V = 1,100 ÷ 220 = 5A."},
+{q:"1kWh는 1kW 기기를 1분 사용한 전력량이다.",a:"X",e:"1kWh = 1kW × 1시간. 전력량 = 전력 × 시간, 전기요금의 단위."},
+{q:"교류 220V의 최대값(피크)은 220V다.",a:"X",e:"220V는 실효값. 최대값 = 220 × √2 ≈ 311V."},
+{q:"지락은 전선과 전선이 서로 붙는 고장이다.",a:"X",e:"지락은 전선이 대지(땅)와 연결되는 고장. 전선끼리 붙는 건 단락. 지락계전기(OCGR)가 감지."},
+{q:"단락(쇼트)은 전선 사이가 아주 낮은 저항으로 붙어 큰 전류가 흐르는 고장이다.",a:"O",e:"단락전류는 수천~수만 A. 차단기 정격차단전류가 이보다 커야 한다."},
+{q:"전력량계(계량기)는 kW 단위로 전력량을 측정한다.",a:"X",e:"전력량계는 kWh(전력 × 시간). kW는 순간 전력 단위."},
+{q:"변류기(CT)는 큰 전류를 작은 전류로 바꿔 측정·보호에 쓴다.",a:"O",e:"수천 A도 5A로 줄여 계기·계전기에 넣는다."},
+{q:"콘덴서용 직렬 리액터(SR)는 보통 콘덴서 용량의 6% 정도를 쓴다.",a:"O",e:"5고조파 억제 이론값 4%, 실무는 여유를 둬 6%."},
+];
+
+// ───────── 저장 ─────────
+const SAVE_KEY='elec-ox.save.v1';
+const SITE='https://rnjsalstjd7096-design.github.io/electric-demon/games/elec-ox/';
+const BLOG='https://blog.naver.com/mms7096';
+const save={best:0,plays:0,mute:false,recent:[],answered:0,correct:0};
+try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s&&typeof s==='object'){Object.assign(save,s);}if(!Array.isArray(save.recent))save.recent=[];}catch(e){}
+function writeSave(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
+
+// ───────── 소리 (WebAudio 합성) ─────────
+let AC=null,master=null;
+function audioInit(){
+  if(AC){if(AC.state==='suspended')AC.resume().catch(()=>{});return;}
+  try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=save.mute?0:0.6;master.connect(AC.destination);}catch(e){AC=null;}
+}
+function tone(type,f0,f1,dur,vol,delay){
+  if(!AC||save.mute)return;const t=AC.currentTime+(delay||0);
+  const o=AC.createOscillator(),g=AC.createGain();o.type=type;
+  o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+dur);
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.02);
+}
+const sfx={
+  good(){tone('triangle',660,660,0.09,0.25);tone('triangle',990,990,0.14,0.25,0.08);},
+  bad(){tone('sawtooth',160,110,0.28,0.22);tone('square',90,80,0.28,0.08);},
+  tick(){tone('square',1400,1400,0.04,0.12);},
+  start(){tone('triangle',523,523,0.1,0.2);tone('triangle',659,659,0.1,0.2,0.1);tone('triangle',784,784,0.18,0.22,0.2);},
+  end(){tone('sine',880,440,0.5,0.25);tone('triangle',440,440,0.6,0.15,0.1);tone('triangle',660,660,0.6,0.12,0.2);},
+  tap(){tone('sine',700,500,0.05,0.08);}
+};
+const $=id=>document.getElementById(id);
+const muteBtn=$('mute');
+function setMute(m){save.mute=!!m;writeSave();muteBtn.textContent=m?'🔇':'🔊';if(master)master.gain.value=m?0:0.6;}
+setMute(!!save.mute);
+muteBtn.addEventListener('pointerdown',e=>{e.preventDefault();audioInit();setMute(!save.mute);});
+
+// ───────── 게임 상태 ─────────
+const ROUND=60;           // 초
+const LOCK_GOOD=220,LOCK_BAD=560; // 정답/오답 뒤 다음 문제까지(ms)
+let G=null,raf=0;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function buildOrder(){
+  // 전부 섞고, 최근 판에 나온 문제(save.recent, 오래된 것부터)는 뒤로 미룬다.
+  const rec=new Map();save.recent.forEach((id,i)=>rec.set(id,i));
+  const ids=shuffle(Q.map((_,i)=>i));
+  const fresh=ids.filter(i=>!rec.has(i)),old=ids.filter(i=>rec.has(i)).sort((a,b)=>rec.get(a)-rec.get(b));
+  return fresh.concat(old);
+}
+function newGame(){
+  G={mode:'play',order:buildOrder(),idx:0,score:0,asked:0,wrong:[],seen:[],lock:0,startAt:performance.now(),offset:0,lastTick:ROUND+1,timeLeft:ROUND};
+  $('score').textContent='0';
+  show('scr-play');
+  showQ();
+  if(raf)cancelAnimationFrame(raf);
+  raf=requestAnimationFrame(frame);
+}
+function cur(){return Q[G.order[G.idx%G.order.length]];}
+function showQ(){
+  if(G.idx>=G.order.length){G.order=buildOrder();G.idx=0;}
+  const q=cur();G.seen.push(G.order[G.idx]);
+  $('qtext').textContent=q.q;$('qnum').textContent='문제 '+(G.asked+1);
+  const c=$('qcard');c.classList.remove('good','bad');const v=$('verdict');v.classList.remove('show','good','bad');
+  setBtns(true);
+}
+function setBtns(on){$('btnO').disabled=!on;$('btnX').disabled=!on;}
+function answer(ch){
+  if(!G||G.mode!=='play'||G.lock>performance.now())return;
+  const q=cur();const ok=q.a===ch;G.asked++;
+  const c=$('qcard'),v=$('verdict');
+  save.answered++;
+  if(ok){G.score++;save.correct++;$('score').textContent=G.score;c.classList.add('good');v.textContent='정답!';v.className='verdict show good';
+    const p=$('plus');p.classList.remove('go');void p.offsetWidth;p.classList.add('go');sfx.good();flash('rgba(53,208,127,.5)');}
+  else{G.wrong.push({q:q.q,a:q.a,e:q.e});c.classList.add('bad');v.textContent='정답은 '+q.a;v.className='verdict show bad';sfx.bad();flash('rgba(255,77,94,.5)');
+    if(navigator.vibrate)try{navigator.vibrate(60);}catch(e){}}
+  const btn=ch==='O'?$('btnO'):$('btnX');btn.classList.add('press');setTimeout(()=>btn.classList.remove('press'),120);
+  setBtns(false);
+  const lock=ok?LOCK_GOOD:LOCK_BAD;G.lock=performance.now()+lock;
+  setTimeout(()=>{if(G&&G.mode==='play'){G.idx++;showQ();}},lock);
+}
+function flash(color){const f=$('flash');f.style.background=color;f.classList.remove('go');void f.offsetWidth;f.classList.add('go');}
+function timeLeft(){return Math.max(0,ROUND-(performance.now()-G.startAt)/1000-G.offset);}
+function frame(){
+  if(!G||G.mode!=='play')return;
+  const tl=timeLeft();G.timeLeft=tl;
+  const sec=Math.ceil(tl);
+  $('timer').innerHTML=sec+'<small>초</small>';
+  $('barFill').style.transform='scaleX('+(tl/ROUND)+')';
+  const hot=tl<=10;
+  $('timer').classList.toggle('hot',hot);$('bar').classList.toggle('hot',hot);
+  if(hot&&sec<G.lastTick&&sec>0){G.lastTick=sec;sfx.tick();}
+  if(tl<=0){finish();return;}
+  raf=requestAnimationFrame(frame);
+}
+function grade(score,asked){
+  if(asked===0)return '아직 한 문제도 안 풀었어요. 다시!';
+  const r=score/asked;
+  if(score>=25&&r>=0.9)return '⚡ 전기 고수! 기술사급 반응 속도';
+  if(score>=18&&r>=0.8)return '🔧 실무자 인정. 현장에서 통하는 상식';
+  if(score>=12&&r>=0.7)return '📘 수험생 합격권. 조금만 더!';
+  if(r>=0.5)return '💡 기본은 있다. 틀린 문제 해설을 보자';
+  return '🔌 처음이라면 이 정도. 해설 읽고 다시 도전';
+}
+function finish(){
+  if(!G||G.mode!=='play')return;
+  G.mode='end';if(raf)cancelAnimationFrame(raf);raf=0;
+  sfx.end();
+  const isNew=G.score>save.best&&G.score>0;
+  if(isNew)save.best=G.score;
+  save.plays++;
+  // 최근 문제 기록: 이번 판에 나온 문제를 뒤에 붙이고, 최근 2판 분량(최대 60개)만 유지
+  save.recent=save.recent.filter(id=>!G.seen.includes(id)).concat(G.seen).slice(-60);
+  writeSave();
+  $('rScore').textContent=G.score;$('rTotal').textContent=G.asked;$('rBest').textContent=save.best;
+  $('newBest').hidden=!isNew;$('grade').textContent=grade(G.score,G.asked);
+  const list=$('wrongList');list.textContent='';
+  const cnt=$('wrongCnt');cnt.textContent=G.wrong.length;cnt.classList.toggle('ok',G.wrong.length===0);
+  if(G.wrong.length===0){const d=document.createElement('div');d.className='allok';d.textContent=G.asked?'틀린 문제가 없어요! 👏 다음 판엔 더 빨리.':'버튼을 눌러 문제를 풀어 보세요.';list.appendChild(d);}
+  G.wrong.forEach((w,i)=>{
+    const d=document.createElement('div');d.className='wrong';
+    const q=document.createElement('div');q.className='q';q.textContent=(i+1)+'. '+w.q;
+    const a=document.createElement('div');a.className='a';a.append('정답 ');const b=document.createElement('b');b.className=w.a;b.textContent=w.a+(w.a==='O'?' 맞다':' 틀리다');a.appendChild(b);
+    const e=document.createElement('div');e.className='e';e.textContent=w.e;
+    const m=document.createElement('div');m.className='more';const l=document.createElement('a');l.href=BLOG;l.target='_blank';l.rel='noopener';l.textContent='자세히: 전기견문록 →';m.appendChild(l);
+    d.append(q,a,e,m);list.appendChild(d);
+  });
+  show('scr-end');$('scr-end').scrollTop=0;
+  $('bestStart').textContent=save.best;
+}
+function shareText(){return '60초 전기 OX '+G.asked+'문제 중 '+G.score+'개 ⚡\n'+SITE;}
+async function share(){
+  const text=shareText();let done=false;
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(text);done=true;}}catch(e){}
+  if(!done){try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();done=document.execCommand('copy');document.body.removeChild(ta);}catch(e){}}
+  toast(done?'결과를 복사했어요. 친구에게 붙여넣기!':'복사가 막혀 있어요. 점수 '+G.score+'개!');
+}
+let toastT=0;
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);}
+function show(id){document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===id));}
+function start(){audioInit();sfx.start();newGame();}
+
+// ───────── 입력 ─────────
+$('bestStart').textContent=save.best;
+$('startBtn').addEventListener('pointerdown',e=>{e.preventDefault();start();});
+$('againBtn').addEventListener('pointerdown',e=>{e.preventDefault();start();});
+$('shareBtn').addEventListener('pointerdown',e=>{e.preventDefault();audioInit();sfx.tap();share();});
+$('btnO').addEventListener('pointerdown',e=>{e.preventDefault();audioInit();answer('O');});
+$('btnX').addEventListener('pointerdown',e=>{e.preventDefault();audioInit();answer('X');});
+document.addEventListener('keydown',e=>{
+  if(e.repeat)return;const k=e.key;
+  if(G&&G.mode==='play'){if(k==='ArrowLeft'||k==='o'||k==='O'||k==='1'){audioInit();answer('O');}else if(k==='ArrowRight'||k==='x'||k==='X'||k==='2'){audioInit();answer('X');}}
+  else if(k==='Enter'||k===' '){e.preventDefault();start();}
+  if(k==='m'||k==='M'){audioInit();setMute(!save.mute);}
+});
+// 스크롤·확대 방지(결과 화면은 세로 스크롤 허용)
+document.addEventListener('touchmove',e=>{if(!e.target.closest('#scr-end'))e.preventDefault();},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('visibilitychange',()=>{/* 탭을 떠나도 타이머는 실제 시간으로 흐른다(공정성) */});
+
+// ───────── 테스트용 ─────────
+window.__game={
+  get state(){return G?{mode:G.mode,score:G.score,asked:G.asked,idx:G.idx,timeLeft:G.mode==='play'?timeLeft():G.timeLeft,wrong:G.wrong.length,seen:G.seen.slice(),best:save.best,plays:save.plays}:{mode:'start',best:save.best,plays:save.plays};},
+  get current(){return G&&G.mode==='play'?{id:G.order[G.idx%G.order.length],...cur()}:null;},
+  start(){start();},
+  answer(c){answer(c);},
+  setTime(sec){if(G&&G.mode==='play'){G.offset+=timeLeft()-sec;}},
+  finish(){finish();},
+  shareText(){return G?shareText():'';},
+  questions:Q,save,
+  get ac(){return AC;},get master(){return master;},
+  reset(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}location.reload();}
+};
+</script>
+</body>
+</html>

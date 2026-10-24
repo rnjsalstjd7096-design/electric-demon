@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0e1a2e">
+<meta name="description" content="탭해서 아기용을 날려 송전 철탑·처진 전선·새 앉은 전선을 피하는 한 손 게임. 감전될 때마다 전기 상식 한 줄. 전기로 마왕군 100만 부대 막기의 아기용이 주인공.">
+<title>아기용 플라이트 — 전선과 철탑을 피해 날아라</title>
+<style>
+  html,body{margin:0;height:100%;background:#0e1a2e;overflow:hidden;overscroll-behavior:none;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+  body{position:fixed;inset:0;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#eef4ff}
+  #wrap{position:relative;margin:0 auto;width:100%;max-width:480px;height:100%;touch-action:none;overflow:hidden}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
+  #mute{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;width:44px;height:44px;border:0;border-radius:22px;
+    background:rgba(0,0,0,.35);color:#fff;font-size:20px;line-height:44px;padding:0;cursor:pointer;touch-action:none;z-index:3}
+  #card{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;z-index:2;
+    background:rgba(6,12,24,.35);opacity:0;transition:opacity .18s;cursor:pointer}
+  #card.show{opacity:1}
+  #card[hidden]{display:none}
+  .box{width:100%;max-width:340px;background:rgba(12,22,40,.94);border:1px solid rgba(255,255,255,.14);border-radius:18px;
+    padding:18px 18px 14px;box-shadow:0 14px 40px rgba(0,0,0,.5);text-align:center}
+  .cause{font-size:20px;font-weight:800;color:#ffd34a;line-height:1.3}
+  .fact{margin:12px 0 0;padding:10px 12px;background:rgba(255,255,255,.07);border-radius:12px;text-align:left}
+  .fact small{display:block;font-size:11px;color:#9fd8ff;font-weight:700;letter-spacing:.04em;margin-bottom:4px}
+  .fact p{margin:0;font-size:14.5px;line-height:1.5;color:#f3f7ff;word-break:keep-all}
+  .score{margin-top:12px;font-size:15px;color:#c9d6ea}
+  .score b{font-size:40px;color:#fff;line-height:1;margin-right:4px}
+  .title{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;background:#2b4a7a;color:#ffe9a6;font-size:13px;font-weight:700}
+  .title:empty{display:none}
+  .best{margin-top:6px;font-size:13px;color:#9fb3cc}
+  .best .new{color:#ffd34a;font-weight:700}
+  .again{margin:14px auto 0;display:block;width:100%;padding:13px 0;border:0;border-radius:14px;background:#ffd34a;color:#1a1a1a;
+    font-size:18px;font-weight:800;cursor:pointer;animation:pulse 1.1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+  .hint{margin-top:6px;font-size:12px;color:#8ea2bd}
+  .row{display:flex;gap:8px;margin-top:12px}
+  .row>*{flex:1;min-height:44px;border:1px solid rgba(255,255,255,.18);border-radius:12px;background:rgba(255,255,255,.08);
+    color:#eef4ff;font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;padding:6px 8px;line-height:1.25;word-break:keep-all}
+  .row a{background:#1f6f5a;border-color:#2f9c80;color:#f6fff9}
+  #toastDom{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translateX(-50%);
+    background:rgba(0,0,0,.7);color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;z-index:4;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap}
+  #toastDom.show{opacity:1}
+</style>
+<meta name="description" content="탭 하나로 아기용을 날려 송전 철탑과 처진 전선을 피하는 게임. 두 가닥을 이으면 감전, 죽을 때마다 전기 상식 한 줄."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/dragon-flight/"><meta property="og:title" content="아기용 플라이트 — 전선과 철탑을 피해 날아라"><meta property="og:description" content="탭 하나로 아기용을 날려 송전 철탑과 처진 전선을 피하는 게임. 두 가닥을 이으면 감전, 죽을 때마다 전기 상식 한 줄."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"></head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  <div id="card" hidden role="dialog" aria-label="결과">
+    <div class="box">
+      <div class="cause" id="cCause">⚡ 감전!</div>
+      <div class="fact"><small>💡 전기 상식</small><p id="cFact"></p></div>
+      <div class="score"><b id="cScore">0</b>점<br><span class="title" id="cTitle"></span></div>
+      <div class="best" id="cBest">최고 0점</div>
+      <button class="again" id="bAgain">다시 날기</button>
+      <div class="hint">아무 데나 탭해도 바로 다시</div>
+      <div class="row">
+        <button id="bShare">📋 결과 복사</button>
+        <a id="bMain" href="https://rnjsalstjd7096-design.github.io/electric-demon/" target="_blank" rel="noopener">아기용의 본편 보러 가기 👉</a>
+      </div>
+    </div>
+  </div>
+  <div id="toastDom"></div>
+</div>
+<script>
+'use strict';
+// ───────── 저장 ─────────
+const SAVE_KEY='dragon-flight.save.v1';
+const save={best:0,mute:false,runs:0,fi:{},titles:[]};
+try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s&&typeof s==='object')Object.assign(save,s);if(!save.fi||typeof save.fi!=='object')save.fi={};if(!Array.isArray(save.titles))save.titles=[];}catch(e){}
+function writeSave(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
+
+const GAME_URL='https://rnjsalstjd7096-design.github.io/electric-demon/games/dragon-flight/';
+const MAIN_URL='https://rnjsalstjd7096-design.github.io/electric-demon/';
+
+// ───────── 감전 원인 · 전기 상식 (FACTS.md와 글자 그대로 같음) ─────────
+const CAUSE={
+  tower:'송전 철탑 전선에 감전!',
+  wire:'처진 전선에 감전!',
+  pole:'변압기 전주에 감전!',
+  birds:'두 가닥을 한꺼번에! 감전!',
+  ground:'땅에 쿵! 날갯짓을 잊었어요'
+};
+const FACTS={
+  birds:[
+    '새는 전선 한 가닥에만 앉아 두 발 사이 전위차가 거의 없어요. 그래서 멀쩡해요.',
+    '전기는 전위차가 있어야 흘러요. 몸이 선과 선, 또는 선과 땅을 잇는 순간 통로가 됩니다.',
+    '아기용도 한 가닥만 건드리면 새처럼 괜찮아요. 두 가닥을 한 번에 잇는 게 문제예요.',
+    '날개가 큰 새는 두 전선에 동시에 닿아 감전되기도 해요. 그래서 전선 사이를 넓히거나 절연 덮개를 씌워요.'
+  ],
+  tower:[
+    '송전 철탑의 전선은 15만4천~76만5천 볼트. 닿지 않아도 가까이 가면 공기를 뚫고 전기가 튈 수 있어요.',
+    '철탑·송전선 근처에서 드론을 띄우지 마세요. 부딪히면 정전과 추락 사고로 이어질 수 있어요.',
+    '전선과 건물·나무는 정해진 거리(이격거리)를 떨어져 있어야 해요. 전선 가까이 사다리·장대를 세우지 마세요.',
+    '번개 칠 때 철탑이나 큰 나무 밑은 피난처가 아니에요. 낙뢰 전류가 주변 땅으로 퍼져요.'
+  ],
+  wire:[
+    '전선은 여름에 열로 늘어나 더 낮게 처져요. 겨울에 안전했던 높이가 여름엔 위험할 수 있어요.',
+    '전선 근처에서 연·낚싯대 금지. 연줄이 전선에 걸리면 줄을 타고 전기가 올 수 있어요.',
+    '땅에 떨어진 전선은 살아 있다고 생각하세요. 가까이 가지 말고 한전(국번 없이 123)에 신고.',
+    '감전된 사람을 맨손으로 잡지 마세요. 먼저 전원을 끊고, 안 되면 마른 나무 막대 같은 절연체로 떼어 내세요.'
+  ],
+  pole:[
+    '전주 위 통 모양 변압기는 2만2천9백 볼트를 집에서 쓰는 220·380볼트로 낮춰 줘요. 위쪽은 고압이에요.',
+    "'고압 위험' 표지가 붙은 전주·설비에 올라가거나 물건을 걸치지 마세요. 이상하면 한전(123)에 신고.",
+    '전주 근처에서 긴 사다리·철근·낚싯대를 세울 때는 전선과 닿지 않는지 먼저 올려다보세요.'
+  ],
+  ground:[
+    '전기는 전위차가 있어야 흘러요. 몸이 선과 선, 또는 선과 땅을 잇는 순간 통로가 됩니다.',
+    '땅에 떨어진 전선은 살아 있다고 생각하세요. 가까이 가지 말고 한전(국번 없이 123)에 신고.',
+    '새는 전선 한 가닥에만 앉아 두 발 사이 전위차가 거의 없어요. 그래서 멀쩡해요.'
+  ]
+};
+const BIRD_OK='새처럼 멀쩡! 한 가닥은 괜찮아요';
+const TITLES=[[40,'송전망 지킴이'],[20,'철탑 넘는 아기용'],[10,'전선 곡예사'],[5,'둥지 밖 첫 비행']];
+function titleFor(n){for(const [k,t] of TITLES)if(n>=k)return t;return '';}
+
+// ───────── 상수 ─────────
+const STEP=1/120;
+const GRAV=1500, FLAP_V=-390, HOLD_MAX=0.16, HOLD_G=0.5, VMAX=680;
+const RESTART_AT=0.5;            // 감전 후 이 시간(초)부터 탭 = 즉시 재시작
+const U=2.4;                     // 아기용 픽셀 1칸 크기(px)
+const HIT_W=7*U, HIT_H=6*U;      // 판정 반폭·반높이 (그림보다 작게 = 너그럽게)
+const GROUND_H=64;
+
+// ───────── 캔버스 ─────────
+const wrap=document.getElementById('wrap'),cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const muteBtn=document.getElementById('mute');
+let W=375,H=812,GY=H-GROUND_H,DX=120,DPR=1;
+function resize(){
+  const r=wrap.getBoundingClientRect();W=Math.max(300,Math.round(r.width));H=Math.max(480,Math.round(r.height));
+  DPR=Math.min(3,window.devicePixelRatio||1);cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  GY=H-GROUND_H;DX=Math.round(W*0.32);
+}
+resize();addEventListener('resize',resize);
+
+// ───────── 난수 ─────────
+let seed=(Date.now()%2147483647)|0;
+function rnd(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
+function rr(a,b){return a+(b-a)*rnd();}
+function clamp(v,a,b){return v<a?a:v>b?b:v;}
+
+// ───────── 소리 (WebAudio 합성) ─────────
+let AC=null,master=null,noiseBuf=null;
+function audioInit(){
+  if(AC){if(AC.state==='suspended')AC.resume();return;}
+  try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    master=AC.createGain();master.gain.value=save.mute?0:0.5;master.connect(AC.destination);
+    noiseBuf=AC.createBuffer(1,AC.sampleRate*0.6,AC.sampleRate);
+    const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  }catch(e){AC=null;}
+}
+function tone(type,f0,f1,dur,vol,delay){
+  if(!AC||save.mute)return;const t=AC.currentTime+(delay||0);
+  const o=AC.createOscillator(),g=AC.createGain();o.type=type;
+  o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+dur);
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.02);
+}
+function noise(dur,freq,q,vol,delay){
+  if(!AC||save.mute)return;const t=AC.currentTime+(delay||0);
+  const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
+  s.buffer=noiseBuf;f.type='bandpass';f.frequency.value=freq;f.Q.value=q;
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+dur+0.02);
+}
+const sfx={
+  flap(){noise(0.14,700,0.7,0.35);tone('sine',200,110,0.12,0.14);},
+  ding(){tone('triangle',880,880,0.07,0.16);tone('triangle',1320,1320,0.14,0.16,0.07);},
+  zap(){noise(0.45,2500,0.8,0.55);tone('sawtooth',60,58,0.45,0.25);tone('square',120,110,0.4,0.08);},
+  thud(){noise(0.22,160,0.6,0.7);tone('sine',140,40,0.25,0.4);},
+  tick(){noise(0.06,3200,1,0.25);tone('triangle',1500,900,0.07,0.12);},
+  restart(){tone('triangle',440,880,0.1,0.12);},
+  title(){tone('triangle',660,660,0.1,0.14);tone('triangle',880,880,0.1,0.14,0.1);tone('triangle',1320,1320,0.22,0.16,0.2);}
+};
+function setMute(m){save.mute=m;writeSave();muteBtn.textContent=m?'🔇':'🔊';if(master)master.gain.value=m?0:0.5;}
+setMute(!!save.mute);
+
+// ───────── 아기용 그림 (본편 electric_demon_defense_v2.2.html의 xdSprite 픽셀을 그대로 옮김) ─────────
+// 칸 단위 상자 [x, y(바닥 기준), w, h, 색]. 날개 4개 상자만 날갯짓에 따라 위아래로 움직임.
+const DRAGON_BODY=[
+  [-9,4,5,3,'#3f8a3a'],[-11,6,3,2,'#3f8a3a'],[-12,7,2,2,'#ffb347'],                 // 꼬리 + 불꽃 끝
+  [-5,1,10,8,'#5fbf4f'],[-3,1,6,6,'#f2e3a6'],[-4,0,3,2,'#3f8a3a'],[1,0,3,2,'#3f8a3a'], // 몸, 배, 발
+  [-4,9,8,7,'#6fcf5a'],[-2,9,6,3,'#f2e3a6'],[-3,13,2,2,'#ffffff'],[1,13,2,2,'#ffffff'],[-2,13,1,2,'#1b1b1b'],[2,13,1,2,'#1b1b1b'], // 머리, 코, 눈
+  [-4,16,2,2,'#f0e2b8'],[2,16,2,2,'#f0e2b8'],[-1,10,2,1,'#2a6a2a']                   // 뿔, 콧구멍
+];
+const DRAGON_WINGS=[[-8,8,5,6,'#8fd86a'],[3,8,5,6,'#8fd86a'],[-9,13,2,2,'#5fbf4f'],[7,13,2,2,'#5fbf4f']];
+// 스프라이트 범위: x -12..9칸(21칸), y 0..18칸(날개 올림 때 21칸). 기준점(0,8)이 몸 가운데.
+const SPR_W=21,SPR_H=21,SPR_OX=12,SPR_OY=8; // OY: 기준점 y(칸)
+const sprCache={};
+function dragonSprite(frame,mode){ // frame -1 올림 / 0 중간 / 1 내림 · mode: 'n' 보통, 'x' 엑스레이, 'b' 파랑 실루엣
+  const k=frame+mode;if(sprCache[k])return sprCache[k];
+  const u=Math.round(U*DPR),c=document.createElement('canvas');c.width=SPR_W*u;c.height=SPR_H*u;const g=c.getContext('2d');
+  const b=(x,y,w,h,col)=>{g.fillStyle=col;g.fillRect((x+SPR_OX)*u,c.height-(y+h)*u,w*u,h*u);};
+  const dy=frame===-1?3:frame===1?-3:0;
+  for(const [x,y,w,h,col] of DRAGON_BODY)b(x,y,w,h,mode==='n'?col:mode==='x'?'#f4fbff':'#6fc3ff');
+  for(const [x,y,w,h,col] of DRAGON_WINGS)b(x,y+dy,w,h,mode==='n'?col:mode==='x'?'#f4fbff':'#6fc3ff');
+  if(mode==='x'){ // 뼈
+    const bone='#2b3a5a';
+    b(-1,2,1,7,bone);for(let i=0;i<3;i++)b(-3,3+i*2,5,1,bone);                        // 등뼈·갈비
+    b(-2,11,4,3,'#2b3a5a');b(-3,10,1,1,bone);b(2,10,1,1,bone);                        // 두개골 눈구멍
+    b(-9,5,4,1,bone);b(-6,8+dy,2,5,bone);b(5,8+dy,2,5,bone);                         // 꼬리뼈·날개뼈
+  }
+  sprCache[k]=c;return c;
+}
+function drawDragon(x,y,ang,frame,mode,scale){ // (x,y)=기준점(몸 가운데) 화면 좌표
+  const img=dragonSprite(frame,mode),s=(scale||1)*U/Math.round(U*DPR);
+  ctx.save();ctx.translate(x,y);ctx.rotate(ang||0);ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(img,-SPR_OX*U*(scale||1),-(SPR_H-SPR_OY)*U*(scale||1),img.width*s,img.height*s);
+  ctx.restore();
+}
+
+// ───────── 게임 상태 ─────────
+let G=null;
+function diff(n){ // n = 지금까지 만든 장애물 수(≈점수)
+  return {
+    speed:Math.min(300,150+n*3),
+    gap:Math.max(150,240-n*2.2),
+    space:Math.max(215,320-n*2)
+  };
+}
+function newRun(){
+  G={mode:'ready',t:0,cam:0,speed:150,
+     d:{y:GY*0.45,vy:0,holding:false,holdT:0,flapT:0,ang:0,rot:0},
+     obs:[],parts:[],toasts:[],
+     score:0,n:0,nextX:0,lastSafe:GY*0.45,lastType:null,
+     deadT:0,cause:null,fact:'',newBest:false,title:'',
+     shake:0,flash:0,bird:null};
+  G.nextX=DX+W*0.9;
+  genMore();
+  hideCard();
+}
+function startFly(){G.mode='fly';G.t=0;flap();}
+function safeOf(o){return o.safe;}
+function addOb(type,x,n){
+  const d=diff(n),o={type,x,w:0,passed:false,touched:0,ph:rnd()*6};
+  const prev=G.lastSafe;
+  if(type==='tower'){
+    o.w=64;o.gapH=d.gap;
+    const lo=o.gapH/2+36,hi=GY-o.gapH/2-30;
+    o.gapY=clamp(prev+rr(-170,170),lo,hi);o.safe=o.gapY;
+  }else if(type==='wire'){
+    o.w=Math.round(rr(210,260));o.sag=clamp(rr(0.28,0.52)*GY,120,GY-150); // 가장 낮은 점의 y
+    o.safe=clamp(prev,o.sag+HIT_H+60,GY-40);
+  }else if(type==='pole'){
+    o.w=46;o.top=clamp(GY-rr(0.30,0.62)*GY,110,GY-120); // 전주 꼭대기 y
+    o.safe=clamp(prev,40,o.top-HIT_H-40);
+  }else if(type==='birds'){
+    o.w=Math.round(rr(140,170));o.gapW=30;
+    o.y1=clamp(prev+rr(-40,40),120,GY-170);o.y2=o.y1+o.gapW;o.sag=6;
+    const above=o.y1-HIT_H-30,below=o.y2+HIT_H+56;
+    o.safe=Math.abs(prev-above)<Math.abs(prev-below)?above:below;
+    o.birds=[0.22,0.5,0.78].map((t,i)=>({t,w:i===1?2:1,jump:0}));
+  }
+  G.obs.push(o);G.lastType=type;G.lastSafe=o.safe;return o;
+}
+function genMore(){
+  const viewR=G.cam+W*2.2;
+  while(G.nextX<viewR){
+    const n=G.n;let types;
+    if(n<3)types=['tower'];
+    else if(n<7)types=['tower','tower','wire','pole'];
+    else types=['tower','tower','wire','pole','birds','birds'];
+    let type=types[Math.floor(rnd()*types.length)];
+    if(type===G.lastType&&type!=='tower')type='tower';
+    const o=addOb(type,G.nextX,n);G.n++;
+    G.nextX=o.x+o.w+diff(G.n).space;
+  }
+  G.obs=G.obs.filter(o=>o.x+o.w>G.cam-80);
+}
+
+// ───────── 입력 ─────────
+function flap(){const d=G.d;d.vy=FLAP_V;d.holding=true;d.holdT=0;d.flapT=0;sfx.flap();}
+function pressDown(){
+  audioInit();
+  if(G.mode==='ready'){startFly();return;}
+  if(G.mode==='fly'){flap();return;}
+  if(G.mode==='dead'){if(G.deadT>=RESTART_AT){newRun();startFly();sfx.restart();}return;}
+}
+function pressUp(){if(G)G.d.holding=false;}
+wrap.addEventListener('pointerdown',e=>{if(e.target.closest('#mute,#card'))return;e.preventDefault();pressDown();},{passive:false});
+wrap.addEventListener('pointerup',pressUp);wrap.addEventListener('pointercancel',pressUp);
+addEventListener('keydown',e=>{if(e.repeat)return;if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'||e.code==='Enter'){e.preventDefault();pressDown();}if(e.code==='KeyM')setMute(!save.mute);});
+addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'||e.code==='Enter')pressUp();});
+muteBtn.addEventListener('pointerdown',e=>e.stopPropagation());
+muteBtn.addEventListener('click',e=>{e.stopPropagation();audioInit();setMute(!save.mute);});
+
+// 결과 카드
+const card=document.getElementById('card');
+card.addEventListener('pointerdown',e=>{if(e.target.closest('.row'))return;e.preventDefault();pressDown();},{passive:false});
+for(const el of card.querySelectorAll('.row>*')){el.addEventListener('pointerdown',e=>e.stopPropagation());}
+document.getElementById('bShare').addEventListener('click',e=>{e.stopPropagation();copyShare();});
+function shareText(){return '🐉 아기용 플라이트 '+G.score+'점'+(G.title?' · 칭호: '+G.title:'')+'\n전선과 철탑을 피해 날아 보세요! 설치 없이 바로 👉 '+GAME_URL;}
+function copyShare(){
+  const text=shareText();
+  const done=()=>domToast('결과를 복사했어요. 친구에게 붙여넣기!');
+  const fallback=()=>{try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.append(ta);ta.select();const ok=document.execCommand('copy');ta.remove();ok?done():domToast('복사가 막혀 있어요');}catch(e){domToast('복사가 막혀 있어요');}};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done,fallback);else fallback();
+}
+let domToastT=0;
+function domToast(s){const el=document.getElementById('toastDom');el.textContent=s;el.classList.add('show');clearTimeout(domToastT);domToastT=setTimeout(()=>el.classList.remove('show'),1800);}
+function showCard(){
+  document.getElementById('cCause').textContent=(G.cause==='ground'?'💥 ':'⚡ ')+CAUSE[G.cause];
+  document.getElementById('cFact').textContent=G.fact;
+  document.getElementById('cScore').textContent=G.score;
+  document.getElementById('cTitle').textContent=G.title;
+  document.getElementById('cBest').innerHTML=G.newBest?'<span class="new">🏆 새 최고 기록!</span>':'최고 '+save.best+'점';
+  card.hidden=false;requestAnimationFrame(()=>card.classList.add('show'));
+}
+function hideCard(){card.hidden=true;card.classList.remove('show');}
+
+// ───────── 판정 ─────────
+function box(){const d=G.d;return {l:DX-HIT_W,r:DX+HIT_W,t:d.y-HIT_H,b:d.y+HIT_H};}
+function wireY(o,sx,yTop,sag){const t=clamp((sx-(o.x-G.cam))/o.w,0,1);return yTop+(sag-yTop)*4*t*(1-t);} // 그리는 곡선(2차 베지어)과 같은 포물선
+function collide(){
+  const bx=box();
+  if(bx.b>=GY)return 'ground';
+  for(const o of G.obs){
+    const sx=o.x-G.cam;if(sx>bx.r||sx+o.w<bx.l)continue;
+    if(o.type==='tower'){if(bx.t<o.gapY-o.gapH/2||bx.b>o.gapY+o.gapH/2)return 'tower';}
+    else if(o.type==='wire'){for(const px of [bx.l+4,DX,bx.r-4]){if(px<sx||px>sx+o.w)continue;if(wireY(o,px,26,o.sag)>=bx.t)return 'wire';}}
+    else if(o.type==='pole'){if(bx.b>o.top)return 'pole';}
+    else if(o.type==='birds'){
+      let t1=false,t2=false;
+      for(const px of [bx.l+4,DX,bx.r-4]){if(px<sx||px>sx+o.w)continue;const w1=wireY(o,px,o.y1,o.y1+o.sag),w2=wireY(o,px,o.y2,o.y2+o.sag);if(w1>=bx.t&&w1<=bx.b)t1=true;if(w2>=bx.t&&w2<=bx.b)t2=true;}
+      if(t1&&t2)return 'birds';
+      if((t1||t2)&&!o.touched){o.touched=1;toast(BIRD_OK);sfx.tick();for(const b of o.birds)b.jump=1;burst(DX+(t1?-6:6),t1?o.y1:o.y2,'#bff6ff',6);}
+    }
+  }
+  return null;
+}
+function nextFact(cause){
+  const list=FACTS[cause]||FACTS.ground;const i=(save.fi[cause]|0)%list.length;save.fi[cause]=(i+1)%list.length;return list[i];
+}
+function die(cause){
+  if(G.mode!=='fly')return;
+  G.mode='dead';G.deadT=0;G.cause=cause;G.fact=nextFact(cause);G.d.holding=false;
+  G.title=titleFor(G.score);G.newBest=G.score>save.best;if(G.newBest)save.best=G.score;save.runs=(save.runs|0)+1;writeSave();
+  if(cause==='ground'){sfx.thud();G.shake=0.3;burst(DX,GY,'#c9b48a',14);G.d.vy=-180;}
+  else{sfx.zap();G.shake=0.45;G.flash=0.18;G.d.vy=-140;G.d.rot=rr(-9,9);}
+}
+function toast(s){G.toasts=[{s,t:0}];}
+function burst(x,y,c,n){for(let i=0;i<n;i++){const a=rnd()*Math.PI*2,v=rr(60,220);G.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,t:0,life:rr(0.3,0.6),c,r:rr(1.5,3)});}}
+function smoke(x,y,n){for(let i=0;i<n;i++)G.parts.push({x:x+rr(-10,10),y:y+rr(-6,6),vx:rr(-20,20),vy:rr(-70,-30),t:0,life:rr(0.9,1.6),c:'smoke',r:rr(5,10)});}
+function updParts(dt){for(const p of G.parts){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.c!=='smoke')p.vy+=400*dt;else p.r+=dt*8;}G.parts=G.parts.filter(p=>p.t<p.life);}
+
+// ───────── 진행 ─────────
+function simAdvance(dt){
+  G.t+=dt;const d=G.d;
+  for(const tt of G.toasts)tt.t+=dt;G.toasts=G.toasts.filter(tt=>tt.t<1.6);
+  updParts(dt);
+  if(G.shake>0)G.shake-=dt;if(G.flash>0)G.flash-=dt;
+  for(const o of G.obs)if(o.birds)for(const b of o.birds)if(b.jump>0)b.jump=Math.max(0,b.jump-dt*2.5);
+  if(G.mode==='ready'){d.y=GY*0.45+Math.sin(G.t*2.6)*9;d.flapT+=dt;return;}
+  if(G.mode==='fly'){
+    G.speed=diff(G.n).speed;G.cam+=G.speed*dt;
+    let g=GRAV;if(d.holding&&d.holdT<HOLD_MAX){d.holdT+=dt;g*=HOLD_G;}
+    d.vy=Math.min(VMAX,d.vy+g*dt);d.y+=d.vy*dt;d.flapT+=dt;
+    if(d.y<HIT_H){d.y=HIT_H;d.vy=Math.max(d.vy,0);}
+    d.ang=clamp(d.vy/VMAX,-0.5,1)*0.9;
+    for(const o of G.obs){if(!o.passed&&o.x+o.w<G.cam+DX-HIT_W){o.passed=true;G.score++;sfx.ding();burst(DX+HIT_W+6,d.y-6,'#ffe98a',5);
+      const t=titleFor(G.score);if(t&&t!==titleFor(G.score-1)){toast('칭호 획득 · '+t);sfx.title();if(!save.titles.includes(t)){save.titles.push(t);writeSave();}}}}
+    genMore();
+    const c=collide();if(c)die(c);
+    return;
+  }
+  if(G.mode==='dead'){
+    G.deadT+=dt;
+    if(G.cause!=='ground'){
+      d.vy=Math.min(VMAX,d.vy+GRAV*dt);d.y+=d.vy*dt;d.ang+=d.rot*dt;
+      if(d.y>GY-HIT_H*0.6){d.y=GY-HIT_H*0.6;if(Math.abs(d.vy)>80){d.vy=-d.vy*0.3;sfx.thud();burst(DX,GY,'#c9b48a',8);}else d.vy=0;d.rot*=0.6;}
+      if(G.deadT>0.12&&G.deadT<0.9&&Math.random()<dt*22)smoke(DX,d.y-10,1);
+    }else{d.vy+=GRAV*dt;d.y=Math.min(GY-HIT_H*0.6,d.y+d.vy*dt);}
+    if(G.deadT>=RESTART_AT&&card.hidden)showCard();
+  }
+}
+
+// ───────── 그리기 ─────────
+function rrect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function spark(x,y,n,col){
+  ctx.strokeStyle=col||'#fff36b';ctx.lineWidth=1.6;
+  for(let i=0;i<n;i++){ctx.beginPath();let px=x,py=y;ctx.moveTo(px,py);for(let k=0;k<3;k++){px+=rr(-7,7);py+=rr(-8,8);ctx.lineTo(px,py);}ctx.stroke();}
+}
+function insulator(x,y,down){ // 애자 (down: 아래로 매달림)
+  ctx.fillStyle='#9fb4c4';for(let i=0;i<3;i++){const yy=down?y+i*5:y-i*5-4;ctx.fillRect(x-4,yy,8,3);}
+}
+function lattice(x0,w0,x1,w1,y0,y1,col){ // 사다리꼴 격자 (y0 위, y1 아래)
+  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();
+  ctx.moveTo(x0-w0/2,y0);ctx.lineTo(x1-w1/2,y1);ctx.moveTo(x0+w0/2,y0);ctx.lineTo(x1+w1/2,y1);ctx.stroke();
+  ctx.lineWidth=1.1;ctx.beginPath();
+  const n=Math.max(1,Math.round((y1-y0)/26));
+  for(let i=0;i<=n;i++){
+    const ta=i/n,tb=(i+1)/n,ya=y0+(y1-y0)*ta,yb=y0+(y1-y0)*tb;
+    const cxa=x0+(x1-x0)*ta,wa=w0+(w1-w0)*ta,cxb=x0+(x1-x0)*tb,wb=w0+(w1-w0)*tb;
+    ctx.moveTo(cxa-wa/2,ya);ctx.lineTo(cxa+wa/2,ya);
+    if(i<n){ctx.moveTo(cxa-wa/2,ya);ctx.lineTo(cxb+wb/2,yb);ctx.moveTo(cxa+wa/2,ya);ctx.lineTo(cxb-wb/2,yb);}
+  }
+  ctx.stroke();
+}
+function drawBG(){
+  const g=ctx.createLinearGradient(0,0,0,GY);
+  g.addColorStop(0,'#13224a');g.addColorStop(0.55,'#3d4f8a');g.addColorStop(1,'#e2956a');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,GY);
+  // 달
+  ctx.fillStyle='#fff3c4';ctx.beginPath();ctx.arc(W*0.78,GY*0.17,22,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e9dca5';ctx.beginPath();ctx.arc(W*0.78-7,GY*0.17-5,5,0,Math.PI*2);ctx.arc(W*0.78+6,GY*0.17+7,3.5,0,Math.PI*2);ctx.fill();
+  // 구름
+  const off0=(G.cam*0.12)%260;ctx.fillStyle='rgba(255,255,255,.13)';
+  for(let i=-1;i<W/260+2;i++){const x=i*260-off0,k=(i+Math.floor(G.cam*0.12/260))&3,y=GY*(0.12+k*0.09);ctx.beginPath();ctx.ellipse(x,y,46,13,0,0,Math.PI*2);ctx.ellipse(x+30,y-8,30,14,0,0,Math.PI*2);ctx.ellipse(x-28,y-4,26,11,0,0,Math.PI*2);ctx.fill();}
+  // 먼 산
+  const off1=(G.cam*0.2)%180;ctx.fillStyle='#2a3763';ctx.beginPath();ctx.moveTo(-10,GY);
+  for(let i=-1;i<W/180+2;i++){const x=i*180-off1,k=(i+Math.floor(G.cam*0.2/180))&3;ctx.lineTo(x,GY-60-k*22);ctx.lineTo(x+90,GY-110-((k*7)%3)*18);}
+  ctx.lineTo(W+10,GY);ctx.closePath();ctx.fill();
+  // 멀리 송전탑 실루엣
+  const off2=(G.cam*0.35)%330;ctx.strokeStyle='rgba(20,26,50,.55)';ctx.lineWidth=1;
+  for(let i=-1;i<W/330+2;i++){const x=i*330-off2+90;ctx.beginPath();ctx.moveTo(x-16,GY);ctx.lineTo(x-4,GY-150);ctx.lineTo(x+4,GY-150);ctx.lineTo(x+16,GY);ctx.moveTo(x-22,GY-120);ctx.lineTo(x+22,GY-120);ctx.moveTo(x-16,GY-140);ctx.lineTo(x+16,GY-140);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x+22,GY-120);ctx.quadraticCurveTo(x+165,GY-96,x+308,GY-120);ctx.stroke();}
+  // 땅
+  ctx.fillStyle='#3f7a46';ctx.fillRect(0,GY,W,H-GY);
+  ctx.fillStyle='#57a35a';ctx.fillRect(0,GY,W,7);
+  ctx.fillStyle='#355f3a';const off3=G.cam%46;for(let i=-1;i<W/46+2;i++){ctx.fillRect(i*46-off3,GY+18,14,3);ctx.fillRect(i*46-off3+24,GY+34,10,3);}
+}
+function drawOb(o){
+  const sx=o.x-G.cam;if(sx>W+60||sx+o.w<-60)return;
+  const live=G.mode!=='dead'||G.cause!==o.type;
+  if(o.type==='tower'){
+    const cx=sx+o.w/2,gt=o.gapY-o.gapH/2,gb=o.gapY+o.gapH/2,col='#56627a';
+    // 아래 철탑
+    lattice(cx,o.w,cx,o.w+22,gb+14,GY,col);
+    ctx.fillStyle='#4a5468';ctx.fillRect(cx-o.w/2-18,gb,o.w+36,6);ctx.fillRect(cx-o.w/2-18,gb+6,o.w+36,8);
+    ctx.fillStyle='#c0392b';ctx.fillRect(cx-o.w/2-18,gb+6,o.w+36,8);ctx.fillStyle='#ecf0f1';ctx.fillRect(cx-o.w/2-18,gb+6,o.w+36,4);
+    insulator(cx-o.w/2-12,gb,false);insulator(cx+o.w/2+12,gb,false);
+    ctx.strokeStyle='#111';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(cx-o.w/2-12,gb-16);ctx.lineTo(cx-o.w/2-12-70,gb-24);ctx.moveTo(cx+o.w/2+12,gb-16);ctx.lineTo(cx+o.w/2+12+70,gb-24);ctx.stroke();
+    // 위 철탑
+    lattice(cx,o.w+10,cx,o.w,0,gt-14,col);
+    ctx.fillStyle='#4a5468';ctx.fillRect(cx-o.w/2-18,gt-6,o.w+36,6);ctx.fillStyle='#c0392b';ctx.fillRect(cx-o.w/2-18,gt-14,o.w+36,8);ctx.fillStyle='#ecf0f1';ctx.fillRect(cx-o.w/2-18,gt-14,o.w+36,4);
+    insulator(cx-o.w/2-12,gt,true);insulator(cx+o.w/2+12,gt,true);
+    ctx.strokeStyle='#111';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(cx-o.w/2-12,gt+16);ctx.lineTo(cx-o.w/2-12-70,gt+24);ctx.moveTo(cx+o.w/2+12,gt+16);ctx.lineTo(cx+o.w/2+12+70,gt+24);ctx.stroke();
+    // 고압 표지
+    ctx.fillStyle='#ffd400';ctx.beginPath();ctx.moveTo(cx,gb+30);ctx.lineTo(cx+12,gb+50);ctx.lineTo(cx-12,gb+50);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#111';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText('⚡',cx,gb+48);
+    if(live&&Math.sin(G.t*7+o.ph)>0.5){spark(cx-o.w/2-12,gt+16,1);spark(cx+o.w/2+12,gb-16,1);}
+  }else if(o.type==='wire'){
+    // 위 가로대 + 애자 + 처진 전선
+    ctx.fillStyle='#4a5468';ctx.fillRect(sx-6,0,o.w+12,12);
+    insulator(sx+6,12,true);insulator(sx+o.w-6,12,true);
+    ctx.strokeStyle='#111';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx+6,12);ctx.lineTo(sx,26);ctx.quadraticCurveTo(sx+o.w/2,2*o.sag-26,sx+o.w,26);ctx.lineTo(sx+o.w-6,12);ctx.stroke();
+    // 늘어진 전선 표지
+    ctx.fillStyle='#fff';rrect(sx+o.w/2-30,o.sag+10,60,18,4);ctx.fill();ctx.fillStyle='#d01e1e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('처진 전선',sx+o.w/2,o.sag+23);
+    if(live&&Math.sin(G.t*9+o.ph)>0.4)spark(sx+o.w/2,o.sag,2);
+  }else if(o.type==='pole'){
+    const px=sx+8;
+    ctx.fillStyle='#5a4030';ctx.fillRect(px-6,o.top+6,12,GY-o.top);
+    ctx.fillStyle='#4a5468';ctx.fillRect(sx-14,o.top,o.w+28,6);
+    insulator(sx-8,o.top,false);insulator(sx+o.w+8,o.top,false);insulator(px,o.top,false);
+    ctx.strokeStyle='#111';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sx-8,o.top-16);ctx.lineTo(sx-8-80,o.top-10);ctx.moveTo(sx+o.w+8,o.top-16);ctx.lineTo(sx+o.w+8+80,o.top-10);ctx.stroke();
+    // 변압기 통
+    ctx.fillStyle='#7d8a95';rrect(px+8,o.top+14,26,36,4);ctx.fill();ctx.fillStyle='#657079';ctx.fillRect(px+10,o.top+20,22,3);ctx.fillRect(px+10,o.top+30,22,3);ctx.fillRect(px+10,o.top+40,22,3);
+    ctx.fillStyle='#9fb4c4';ctx.fillRect(px+14,o.top+6,4,8);ctx.fillRect(px+26,o.top+6,4,8);
+    ctx.fillStyle='#ffd400';ctx.beginPath();ctx.moveTo(px+21,o.top+56);ctx.lineTo(px+31,o.top+72);ctx.lineTo(px+11,o.top+72);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#111';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('⚡',px+21,o.top+70);
+    ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';ctx.fillText('고압',px+21,o.top+84);
+    if(live&&Math.sin(G.t*8+o.ph)>0.6)spark(px+21,o.top+8,1);
+  }else if(o.type==='birds'){
+    // 두 가닥 (양끝 애자 받침)
+    ctx.fillStyle='#4a5468';ctx.fillRect(sx-10,o.y1-6,10,o.gapW+12);ctx.fillRect(sx+o.w,o.y1-6,10,o.gapW+12);
+    ctx.fillStyle='#9fb4c4';for(const yy of [o.y1,o.y2]){ctx.fillRect(sx-7,yy-2,6,4);ctx.fillRect(sx+o.w+1,yy-2,6,4);}
+    ctx.strokeStyle='#111';ctx.lineWidth=2.5;
+    for(const yy of [o.y1,o.y2]){ctx.beginPath();ctx.moveTo(sx,yy);ctx.quadraticCurveTo(sx+o.w/2,yy+o.sag*2,sx+o.w,yy);ctx.stroke();}
+    // 새들 (한 가닥에만 앉음)
+    for(const b of o.birds){
+      const yy=b.w===1?o.y1:o.y2,bx=sx+o.w*b.t,by=wireY(o,bx,yy,yy+o.sag)-Math.sin(b.jump*Math.PI)*16,bob=Math.sin(G.t*5+bx)*1;
+      ctx.fillStyle='#2d2d44';ctx.beginPath();ctx.ellipse(bx,by-6+bob,7,5,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(bx+5,by-11+bob,3.5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#f5a623';ctx.fillRect(bx+8,by-11+bob,3,2);
+      ctx.fillStyle='#fff';ctx.fillRect(bx+5,by-12+bob,1.5,1.5);
+      if(b.jump>0){ctx.strokeStyle='#2d2d44';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(bx-6,by-8+bob);ctx.lineTo(bx-12,by-14+bob);ctx.moveTo(bx+2,by-8+bob);ctx.lineTo(bx+8,by-15+bob);ctx.stroke();}
+      ctx.fillStyle='#2d2d44';ctx.fillRect(bx-2,by-2+bob,1.5,3);ctx.fillRect(bx+2,by-2+bob,1.5,3);
+    }
+    ctx.fillStyle='#fff';rrect(sx+o.w/2-36,o.y2+14,72,18,4);ctx.fill();ctx.fillStyle='#1e5fd0';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('두 가닥 금지',sx+o.w/2,o.y2+27);
+    if(live&&Math.sin(G.t*9+o.ph)>0.7)spark(sx+o.w*0.9,o.y1,1);
+  }
+}
+function drawParts(){
+  for(const p of G.parts){
+    const a=1-p.t/p.life;
+    if(p.c==='smoke'){ctx.fillStyle='rgba(120,120,130,'+(a*0.55).toFixed(2)+')';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+    else{ctx.fillStyle=p.c;ctx.globalAlpha=a;ctx.fillRect(p.x-p.r,p.y-p.r,p.r*2,p.r*2);ctx.globalAlpha=1;}
+  }
+}
+function drawHero(){
+  const d=G.d;
+  if(G.mode==='dead'&&G.cause!=='ground'){
+    const t=G.deadT;
+    let mode='n',frame=-1;
+    if(t<0.34){mode=Math.floor(t/0.05)%2===0?'x':'b';}
+    drawDragon(DX,d.y,d.ang,frame,mode);
+    if(t<0.55){ // 비늘 곤두섬 + 전기 테두리
+      ctx.strokeStyle=t<0.34?'#fff36b':'#9fd8ff';ctx.lineWidth=1.5;
+      for(let i=0;i<10;i++){const a=i/10*Math.PI*2+t*3,r0=HIT_W+6,r1=r0+8+Math.sin(t*40+i)*4;ctx.beginPath();ctx.moveTo(DX+Math.cos(a)*r0,d.y+Math.sin(a)*r0);ctx.lineTo(DX+Math.cos(a)*r1,d.y+Math.sin(a)*r1);ctx.stroke();}
+      spark(DX+rr(-14,14),d.y+rr(-14,14),2);
+    }
+    return;
+  }
+  let frame=0;
+  if(G.mode==='ready')frame=Math.sin(G.t*9)>0.3?-1:Math.sin(G.t*9)<-0.3?1:0;
+  else if(G.mode==='fly'){frame=d.flapT<0.08?-1:d.flapT<0.18?1:d.vy>250?-1:0;}
+  else frame=1;
+  drawDragon(DX,d.y,G.mode==='dead'?d.ang:d.ang||0,frame,'n');
+}
+function drawHUD(){
+  ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  const top=Math.max(18,(window.visualViewport?0:0))+56;
+  if(G.mode!=='ready'){
+    ctx.font='900 46px system-ui,sans-serif';ctx.lineWidth=6;ctx.strokeStyle='rgba(0,0,0,.45)';ctx.strokeText(G.score,W/2,top);ctx.fillStyle='#fff';ctx.fillText(G.score,W/2,top);
+    ctx.font='700 13px system-ui,sans-serif';ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillText('최고 '+Math.max(save.best,G.score),W/2,top+20);
+  }
+  if(G.mode==='ready'){
+    ctx.font='800 20px system-ui,sans-serif';ctx.fillStyle='rgba(255,255,255,.72)';ctx.fillText('🐉 아기용 플라이트',W/2,top);
+    const y=GY*0.68,p=0.5+0.5*Math.sin(G.t*4);
+    ctx.font='800 30px system-ui,sans-serif';ctx.lineWidth=7;ctx.strokeStyle='rgba(0,0,0,.5)';ctx.strokeText('탭해서 날기',W/2,y);ctx.fillStyle='#ffe98a';ctx.fillText('탭해서 날기',W/2,y);
+    ctx.strokeStyle='rgba(255,255,255,'+(0.9-p*0.6).toFixed(2)+')';ctx.lineWidth=3;ctx.beginPath();ctx.arc(W/2,y+58,16+p*14,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.arc(W/2,y+58,8,0,Math.PI*2);ctx.fill();
+    ctx.font='700 13px system-ui,sans-serif';ctx.fillStyle='rgba(255,255,255,.7)';if(save.best>0)ctx.fillText('최고 '+save.best+'점',W/2,y+100);
+  }
+  for(const tt of G.toasts){
+    const a=tt.t<0.15?tt.t/0.15:tt.t>1.2?Math.max(0,(1.6-tt.t)/0.4):1;
+    ctx.globalAlpha=a;ctx.font='800 15px system-ui,sans-serif';const w=ctx.measureText(tt.s).width+28;
+    ctx.fillStyle='rgba(0,0,0,.6)';rrect(W/2-w/2,GY*0.3-20,w,32,16);ctx.fill();ctx.fillStyle='#bff6ff';ctx.fillText(tt.s,W/2,GY*0.3+2);ctx.globalAlpha=1;
+  }
+}
+function draw(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.save();
+  if(G.shake>0){ctx.translate(rr(-1,1)*G.shake*14,rr(-1,1)*G.shake*14);}
+  drawBG();
+  for(const o of G.obs)drawOb(o);
+  drawParts();
+  drawHero();
+  ctx.restore();
+  if(G.flash>0){ctx.fillStyle='rgba(255,255,255,'+(G.flash/0.18*0.8).toFixed(2)+')';ctx.fillRect(0,0,W,H);}
+  drawHUD();
+}
+
+// ───────── 루프 ─────────
+let last=performance.now(),acc=0,paused=false,fpsN=0,fpsT=0,fps=0;
+function frame(now){
+  requestAnimationFrame(frame);
+  let dt=(now-last)/1000;last=now;if(dt>0.1)dt=0.1;
+  fpsN++;fpsT+=dt;if(fpsT>=1){fps=fpsN/fpsT;fpsN=0;fpsT=0;}
+  if(paused)return;
+  acc+=dt;while(acc>=STEP){simAdvance(STEP);acc-=STEP;}
+  draw();
+}
+newRun();
+requestAnimationFrame(frame);
+document.addEventListener('visibilitychange',()=>{last=performance.now();if(G&&G.mode==='fly'&&document.hidden)G.d.holding=false;});
+
+// ───────── 테스트용 ─────────
+window.__game={
+  get state(){const d=G.d;return {mode:G.mode,t:G.t,score:G.score,best:save.best,y:d.y,vy:d.vy,speed:G.speed,deadT:G.deadT,cause:G.cause,fact:G.fact,title:G.title,
+    restartAt:RESTART_AT,W,H,GY,DX,fps:Math.round(fps),runs:save.runs,newBest:G.newBest,cardShown:!card.hidden,toasts:G.toasts.map(t=>t.s)};},
+  get obstacles(){return G.obs.map(o=>({type:o.type,sx:o.x-G.cam,w:o.w,safe:o.safe,passed:o.passed,gapY:o.gapY,gapH:o.gapH,sag:o.sag,top:o.top,y1:o.y1,y2:o.y2}));},
+  next(){const o=G.obs.find(o=>o.x+o.w>G.cam+DX-HIT_W);return o?{type:o.type,sx:o.x-G.cam,w:o.w,safe:o.safe,gapY:o.gapY,gapH:o.gapH,sag:o.sag,top:o.top,y1:o.y1,y2:o.y2}:null;},
+  step(sec){const n=Math.round(sec/STEP);for(let i=0;i<n;i++)simAdvance(STEP);draw();},
+  pause(p){paused=!!p;last=performance.now();},
+  tap(){pressDown();},release(){pressUp();},
+  seed(s){seed=s>>>0||1;},restart(){newRun();},
+  die(c){die(c||'tower');},setScore(n){G.score=n|0;},set(y,vy){G.d.y=y;if(vy!=null)G.d.vy=vy;},
+  audio(){return {AC,master};},sfx,
+  share:shareText,facts:FACTS,causes:CAUSE,titles:TITLES,save
+};
+</script>
+</body>
+</html>
