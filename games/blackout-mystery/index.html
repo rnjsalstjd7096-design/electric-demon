@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1320">
+<title>정전 아파트 미스터리</title>
+<style>
+:root{--bg:#0a1320;--bg2:#101923;--pn:#152238;--ln:#2c415b;--tx:#eaf1fb;--mu:#a5b7ca;--cy:#64ceeb;--au:#f2c66d;--gr:#78e2ae;--rd:#e77d78;
+--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#060b13;color:var(--tx);font-family:system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;overflow:hidden;overscroll-behavior:none}
+body{display:flex;justify-content:center;background:radial-gradient(ellipse at 50% 30%,#122036,#060b13 70%)}
+#game{position:relative;width:min(100vw,560px);height:100vh;height:100dvh;overflow:hidden;background:var(--bg);user-select:none;-webkit-user-select:none}
+@media(min-width:600px){#game{box-shadow:0 0 0 1px var(--ln),0 0 60px rgba(100,206,235,.12)}}
+#cv{position:absolute;inset:0;touch-action:none;display:block}
+button{font:inherit;color:inherit;cursor:pointer}
+.hide{display:none!important}
+.btn{min-height:44px;padding:10px 18px;border-radius:12px;background:#1c2c46;border:1px solid var(--ln);color:var(--tx);font-weight:700;font-size:15px}
+.btn:active{transform:translateY(1px)}
+.btn.pri{background:linear-gradient(#f6d58a,#d9a441);color:#1a1405;border-color:#f2c66d;box-shadow:0 0 16px rgba(242,198,109,.35)}
+.btn.cy{background:linear-gradient(#7fdcf3,#3fa9c9);color:#04202a;border-color:#64ceeb}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.45;cursor:default}
+/* HUD */
+#hud{position:absolute;left:0;right:0;top:0;z-index:10;padding:calc(var(--st) + 8px) calc(var(--sr) + 10px) 0 calc(var(--sl) + 10px);pointer-events:none}
+#hud .top{display:flex;align-items:center;gap:6px;pointer-events:auto}
+.ibtn{min-width:44px;height:44px;border-radius:12px;background:rgba(21,34,56,.88);border:1px solid var(--ln);color:var(--tx);font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 10px;position:relative;font-size:14px}
+.ibtn em{position:absolute;top:-5px;right:-5px;background:var(--rd);color:#fff;font-style:normal;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.ibtn em:empty{display:none}
+.flr{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;line-height:1.15;background:rgba(21,34,56,.75);border:1px solid var(--ln);border-radius:12px;padding:3px 10px;height:44px}
+.flr b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;align-self:flex-start;margin-top:2px}
+.chip.off{background:rgba(231,125,120,.18);color:var(--rd)}.chip.on{background:rgba(120,226,174,.18);color:var(--gr)}.chip.out{background:rgba(100,206,235,.18);color:var(--cy)}
+.bat{display:flex;align-items:center;gap:6px;height:44px;padding:0 8px;background:rgba(21,34,56,.75);border:1px solid var(--ln);border-radius:12px;font-size:12px;font-weight:700}
+.cell{width:26px;height:14px;border:2px solid var(--mu);border-radius:3px;position:relative;padding:1px}
+.cell:after{content:'';position:absolute;right:-5px;top:3px;width:3px;height:5px;background:var(--mu);border-radius:0 2px 2px 0}
+.cell i{display:block;height:100%;width:100%;background:var(--gr);border-radius:1px}
+#obj{margin-top:6px;font-size:13px;line-height:1.35;color:var(--tx);background:rgba(10,19,32,.78);border:1px solid rgba(44,65,91,.8);border-radius:10px;padding:6px 10px;display:inline-block;max-width:100%}
+#obj b{color:var(--au)}
+#ctrl{position:absolute;left:0;right:0;bottom:0;z-index:10;padding:0 calc(var(--sr) + 14px) calc(var(--sb) + 14px) calc(var(--sl) + 14px);display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.dpad{display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px);gap:2px;pointer-events:auto;touch-action:none}
+.dpad button{background:rgba(21,34,56,.72);border:1px solid var(--ln);border-radius:12px;color:var(--mu);font-size:18px;touch-action:none}
+.dpad button.on{background:rgba(100,206,235,.3);color:var(--tx)}
+.dpad [data-d=u]{grid-area:1/2}.dpad [data-d=l]{grid-area:2/1}.dpad [data-d=r]{grid-area:2/3}.dpad [data-d=d]{grid-area:3/2}
+.act{pointer-events:auto;width:86px;height:86px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#f8dc93,#d9a441);color:#1b1405;font-weight:800;font-size:17px;border:none;box-shadow:0 0 18px rgba(242,198,109,.45);touch-action:none}
+.act.dim{opacity:.5;filter:grayscale(.5);box-shadow:none}
+#game.ovl #toast{bottom:auto;top:calc(var(--st) + 4px)}
+#toast{position:absolute;left:50%;bottom:calc(var(--sb) + 196px);transform:translateX(-50%);z-index:60;pointer-events:none;display:flex;flex-direction:column;gap:6px;align-items:center;width:92%}
+.tst{background:rgba(21,34,56,.95);border:1px solid var(--au);color:var(--tx);border-radius:12px;padding:8px 14px;font-size:14px;font-weight:700;box-shadow:0 0 20px rgba(242,198,109,.3);animation:tin .3s ease-out;text-align:center}
+.tst.g{border-color:var(--gr)}.tst.r{border-color:var(--rd)}
+@keyframes tin{from{opacity:0;transform:translateY(-8px)}to{opacity:1}}
+/* 대화 */
+#dlg{position:absolute;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;padding:0 10px calc(var(--sb) + 12px)}
+.dbox{width:100%;max-width:540px;background:rgba(14,24,40,.96);border:1px solid var(--ln);border-top:2px solid var(--au);border-radius:16px;padding:12px 16px 14px;min-height:130px;position:relative;box-shadow:0 -6px 30px rgba(0,0,0,.5)}
+.who{font-weight:800;color:var(--au);font-size:14px;margin-bottom:4px;min-height:18px}
+.who.me{color:var(--cy)}
+.dtx{font-size:16px;line-height:1.6;white-space:pre-wrap;word-break:keep-all}
+.dtx.nar{color:#c9d6e6;font-style:italic}
+.dnext{position:absolute;right:14px;bottom:8px;color:var(--au);font-size:12px;animation:bob 1s infinite}
+@keyframes bob{50%{transform:translateY(3px)}}
+.dch{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.dch button.sel{outline:2px solid var(--cy)}
+/* 모달 */
+.ov{position:absolute;inset:0;z-index:30;background:rgba(4,8,14,.76);display:flex;align-items:center;justify-content:center;padding:calc(var(--st) + 10px) calc(var(--sr) + 8px) calc(var(--sb) + 10px) calc(var(--sl) + 8px)}
+#nb{z-index:40}
+.mw{width:100%;max-width:520px;max-height:100%;display:flex;flex-direction:column;background:var(--pn);border:1px solid var(--ln);border-radius:16px;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.6)}
+.mh{flex:none;display:flex;align-items:center;gap:8px;padding:10px 10px 10px 16px;border-bottom:1px solid var(--ln);background:#12203a}
+.mh h2{margin:0;font-size:17px;flex:1}
+.mh h2 small{color:var(--mu);font-weight:600;font-size:12px;margin-left:6px}
+.xbtn{width:44px;height:44px;border-radius:10px;background:transparent;border:1px solid var(--ln);font-size:18px}
+.mb{overflow:auto;padding:14px;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.mf{flex:none;padding:10px 14px;border-top:1px solid var(--ln);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.pin{margin:0 0 10px;color:var(--mu);font-size:14px;line-height:1.55;word-break:keep-all}
+.memo{background:#1b2a14;border:1px dashed #8fb36a;border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.5;margin-bottom:12px;color:#e6f2d6}
+.memo b{color:#cfe8a9}
+.memo.no{background:#1a2233;border-color:var(--ln);color:var(--mu)}
+.pmsg{min-height:22px;margin:10px 0 4px;font-size:14px;font-weight:700;text-align:center;word-break:keep-all}
+.pmsg.bad{color:var(--rd)}.pmsg.good{color:var(--gr)}.pmsg.info{color:var(--cy)}
+.prow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.phint{margin-top:10px;background:#2a2412;border:1px solid #6d5a2a;border-radius:10px;padding:8px 10px;font-size:13px;color:#f6e3b4;line-height:1.5}
+.shake{animation:shk .35s}
+@keyframes shk{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+/* 퍼즐: 차단기 */
+.brks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#0e1828;border:2px solid #3a4f6d;border-radius:12px;padding:10px}
+.brk{background:#1a2740;border:1px solid var(--ln);border-radius:10px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:110px}
+.brk .bn{font-weight:800;color:var(--au)}
+.brk .lv{width:30px;height:48px;background:#0a111c;border-radius:6px;position:relative;border:1px solid #33465f}
+.brk .lv i{position:absolute;left:3px;right:3px;height:20px;bottom:3px;background:#6b7787;border-radius:4px;transition:.15s}
+.brk.on .lv i{bottom:23px;background:var(--gr);box-shadow:0 0 10px var(--gr)}
+.brk .bl{font-size:11px;color:var(--mu);text-align:center;word-break:keep-all}
+.brk .st{font-size:11px;font-weight:800;color:#6b7787}.brk.on .st{color:var(--gr)}
+/* 퓨즈 */
+.timer{background:#0b0f16;border:2px solid #4a5568;border-radius:12px;padding:14px;text-align:center;margin:6px 0 12px}
+.tdisp{font-family:ui-monospace,monospace;font-size:40px;color:#ff6b5e;text-shadow:0 0 12px #ff3b2e;letter-spacing:2px}
+.tdisp small{font-size:16px}
+.tlab{font-size:12px;color:var(--mu);margin-top:6px}
+.volt{text-align:center;font-weight:800;color:var(--au);margin-bottom:8px}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{background:#0e1828;border:2px solid #3a4f6d;border-radius:10px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:96px}
+.slot.sel{border-color:var(--cy);box-shadow:0 0 10px rgba(100,206,235,.4)}
+.slot b{font-size:13px}.slot span{font-size:13px;color:var(--au);font-weight:700}
+.slot em{font-style:normal;font-size:13px;padding:3px 8px;border-radius:6px;background:#1c2c46;color:var(--mu)}
+.slot em.f{background:#c9a24a;color:#1b1405;font-weight:800}
+.tray{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.fz{min-width:52px;min-height:44px;border-radius:10px;background:linear-gradient(#e8e2d0,#b9b09a);color:#2a2414;font-weight:800;border:1px solid #fff4}
+/* 전선 */
+.wires{position:relative;display:grid;grid-template-columns:1fr 1fr;column-gap:90px;row-gap:8px;padding:6px 0}
+.wires svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.wl,.wr{min-height:46px;border-radius:10px;border:2px solid var(--ln);background:#0e1828;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;padding:0 8px;position:relative;z-index:1}
+.wr{justify-content:center;font-family:ui-monospace,monospace;font-size:16px}
+.wl i{width:22px;height:12px;border-radius:6px;flex:none;border:1px solid #fff5}
+.wl.sel,.wr.sel{border-color:var(--cy);box-shadow:0 0 10px rgba(100,206,235,.5)}
+/* 회전 */
+.rot{display:grid;grid-template-columns:repeat(7,minmax(0,46px));grid-template-rows:repeat(7,46px);gap:2px;justify-content:center}
+.rt{background:#0e1828;border:1px solid #2a3c55;border-radius:6px;padding:0}
+.rt svg{width:100%;height:100%;display:block;transition:transform .12s}
+.rl{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--mu);text-align:center;line-height:1.1}
+.rl.on{color:var(--au);text-shadow:0 0 8px var(--au)}
+/* 멀티미터 */
+.mread{display:flex;align-items:center;gap:10px;background:#0b0f16;border:2px solid #4a5568;border-radius:12px;padding:8px 12px;margin-bottom:10px}
+.mread b{font-family:ui-monospace,monospace;font-size:28px;color:#9cf7c6;min-width:90px;text-shadow:0 0 8px #3fe39a}
+.mread small{color:var(--mu);font-size:12px;line-height:1.35}
+.chain{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:56px 46px 56px;gap:0;max-width:380px;margin:0 auto}
+.pt{width:44px;height:44px;border-radius:50%;background:#1c2c46;border:2px solid var(--mu);font-weight:800;align-self:center;justify-self:center;z-index:1;font-size:14px}
+.pt.r{background:#7a1f1a;border-color:#ff7a70}.pt.k{background:#111;border-color:#ddd}
+.sg{display:flex;flex-direction:column;align-items:center;justify-content:center;border:none;background:transparent;padding:0;position:relative;min-height:44px}
+.sg:before{content:'';position:absolute;left:-4px;right:-4px;top:50%;height:3px;background:#7b8ba0}
+.sg.v:before{left:50%;right:auto;top:-6px;bottom:-6px;width:3px;height:auto}
+.sg span{position:relative;background:#152238;font-size:10.5px;font-weight:700;padding:1px 3px;border-radius:4px;color:var(--tx);border:1px solid #34495f;white-space:nowrap}
+.sg.sel span{border-color:var(--au);color:var(--au);box-shadow:0 0 8px rgba(242,198,109,.6)}
+.src{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--au);position:relative}
+.src:before{content:'';position:absolute;left:50%;margin-left:-1.5px;top:-6px;bottom:-6px;width:3px;background:#c9a24a}.src span{position:relative;background:#152238;border:1px solid #6d5a2a;border-radius:6px;padding:2px 4px;text-align:center;line-height:1.2}
+.mlog{font-size:12px;color:var(--mu);margin-top:8px;line-height:1.5;max-height:72px;overflow:auto}
+/* 부하 */
+.circs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.circ{background:#0e1828;border:1px solid var(--ln);border-radius:10px;padding:6px;font-size:12px;text-align:center}
+.circ b{display:block;font-size:15px}
+.circ .bar{height:8px;background:#0a111c;border-radius:4px;overflow:hidden;margin-top:4px}
+.circ .bar i{display:block;height:100%;background:var(--gr)}
+.circ.over{border-color:var(--rd)}.circ.over .bar i{background:var(--rd)}.circ.over b{color:var(--rd)}
+.aps{display:flex;flex-direction:column;gap:5px}
+.ap{display:flex;align-items:center;gap:6px;background:#0e1828;border:1px solid #23354d;border-radius:10px;padding:3px 4px 3px 10px}
+.ap .an{flex:1;font-size:13px;font-weight:700;min-width:0}.ap .an small{display:block;color:var(--au);font-weight:700}
+.ap button{width:44px;height:40px;border-radius:8px;background:#1c2c46;border:1px solid var(--ln);font-weight:800}
+.ap button.on{background:var(--cy);color:#04202a;border-color:var(--cy)}
+/* 스위치 */
+.lamps,.sws{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;text-align:center}
+.lamp{width:38px;height:38px;border-radius:50%;margin:0 auto;background:#2a3446;border:2px solid #44546b;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#8796aa;transition:.15s}
+.lamp.on{background:radial-gradient(circle,#fff5c8,#f2c66d);border-color:#fff1b0;color:#4a3a10;box-shadow:0 0 16px #f2c66d}
+.sw{min-height:66px;border-radius:10px;background:#0e1828;border:1px solid var(--ln);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 0}
+.sw .tg{width:18px;height:30px;background:#0a111c;border-radius:5px;position:relative;border:1px solid #33465f}
+.sw .tg i{position:absolute;left:2px;right:2px;height:12px;bottom:2px;background:#6b7787;border-radius:3px;transition:.12s}
+.sw.on .tg i{bottom:14px;background:var(--cy)}
+.sw b{font-size:12px}.swl{font-size:10.5px;color:var(--mu);margin-top:3px;word-break:keep-all}
+/* 수첩 */
+.tabs{flex:none;display:flex;gap:4px;padding:8px 10px 0;background:#12203a;border-bottom:1px solid var(--ln);overflow-x:auto}
+.tab{min-height:40px;padding:6px 12px;border-radius:10px 10px 0 0;border:1px solid transparent;background:transparent;color:var(--mu);font-weight:700;font-size:14px;white-space:nowrap}
+.tab.on{background:var(--pn);border-color:var(--ln);border-bottom-color:var(--pn);color:var(--tx);margin-bottom:-1px}
+.ni{background:#0f1a2c;border:1px solid #24364e;border-left:4px solid var(--au);border-radius:10px;padding:9px 11px;margin-bottom:8px}
+.ni.ts{border-left-color:var(--cy)}.ni.memo2{border-left-color:#8fb36a}
+.ni h3{margin:0 0 4px;font-size:14px;display:flex;gap:6px;align-items:center}
+.ni h3 small{color:var(--mu);font-weight:600;font-size:11px;margin-left:auto}
+.ni h3 .nw{background:var(--rd);color:#fff;font-size:10px;padding:1px 5px;border-radius:5px}
+.ni p{margin:0;font-size:13px;line-height:1.55;color:#cfdae8;word-break:keep-all}
+.empty{color:var(--mu);font-size:14px;text-align:center;padding:24px 0}
+.prog{display:flex;flex-direction:column;gap:6px}
+.pg{display:flex;align-items:center;gap:10px;background:#0f1a2c;border:1px solid #24364e;border-radius:10px;padding:8px 12px;font-size:14px}
+.pg b{flex:1}.pg span{font-size:12px;font-weight:700}
+/* 층 이동 */
+.fl{display:flex;flex-direction:column;gap:6px}
+.fbtn{display:flex;align-items:center;gap:10px;min-height:48px;border-radius:12px;background:#0f1a2c;border:1px solid var(--ln);padding:6px 14px;text-align:left}
+.fbtn b{width:38px;font-size:16px;color:var(--au)}.fbtn span{flex:1;font-size:14px}.fbtn small{font-size:12px;font-weight:700}
+.fbtn.cur{border-color:var(--cy)}.fbtn.lock{opacity:.55}
+/* 추리 */
+.q{margin-bottom:14px}.q h3{font-size:15px;margin:0 0 8px;color:var(--au)}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{min-height:44px;padding:8px 12px;border-radius:10px;background:#0f1a2c;border:1px solid var(--ln);font-size:13.5px;text-align:left;line-height:1.35;word-break:keep-all}
+.opt.on{background:rgba(100,206,235,.18);border-color:var(--cy);color:#fff;box-shadow:0 0 8px rgba(100,206,235,.35)}
+.opts.col{flex-direction:column}.opts.col .opt{width:100%}
+/* 화면 */
+.scr{position:absolute;inset:0;z-index:90;background:radial-gradient(ellipse at 50% 20%,#16253d 0,#0a1320 60%);display:flex;flex-direction:column;align-items:center;overflow:auto;padding:calc(var(--st) + 14px) calc(var(--sr) + 18px) calc(var(--sb) + 18px) calc(var(--sl) + 18px);touch-action:pan-y}
+.back{position:absolute;left:calc(var(--sl) + 12px);top:calc(var(--st) + 10px);color:var(--mu);text-decoration:none;font-size:14px;min-height:44px;display:flex;align-items:center;padding:0 6px;z-index:2}
+.bld{width:200px;max-width:56vw;margin-top:40px;filter:drop-shadow(0 0 20px rgba(100,206,235,.15))}
+.bld .wn{fill:#0d1624}.bld .flk{fill:#f2c66d;animation:flk 3.2s infinite}
+.bld .bolt{fill:#fff6c4;opacity:0;animation:bolt 7s infinite}
+@keyframes flk{0%,40%,44%,48%,100%{opacity:1}42%,46%{opacity:.1}}
+@keyframes bolt{0%,88%,94%,100%{opacity:0}90%,92%{opacity:1}}
+h1{margin:10px 0 4px;font-size:30px;text-align:center;letter-spacing:1px;text-shadow:0 0 18px rgba(242,198,109,.55);color:#fff3cf}
+.sub{color:var(--mu);text-align:center;font-size:14px;line-height:1.5;margin:0 0 16px;word-break:keep-all}
+.menu{display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px}
+.rec{margin-top:14px;font-size:13px;color:var(--mu);text-align:center;line-height:1.6}
+.rec b{color:var(--au)}
+.how{max-width:460px;width:100%}
+.how h2{text-align:center;margin:40px 0 12px}
+.hw{display:flex;gap:12px;align-items:flex-start;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.hw i{font-style:normal;width:34px;height:34px;flex:none;border-radius:9px;background:#0f1a2c;display:flex;align-items:center;justify-content:center;color:var(--au);font-weight:800}
+.hw p{margin:0;font-size:13.5px;line-height:1.55;word-break:keep-all}.hw b{color:var(--cy)}
+#pause{z-index:70;background:rgba(5,10,18,.86);justify-content:center}
+#pause h2{font-size:26px;margin:0 0 18px}
+.endt{font-size:13px;color:var(--cy);font-weight:800;letter-spacing:2px;margin-top:40px}
+.endh{font-size:24px;margin:6px 0 12px;text-align:center;color:#fff3cf;text-shadow:0 0 16px rgba(242,198,109,.5)}
+.story{max-width:460px;background:var(--pn);border:1px solid var(--ln);border-radius:14px;padding:12px 16px;font-size:14px;line-height:1.7;word-break:keep-all}
+.story p{margin:0 0 8px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:460px;width:100%;margin:12px 0}
+.stats div{background:#0f1a2c;border:1px solid var(--ln);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--mu)}
+.stats b{display:block;font-size:17px;color:var(--tx)}
+.stats .big{grid-column:1/3;text-align:center}.stats .big b{font-size:28px;color:var(--au)}
+.newrec{color:var(--gr);font-weight:800;animation:bob 1s infinite;display:inline-block}
+#fade{position:absolute;inset:0;background:#000;z-index:80;opacity:0;pointer-events:none;transition:opacity .28s}
+#fade.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<meta name="description" content="정전된 아파트 8구역을 돌며 전기 퍼즐 7개를 풀고 단서를 모아 정전의 범인을 찾는 추리 게임. 엔딩 3개."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/blackout-mystery/"><meta property="og:title" content="정전 아파트 미스터리"><meta property="og:description" content="정전된 아파트 8구역을 돌며 전기 퍼즐 7개를 풀고 단서를 모아 정전의 범인을 찾는 추리 게임. 엔딩 3개."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="정전 아파트 미스터리",D="정전된 아파트 8구역을 돌며 전기 퍼즐 7개를 풀고 단서를 모아 정전의 범인을 찾는 추리 게임. 엔딩 3개.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/blackout-mystery/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="game">
+<canvas id="cv" aria-label="아파트 탐험 화면"></canvas>
+
+<div id="hud" class="hide">
+  <div class="top">
+    <button id="bPause" class="ibtn" aria-label="일시정지"><svg width="14" height="16" viewBox="0 0 14 16"><rect x="1" y="1" width="4" height="14" rx="1" fill="#eaf1fb"/><rect x="9" y="1" width="4" height="14" rx="1" fill="#eaf1fb"/></svg></button>
+    <div class="flr"><b id="flName">1층 로비</b><span id="flState" class="chip off">정전</span></div>
+    <div class="bat" title="손전등 배터리"><div class="cell"><i id="batBar"></i></div><span id="batTx">100%</span></div>
+    <button id="bNote" class="ibtn" aria-label="수첩">수첩<em id="nbNew"></em></button>
+  </div>
+  <div id="obj"></div>
+</div>
+<div id="ctrl" class="hide">
+  <div class="dpad"><button data-d="u" aria-label="위">▲</button><button data-d="l" aria-label="왼쪽">◀</button><button data-d="r" aria-label="오른쪽">▶</button><button data-d="d" aria-label="아래">▼</button></div>
+  <button id="bAct" class="act">조사</button>
+</div>
+<div id="modal" class="ov hide"><div class="mw"><div class="mh"><h2 id="mTitle"></h2><button class="xbtn" id="mClose" aria-label="닫기">✕</button></div><div class="mb" id="mBody"></div></div></div>
+<div id="nb" class="ov hide"><div class="mw"><div class="mh"><h2 id="nbTitle">수첩</h2><button class="xbtn" id="nbClose" aria-label="닫기">✕</button></div><div class="tabs" id="nbTabs"></div><div class="mb" id="nbBody"></div><div class="mf"><button class="btn pri" id="bDeduce">추리하기</button></div></div></div>
+<div id="dlg" class="hide"><div class="dbox"><div class="who" id="dWho"></div><div class="dtx" id="dTx"></div><div class="dch" id="dCh"></div><div class="dnext" id="dNext">▼ 탭</div></div></div>
+<div id="toast"></div>
+
+<div id="pause" class="scr hide">
+  <h2>일시정지</h2>
+  <div class="menu">
+    <button class="btn pri" id="pResume">계속하기</button>
+    <button class="btn" id="pNote">수첩 보기</button>
+    <button class="btn" id="pSound">소리: 켜짐</button>
+    <button class="btn" id="pRestart">처음부터 다시</button>
+    <button class="btn ghost" id="pTitle">타이틀로 (자동 저장됨)</button>
+  </div>
+</div>
+
+<div id="title" class="scr">
+  <a class="back" href="../">← 게임 목록</a>
+  <svg class="bld" viewBox="0 0 200 230" aria-hidden="true">
+    <path class="bolt" d="M150 0 L132 40 L146 40 L124 86 L160 32 L146 32 L162 0Z"/>
+    <rect x="96" y="14" width="3" height="26" fill="#3a4f6d"/><rect x="86" y="18" width="24" height="2" fill="#3a4f6d"/>
+    <rect x="45" y="38" width="110" height="186" rx="3" fill="#121d2e" stroke="#2c415b" stroke-width="2"/>
+    <rect x="45" y="38" width="110" height="10" fill="#1c2b43"/>
+    <g id="wins"></g>
+    <rect x="88" y="196" width="24" height="28" fill="#1c2b43" stroke="#3a4f6d"/>
+    <rect x="30" y="222" width="140" height="4" fill="#2c415b"/>
+  </svg>
+  <h1>정전 아파트 미스터리</h1>
+  <p class="sub">폭우 속 정전된 “별빛맨션”. 층마다 전기를 살리며<br>누가 전기를 끊었는지 밝혀내자!</p>
+  <div class="menu">
+    <button class="btn pri hide" id="tCont">이어하기</button>
+    <button class="btn pri" id="tStart">게임 시작</button>
+    <button class="btn cy" id="tHow">방법 보기</button>
+    <button class="btn" id="tSound">소리: 켜짐</button>
+  </div>
+  <div class="rec" id="tRec"></div>
+</div>
+
+<div id="howto" class="scr hide">
+  <a class="back" href="#" id="hBack">← 돌아가기</a>
+  <div class="how">
+    <h2>방법 보기</h2>
+    <div class="hw"><i>?</i><p><b>목표</b> — 정전된 별빛맨션(지하 1층~6층, 옥상)을 한 층씩 복구하며 단서를 모아, <b>누가·왜·어떻게</b> 전기를 끊었는지 밝혀내요.</p></div>
+    <div class="hw"><i>↕</i><p><b>이동</b> — 가고 싶은 곳을 탭하면 걸어가요. 방향 버튼 · 방향키 · WASD도 돼요.</p></div>
+    <div class="hw"><i>E</i><p><b>조사·대화</b> — 물건이나 사람을 탭하거나, 옆에 서서 [조사] 버튼 · E · Space. 반짝이는 별은 아직 조사하지 않은 단서예요.</p></div>
+    <div class="hw"><i>▮</i><p><b>손전등</b> — 어두운 층에서는 배터리가 닳아요. 건전지를 주우면 충전! 배터리가 바닥나면 시야가 좁아져요.</p></div>
+    <div class="hw"><i>⚡</i><p><b>분전반</b> — <b>빨간 불빛</b>이 깜빡이는 곳. 층마다 다른 전기 퍼즐(차단기·퓨즈·전선 색·배선·멀티미터·전력 계산·스위치)을 풀면 불이 켜지고 새 단서와 통로가 나타나요.</p></div>
+    <div class="hw"><i>↑</i><p><b>계단</b> — <b>초록 비상구 표시</b>. 이 층 전기를 살려야 다음 층 방화문이 열려요. 메인 전원을 살리면 엘리베이터도 움직여요.</p></div>
+    <div class="hw"><i>N</i><p><b>수첩</b> — 모은 증거·증언·메모를 확인해요. [수첩] 버튼 · Tab · N</p></div>
+    <div class="hw"><i>!</i><p><b>추리</b> — 옥상까지 가면 범인·동기·방법·결정적 증거를 골라 추리를 발표해요. 틀려도 힌트와 함께 다시 도전! 진행은 자동 저장돼요. 일시정지는 Esc.</p></div>
+    <div class="menu" style="margin:14px auto"><button class="btn pri" id="hOk">알겠어요!</button></div>
+  </div>
+</div>
+
+<div id="result" class="scr hide"></div>
+<div id="fade"></div>
+</div>
+
+<script>
+'use strict';
+/* ================================================================
+ * 정전 아파트 미스터리 — 구조
+ * 1) 데이터: 층 지도(FLOORS), 단서(CLUES), 대사(NPC), 퍼즐(PZ), 추리(DED)
+ * 2) 저장(localStorage edgames.10.*) / 사운드(Web Audio 합성)
+ * 3) 탐험 엔진: 격자 이동 + 탭 길찾기, 손전등 시야(어둠 레이어 destination-out), 렌더링
+ * 4) UI: 대화창, 수첩, 층 이동, 퍼즐 7종, 추리 화면, 결과(엔딩 3종)
+ * ================================================================ */
+
+// ===== 상수 =====
+const KEY = 'edgames.10.';
+const ORDER = ['1F','B1','2F','3F','4F','5F','6F','R'];
+const FNAME = {B1:'지하 1층 기계실','1F':'1층 로비','2F':'2층','3F':'3층','4F':'4층','5F':'5층','6F':'6층',R:'옥상'};
+const FSHORT = {B1:'B1','1F':'1F','2F':'2F','3F':'3F','4F':'4F','5F':'5F','6F':'6F',R:'옥상'};
+const MOVE_SPEED = 5.2;        // 칸/초
+const BAT_DRAIN = 100/300;     // %/초 (어두운 층에서)
+const BAT_ITEM = 45;           // 건전지 1개 충전량
+const LIGHT_R = 3.3, LIGHT_R_LOW = 1.6; // 손전등 반경(칸)
+const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ===== 단서 =====  cat: ev 증거 / ts 증언 / memo 퍼즐 메모
+const CLUES = {
+ c_log:{cat:'ev',t:'관리일지',f:'1F',x:'경비실 책상 위 관리일지. 오늘 저녁 장 한 장이 누군가에 의해 찢겨 나갔다. 남은 기록: “20:50 옥상 TV 안테나 점검하러 감 — 박만수”'},
+ c_receipt:{cat:'ev',t:'번개철물 영수증',f:'1F',x:'로비 쓰레기통 속 구겨진 영수증. “오늘 17:42 번개철물 — 디지털 타이머 스위치 TM-21 1개, 절연 테이프 1개.” 카드 서명은 ‘오’로 시작하는 흘림체다.'},
+ c_steps:{cat:'ev',t:'젖은 구두 발자국',f:'1F',x:'불이 켜지자 보인다. 현관에서 계단 쪽으로 이어진 큼직한 구두 발자국과, 우산에서 떨어진 물방울 자국.'},
+ c_timer:{cat:'ev',t:'타이머 스위치',f:'B1',x:'메인 차단기에 몰래 감겨 있던 디지털 타이머. “21:00 OFF”로 맞춰져 있었다. 모델 TM-21, ‘번개철물’ 가격표가 붙은 새 제품.'},
+ c_badge:{cat:'ev',t:'금색 번개 배지',f:'B1',x:'기계실 바닥에 떨어져 있던 금색 번개 모양 배지. 뒷면에 “별빛맨션 재개발 추진위원회”라고 새겨져 있다.'},
+ c_plan:{cat:'ev',t:'수상한 작업 메모',f:'B1',x:'타이머 빈 상자 속 메모: “메인 9시 정각 OFF. 복구 늦추기 → 2층 선 바꿔 꽂기, 3층 배선 돌려 놓기, 4층 접속함 풀기, 5층은 박사님이 알아서, 6층 스위치 섞기.”'},
+ c_flyer:{cat:'ev',t:'재개발 전단',f:'2F',x:'“내일 오전 10시 전기설비 안전진단! 설비 노후 D등급이면 재개발 확정!” — 재개발 추진위원장 오성태. 아래쪽에 금색 번개 배지 그림이 있다.'},
+ c_umbrella:{cat:'ev',t:'젖은 검은 우산',f:'2F',x:'202호 문 앞 우산꽂이의 검은 우산. 아직 물이 뚝뚝 떨어진다. 방금 밖에 다녀온 것처럼.'},
+ c_bag:{cat:'ev',t:'숨겨진 공구 가방',f:'2F',x:'2층 창고 구석에 숨겨진 공구 가방. 각 층 분전반에서 빼 온 단자와 퓨즈, 그리고 ‘번개철물’ 비닐봉지가 들어 있다.'},
+ c_script:{cat:'ev',t:'방송 대본',f:'3F',x:'민지의 방송 대본. “오늘 밤 9시, 귀신이 불을 끈다?! (9시 정각, 방 스탠드 끄기 연출)”'},
+ c_stream:{cat:'ev',t:'생방송 녹화본',f:'3F',x:'20:30~21:12 생방송 녹화본. 21:00 정각, 카메라 앞의 민지가 진짜 정전에 비명을 지른다. 20:47 장면, 창문 너머 복도에 검은 우산을 쓴 사람이 비친다.'},
+ c_card:{cat:'ev',t:'기름 묻은 명함',f:'3F',x:'3층 분전반 옆에 떨어진 명함. “별빛맨션 재개발 추진위원장 오성태.” 모서리에 배선용 검은 기름 자국이 묻어 있다.'},
+ c_cctv:{cat:'ev',t:'엘리베이터 CCTV',f:'4F',x:'20:31 녹화: 검은 우산으로 얼굴을 가리고 공구 가방을 든 남자가 ‘B1’ 버튼을 누른다. 가슴에 금색 배지가 반짝인다.'},
+ c_exp:{cat:'ev',t:'강 박사의 실험 노트',f:'5F',x:'“20:50 자동 김치찌개 끓이개 가동 → 5층 차단기만 떨어짐(과부하). 21:00:00 건물 전체 정전! 초 단위 정각이었다.”'},
+ c_torn:{cat:'ev',t:'찢긴 일지 조각',f:'6F',x:'6층 재활용함 속 구겨진 종이 — 관리일지의 찢긴 장이다! “20:20 202호 오성태 — 기계실 소음 확인한다며 기계실 열쇠 대여 (미반납)”'},
+ t_oh:{cat:'ts',t:'오 사장(202호)의 말',f:'2F',x:'“저녁 내내 집에 있었어요. 한 발짝도 안 나갔죠.” 낡은 건물이니 정전은 당연하다며, 내일 안전진단을 기대하는 눈치다.'},
+ t_oh2:{cat:'ts',t:'말을 더듬는 오 사장',f:'2F',x:'젖은 우산 이야기를 꺼내자 “부, 분리수거를…” 하며 말을 더듬었다. 집에만 있었다는 말과 맞지 않는다.'},
+ t_minji:{cat:'ts',t:'민지(303호)의 말',f:'3F',x:'“귀신잡는 민지” 채널 운영자. 9시 정전 연출 대본은 자기 것이지만 방 스탠드만 끄는 연출이었다고. 정전 순간엔 생방송 중이었다고 주장한다.'},
+ t_jung:{cat:'ts',t:'정 할머니(403호)의 말',f:'4F',x:'20시 30분쯤 엘리베이터 앞에서 검은 우산으로 얼굴을 가린 사람이 공구 가방을 들고 지하로 내려가는 걸 봤다. 가슴에 금색 번개 배지가 반짝였다고.'},
+ t_jung2:{cat:'ts',t:'할머니가 떠올린 것',f:'4F',x:'고양이 번개를 찾아 드리자 기억해 냈다. “9시 조금 넘어 그 사람이 계단으로 올라가고, 2층 방화문이 쾅 닫혔어.”'},
+ t_kang:{cat:'ts',t:'강 박사(501호)의 말',f:'5F',x:'8시 50분 실험 때문에 5층 차단기만 떨어졌다고 고백. 건물 전체 정전은 9시 “정각” — 사람 손이 아니라 타이머 짓이라고 한다.'},
+ t_junho:{cat:'ts',t:'준호(601호)의 말',f:'6F',x:'깜깜해진 뒤 손전등 든 아저씨가 6층 분전반을 마구 만졌다. 우산에서 물이 뚝뚝, 큰 구두. “내일이면 끝이야” 하고 혼잣말을 했다고.'},
+ t_park:{cat:'ts',t:'관리인 박 씨의 말',f:'R',x:'20:50 옥상에 올라왔다가 정전으로 전자 잠금 문에 갇혔다. 20:20쯤 주민 한 명이 “기계실 소음”을 핑계로 기계실 열쇠를 빌려 갔고, 그 이름을 일지에 적어 두었다고 한다.'},
+ m_chart:{cat:'memo',t:'비상 회로표',f:'1F',x:'경비실 비상 분전반: ② 로비 조명 · ④ 경비실 · ⑤ 비상등 — 이 세 개만 올릴 것. ①·③·⑥은 누전 수리 중! 올리면 바로 떨어짐.'},
+ m_fuse:{cat:'memo',t:'퓨즈 고르는 법',f:'B1',x:'전류(A) = 전력(W) ÷ 전압(V). 계산한 전류보다 크면서 가장 작은 퓨즈를 끼운다. 너무 작으면 바로 끊어지고, 너무 크면 화재 위험! (이 건물 전압 220V)'},
+ m_wire:{cat:'memo',t:'전선 색상표 (KEC)',f:'2F',x:'L1 갈색 · L2 검정 · L3 회색 · N(중성선) 파랑 · PE(보호도체) 초록-노랑 줄무늬'},
+ m_meter:{cat:'memo',t:'고장 찾기 요령',f:'4F',x:'직렬 회로는 한 곳만 끊어져도 전부 꺼진다. 멀티미터로 두 지점 사이를 재면, 끊어진 곳이 그 사이에 있을 때만 220V, 아니면 0V. 범위를 반씩 좁혀 가자!'},
+ m_load:{cat:'memo',t:'강 박사의 메모',f:'5F',x:'차단기 1개 = 20A. 전력 P = 전압 V × 전류 I → 220V × 20A = 4,400W까지! 넘으면 탁 떨어진다.'},
+};
+const TOTAL_CLUES = Object.keys(CLUES).filter(k=>CLUES[k].cat!=='memo').length;
+
+// ===== 층 지도 =====  # 벽, w 창문, E 자동문(전기 복구 시 열림), + 건전지, @ 시작 위치, 나머지 글자 = 물건
+const D = (t)=>({kind:'deco',text:t});
+const DOOR = (label,t)=>({kind:'deco',look:'door',label,name:label+'호',text:[t]});
+const FLOORS = {
+ '1F':{theme:'lobby',map:[
+  '#####w###w###',
+  '#k.c#s......#',
+  '#...#.f.....w',
+  '#P..#...m...#',
+  '##.###......#',
+  '#...........w',
+  'w..o.....q..#',
+  '#...........#',
+  '#####E####..#',
+  '#+..r...e#..#',
+  '#........#..#',
+  '##########t.#',
+  'w...........w',
+  '#.....@.....#',
+  '######x######'],obj:{
+  k:{kind:'clue',look:'desk',name:'경비실 책상',clue:'c_log'},
+  c:{kind:'clue',look:'chart',name:'비상 회로표',clue:'m_chart'},
+  P:{kind:'panel',look:'panel',name:'비상 분전반'},
+  s:{kind:'stairs',look:'stairs',name:'계단'},
+  f:{kind:'clue',look:'steps',name:'젖은 발자국',clue:'c_steps',litOnly:true},
+  m:{...D(['202호 우편함에 “재개발 추진위원회” 우편물이 수북하다.']),look:'mailbox',name:'우편함'},
+  o:{...D(['낡은 가죽 소파. 쿠션 밑에 동전 하나… 단서는 아니다.']),look:'sofa',name:'소파'},
+  q:{...D(['“관리사무소 알림: 내일 오전 10시 전기설비 안전진단이 있습니다.”']),look:'board',name:'공지 게시판'},
+  r:{...D(['택배 상자가 쌓여 있다. “601호 준호 앞 — 장난감 손전등”이라고 적힌 상자도 보인다.']),look:'shelf',name:'선반'},
+  e:{kind:'elev',look:'elev',name:'엘리베이터'},
+  t:{kind:'clue',look:'trash',name:'쓰레기통',clue:'c_receipt'},
+  x:{kind:'exit',look:'frontdoor',name:'현관문'}}},
+ 'B1':{theme:'b1',map:[
+  '#############',
+  '#s....#.....#',
+  '#.....#..P..#',
+  '#..e..#..g..#',
+  '#...........#',
+  '#.c.....h...#',
+  '#...........#',
+  '#####E#######',
+  '#...........#',
+  '#..+.....j..#',
+  '#...........#',
+  '#.k.....v...#',
+  '#...........#',
+  '#############'],obj:{
+  s:{kind:'stairs',look:'stairs',name:'계단'},
+  e:{kind:'elev',look:'elev',name:'엘리베이터'},
+  P:{kind:'panel',look:'mainpanel',name:'메인 수전반'},
+  g:{kind:'clue',look:'badge',name:'반짝이는 것',clue:'c_badge',litOnly:true},
+  c:{kind:'use',use:'fuses',look:'toolbox',name:'공구함'},
+  h:{kind:'clue',look:'sign',name:'벽 안내판',clue:'m_fuse'},
+  k:{kind:'clue',look:'box',name:'빈 상자',clue:'c_plan'},
+  j:{...D(['관리용 소형 전기차. 충전기에 초록 불이 들어왔다.']),look:'car',name:'전기차'},
+  v:{...D(['녹슨 자전거. 바퀴에 거미줄이 걸려 있다.']),look:'bike',name:'자전거'}}},
+ '2F':{theme:'apt',map:[
+  '####p#a##b###',
+  '#s........u.#',
+  '#...........w',
+  '#....N......#',
+  '#...........#',
+  '####.####E###',
+  '#.....#.....#',
+  'P.....#..k..#',
+  '#...f.#..+..#',
+  '#.....#..e..#',
+  '#####w#######'],obj:{
+  s:{kind:'stairs',look:'stairs',name:'계단'},
+  p:{kind:'clue',look:'poster',name:'전선 색상표 포스터',clue:'m_wire'},
+  a:DOOR('201','201호. 이사 가서 비어 있다.'),
+  b:DOOR('202','202호 문패: “재개발 추진위원장 오성태”'),
+  u:{kind:'clue',look:'umbrella',name:'우산꽂이',clue:'c_umbrella',litOnly:true},
+  N:{kind:'npc',npc:'oh',look:'npc',name:'오 사장',col:'#3c4b66',hair:'#222',badge:true},
+  P:{kind:'panel',look:'panel',name:'2층 분전반'},
+  f:{kind:'clue',look:'board',name:'게시판',clue:'c_flyer'},
+  k:{kind:'clue',look:'bag',name:'공구 가방',clue:'c_bag'},
+  e:{kind:'elev',look:'elev',name:'엘리베이터'}}},
+ '3F':{theme:'apt',map:[
+  '####a##b##c##',
+  '#s..........#',
+  '#.......M...w',
+  '#..l.....x..#',
+  '#...........#',
+  '####.####E###',
+  '#.....#.....#',
+  'P.n...#..d..#',
+  '#.....#..+..#',
+  '#.....#..e..#',
+  '#####w#######'],obj:{
+  s:{kind:'stairs',look:'stairs',name:'계단'},
+  a:DOOR('301','301호. 대답이 없다. 여행 중인 듯하다.'),
+  b:DOOR('302','302호. 문틈으로 코 고는 소리가 들린다.'),
+  c:DOOR('303','303호. 문에 “촬영 중! 노크 금지” 스티커.'),
+  M:{kind:'npc',npc:'minji',look:'npc',name:'민지',col:'#b04a7a',hair:'#3a2418'},
+  l:{kind:'clue',look:'laptop',name:'민지의 노트북',clue:'c_stream',needPower:true,darkText:['민지의 노트북. 배터리가 다 되어 꺼져 있다. 전기가 들어와야 켤 수 있겠다.']},
+  x:{kind:'clue',look:'paper',name:'떨어진 종이',clue:'c_script',solid:false},
+  P:{kind:'panel',look:'panel',name:'3층 분전반'},
+  n:{kind:'clue',look:'card',name:'작은 종이',clue:'c_card',litOnly:true},
+  d:{...D(['택배 상자. “302호 앞 — 고양이 사료 10kg”']),look:'box',name:'택배 상자'},
+  e:{kind:'elev',look:'elev',name:'엘리베이터'}}},
+ '4F':{theme:'apt',map:[
+  '####a##b#c###',
+  '#s..........#',
+  '#..G........w',
+  '#.......t...#',
+  '#...........#',
+  '####.####E###',
+  '#.....#.....#',
+  'P..m..#..v..#',
+  '#.....#..+..#',
+  '#..+..#..e..#',
+  '#####w#######'],obj:{
+  s:{kind:'stairs',look:'stairs',name:'계단'},
+  a:DOOR('401','401호. 비어 있다.'),
+  b:DOOR('402','402호. 조용하다.'),
+  c:DOOR('403','403호 정 할머니 댁. 문 앞에 고양이 밥그릇이 놓여 있다.'),
+  G:{kind:'npc',npc:'jung',look:'npc',name:'정 할머니',col:'#7a5a9a',hair:'#d8d8d8'},
+  t:{...D(['커다란 고무나무 화분. 잎이 반질반질하다.']),look:'plant',name:'화분'},
+  m:{kind:'clue',look:'sign',name:'안내문',clue:'m_meter'},
+  v:{kind:'clue',look:'monitor',name:'CCTV 모니터',clue:'c_cctv',needPower:true,darkText:['엘리베이터 홀 CCTV 모니터. 전원이 꺼져 있다.']},
+  P:{kind:'panel',look:'panel',name:'4층 분전반'},
+  e:{kind:'elev',look:'elev',name:'엘리베이터'}}},
+ '5F':{theme:'apt',map:[
+  '####a##b#####',
+  '#s..........#',
+  '#.....K.....w',
+  '#.x......z..#',
+  '#...........#',
+  '####.####E###',
+  '#.....#.....#',
+  'P..n..#..c..#',
+  '#.....#..+..#',
+  '#.....#..e..#',
+  '#####w#######'],obj:{
+  s:{kind:'stairs',look:'stairs',name:'계단'},
+  a:DOOR('501','501호 강 박사 연구실 겸 집. “실험 중 — 폭발 아님” 팻말.'),
+  b:DOOR('502','502호. 아무도 없는 것 같다.'),
+  K:{kind:'npc',npc:'kang',look:'npc',name:'강 박사',col:'#e8e8e8',hair:'#bbb',coat:true},
+  x:{kind:'clue',look:'table',name:'실험 노트',clue:'c_exp'},
+  z:{...D(['강 박사의 “자동 김치찌개 끓이개”. 코일이 아직 따뜻하다. 냄새는 좋다.']),look:'machine',name:'실험 장치'},
+  n:{kind:'clue',look:'paper',name:'메모지',clue:'m_load',solid:false},
+  c:{kind:'use',use:'cat',look:'cat',name:'고양이',litOnly:true},
+  P:{kind:'panel',look:'panel',name:'5층 분전반'},
+  e:{kind:'elev',look:'elev',name:'엘리베이터'}}},
+ '6F':{theme:'apt',map:[
+  '####a##b#####',
+  '#s..........#',
+  '#......J....w',
+  '#..y........#',
+  '#...........#',
+  '####.####E###',
+  '#.....#.....#',
+  'P.....#.....R',
+  '#..+..#.....#',
+  '#.....#..e..#',
+  '#####w#######'],obj:{
+  s:{kind:'stairs',look:'stairs',name:'계단'},
+  a:DOOR('601','601호 준호네. 문에 크레파스로 그린 번개 그림.'),
+  b:DOOR('602','602호. 불 꺼진 창.'),
+  J:{kind:'npc',npc:'junho',look:'npc',name:'준호',col:'#3f9a5c',hair:'#2a1a10',kid:true},
+  y:{kind:'clue',look:'recycle',name:'재활용함',clue:'c_torn'},
+  P:{kind:'panel',look:'panel',name:'6층 분전반'},
+  R:{kind:'use',use:'roof',look:'roofdoor',name:'옥상 문'},
+  e:{kind:'elev',look:'elev',name:'엘리베이터'}}},
+ 'R':{theme:'roof',map:[
+  '#############',
+  '#...........#',
+  '#..T.....A..#',
+  '#...........#',
+  '#.....B.....#',
+  '#...........#',
+  '#s..........#',
+  '#############'],obj:{
+  s:{kind:'stairs',look:'stairs',name:'계단 문'},
+  T:{...D(['물탱크. 빗물에 젖어 번들거린다.']),look:'tank',name:'물탱크'},
+  A:{...D(['공용 TV 안테나. 관리인 아저씨가 점검하던 중이었나 보다.']),look:'antenna',name:'안테나'},
+  B:{kind:'npc',npc:'park',look:'npc',name:'관리인 박 씨',col:'#5d6b3a',hair:'#555',cap:true}}},
+};
+
+const ENTER = {
+ 'B1':['지하 1층 기계실. 축축한 공기에 기계 기름 냄새가 섞여 있다.','메인 수전반을 찾아야 한다. 빨간 불빛을 따라가 보자.'],
+ '2F':['2층 복도. 빗소리 사이로 누군가의 발소리가 들린다.'],
+ '3F':['3층. 어둠 속에서 휴대폰 불빛 하나가 흔들린다.'],
+ '4F':['4층. 어디선가 “번개야~” 하고 고양이를 부르는 목소리가 들린다.'],
+ '5F':['5층. 은은한 김치찌개 냄새가 난다…?'],
+ '6F':['6층. 위쪽 옥상에서 쿵, 쿵 하는 소리가 들린다.'],
+ 'R':['옥상. 세찬 비바람이 몰아친다. 물탱크 옆에 누군가 웅크리고 있다!']
+};
+const RESTORE_MSG = {
+ '1F':['비상 발전기가 우웅 돌기 시작했다. 로비 조명이 켜졌다!','엘리베이터 홀 자동문이 열렸다. 그리고… 바닥에 젖은 발자국이 보인다.','지하 1층 방화문 잠금도 풀렸다. 계단으로 내려가 보자.'],
+ 'B1':['메인 전원 투입! 건물 전체에 전기가 흐르기 시작했다. 엘리베이터도 움직인다.','하지만 위층은 여전히 깜깜하다. 누군가 층마다 분전반을 망가뜨려 놓은 것 같다.','수전반 아래 바닥에서 무언가 반짝인다. 창고 자동문도 열렸다.'],
+ '2F':['2층 복도등이 켜졌다! 창고 자동문이 열렸다.','202호 문 앞 우산꽂이가 눈에 들어온다.'],
+ '3F':['3층에 불이 들어왔다! 민지의 노트북 충전기에 불이 켜졌다.','분전반 옆 바닥에 작은 종이가 떨어져 있다.'],
+ '4F':['4층 복도등이 켜졌다! 창고 쪽 CCTV 모니터가 깜빡이며 켜진다.'],
+ '5F':['5층 회로 정상! 강 박사가 박수를 친다.','창고 쪽에서 “야옹” 하는 소리가 들린다.'],
+ '6F':['6층까지 모두 불이 들어왔다! 창고 안 옥상 문 전자 잠금이 “딸깍” 풀렸다.','옥상에서 누군가 문을 두드리는 소리가 들린다!']
+};
+const THEME = {
+ lobby:{f1:'#2e3440',f2:'#272c37',wall:'#34445a',face:'#25334a',top:'#4d6180'},
+ b1:{f1:'#2b2e33',f2:'#2b2e33',wall:'#3a4048',face:'#2b3037',top:'#59616d'},
+ apt:{f1:'#3a2e22',f2:'#33281d',wall:'#3a4658',face:'#2a3445',top:'#58687f'},
+ roof:{f1:'#24392f',f2:'#20342b',wall:'#4a525e',face:'#363d47',top:'#6a7482'}
+};
+
+// ===== 저장 =====
+const store = {
+ get(k,d){ try{ const v=localStorage.getItem(KEY+k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+ set(k,v){ try{ localStorage.setItem(KEY+k, JSON.stringify(v)); }catch(e){} },
+ del(k){ try{ localStorage.removeItem(KEY+k); }catch(e){} }
+};
+let S = null; // 진행 상태(저장 대상)
+function newState(){ return {v:1,floor:'1F',x:6,y:13,dir:[0,-1],restored:{},clues:[],newc:[],taken:{},flags:{},visited:{'1F':1},battery:100,time:0,hints:0,hintUsed:{},wrong:0,ded:{}}; }
+function saveGame(){ if(S && screen==='game'){ S.x=P.x; S.y=P.y; S.dir=[P.dir.x,P.dir.y]; store.set('save', S); } }
+function loadSave(){ const s=store.get('save',null); if(s && s.v===1 && FLOORS[s.floor] && Array.isArray(s.clues)) return s; return null; }
+const has = id => S && S.clues.indexOf(id)>=0;
+
+// ===== 사운드 =====
+let AC=null, master=null, NBUF=null, rainNode=null;
+let soundOn = store.get('sound', true) !== false;
+function ensureAudio(){
+ try{
+  if(!AC){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return; AC=new C(); master=AC.createGain(); master.gain.value=soundOn?0.7:0; master.connect(AC.destination); }
+  if(AC.state==='suspended') AC.resume();
+  if(screen==='game') rainOn();
+ }catch(e){}
+}
+function tone(f,d,type,v,f2,delay){
+ if(!AC||!soundOn) return;
+ const t=AC.currentTime+(delay||0), o=AC.createOscillator(), g=AC.createGain();
+ o.type=type||'sine'; o.frequency.setValueAtTime(f,t); if(f2) o.frequency.exponentialRampToValueAtTime(f2,t+d);
+ g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v||0.2,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+ o.connect(g); g.connect(master); o.start(t); o.stop(t+d+0.05);
+}
+function nbuf(){ if(!NBUF){ NBUF=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate); const a=NBUF.getChannelData(0); for(let i=0;i<a.length;i++) a[i]=Math.random()*2-1; } return NBUF; }
+function noise(d,v,ff,ft,delay){
+ if(!AC||!soundOn) return;
+ const t=AC.currentTime+(delay||0), s=AC.createBufferSource(), f=AC.createBiquadFilter(), g=AC.createGain();
+ s.buffer=nbuf(); f.type=ft||'lowpass'; f.frequency.value=ff||1000;
+ g.gain.setValueAtTime(v||0.2,t); g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+ s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t+d+0.05);
+}
+const SFX = {
+ step(){ noise(.05,.035,700,'lowpass'); },
+ click(){ tone(1100,.04,'square',.05); },
+ blip(){ tone(620,.07,'triangle',.09,880); },
+ pick(){ tone(880,.08,'triangle',.14); tone(1320,.14,'triangle',.11,0,.07); },
+ clue(){ [523,659,784,1047].forEach((f,i)=>tone(f,.2,'triangle',.11,0,i*.07)); },
+ fail(){ tone(170,.28,'sawtooth',.1,100); },
+ spark(){ noise(.2,.22,3000,'highpass'); tone(1800,.09,'square',.05,300); },
+ power(){ tone(55,1.3,'sawtooth',.09,110); tone(110,1.3,'sine',.13,220); noise(.35,.18,2500,'highpass'); [392,523,659,784].forEach((f,i)=>tone(f,.45,'triangle',.11,0,.7+i*.09)); },
+ thunder(){ noise(1.8,.3,260,'lowpass'); noise(.5,.18,700,'lowpass',.05); },
+ door(){ tone(90,.25,'sine',.22,55); noise(.15,.08,400); },
+ meow(){ tone(700,.35,'sine',.13,480); tone(950,.18,'sine',.06,700,.05); },
+ talk(){ tone(480+Math.random()*160,.035,'square',.02); },
+ page(){ noise(.14,.1,2200,'bandpass'); },
+ ok(){ [659,784,1047].forEach((f,i)=>tone(f,.16,'triangle',.11,0,i*.06)); },
+ end(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,.5,'triangle',.1,0,i*.13)); }
+};
+function sfx(n){ try{ if(AC&&soundOn&&SFX[n]) SFX[n](); }catch(e){} }
+function rainOn(){
+ if(!AC||rainNode) return;
+ try{ const s=AC.createBufferSource(); s.buffer=nbuf(); s.loop=true; const f=AC.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1600; f.Q.value=0.5; const g=AC.createGain(); g.gain.value=0.03; s.connect(f); f.connect(g); g.connect(master); s.start(); rainNode={s,g}; }catch(e){}
+}
+function rainOff(){ if(rainNode){ try{ rainNode.s.stop(); }catch(e){} rainNode=null; } }
+function setSound(on){
+ soundOn=on; store.set('sound',on);
+ if(master) master.gain.value=on?0.7:0;
+ $('#tSound').textContent=$('#pSound').textContent='소리: '+(on?'켜짐':'꺼짐');
+}
+
+// ===== DOM / 캔버스 =====
+const $ = s=>document.querySelector(s);
+const game=$('#game'), cv=$('#cv'), ctx=cv.getContext('2d');
+const dark=document.createElement('canvas'), dctx=dark.getContext('2d');
+let DPR=1, CW=0, CH=0, T=40; const DS=0.5; // 어둠 레이어 해상도 배율(부드러운 그라데이션이라 낮아도 됨)
+function resize(){
+ DPR=Math.min(window.devicePixelRatio||1, 2.5); CW=game.clientWidth; CH=game.clientHeight;
+ cv.width=Math.round(CW*DPR); cv.height=Math.round(CH*DPR); cv.style.width=CW+'px'; cv.style.height=CH+'px';
+ dark.width=Math.ceil(CW*DS); dark.height=Math.ceil(CH*DS);
+ T=Math.max(34, Math.min(54, Math.floor(CW/10)));
+ if(modalName==='wire') drawWires();
+}
+window.addEventListener('resize', resize);
+
+// ===== 지도 빌드 =====
+const MAPS={};
+function buildFloor(fid){
+ const F=FLOORS[fid], H=F.map.length, W=F.map[0].length, tiles=[], objs=[], lamps=[]; let start=null;
+ for(let y=0;y<H;y++){ const row=[]; for(let x=0;x<W;x++){
+  const ch=F.map[y][x]; let t='.';
+  if(ch==='#'||ch==='w'||ch==='E') t=ch;
+  else if(ch==='@') start={x,y};
+  else if(ch==='+') objs.push({id:fid+'_bat_'+x+'_'+y,kind:'battery',look:'battery',name:'건전지',x,y,solid:false});
+  else if(ch!=='.'){ const d=F.obj[ch]; const border=(x===0||y===0||x===W-1||y===H-1); if(border) t='#';
+   objs.push(Object.assign({id:fid+'_'+ch,x,y,wall:border},d,{solid:d.solid!==undefined?d.solid:!d.litOnly})); }
+  row.push(t);
+ } tiles.push(row); }
+ for(let y=1;y<H;y+=3) for(let x=1;x<W;x+=3){ const lx=x+1, ly=y+1; if(ly<H&&lx<W&&tiles[ly][lx]!=='#') lamps.push({x:lx,y:ly}); }
+ return MAPS[fid]={W,H,tiles,objs,start,lamps};
+}
+ORDER.forEach(buildFloor);
+const M = ()=>MAPS[S.floor];
+const lit = f=>!!S.restored[f||S.floor];
+function visible(o){ return !S.taken[o.id] && (!o.litOnly || lit()); }
+function objAt(x,y){ return M().objs.find(o=>o.x===x&&o.y===y&&visible(o)); }
+function walkable(x,y){
+ const m=M(); if(x<0||y<0||x>=m.W||y>=m.H) return false;
+ const t=m.tiles[y][x]; if(t==='#'||t==='w') return false; if(t==='E'&&!lit()) return false;
+ const o=objAt(x,y); return !(o&&o.solid);
+}
+
+// ===== 플레이어 / 상태 =====
+const P={x:6,y:13,fx:6,fy:13,dir:{x:0,y:-1},ang:-Math.PI/2,moving:false,sx:0,sy:0,path:[],pend:null,bob:0};
+let screen='title', paused=false, dlgOn=false, nbOpen=false, modalName=null, fading=false;
+let camX=0, camY=0, flash=0, lightT=8, litAnim=9, animT=0, saveT=0, hudT=0, tapMark=null;
+const held=[]; const parts=[];
+function canMove(){ return screen==='game'&&!paused&&!dlgOn&&!nbOpen&&!modalName&&!fading; }
+
+function bfs(goals){
+ const m=M(), key=(x,y)=>y*m.W+x, prev=new Map(); const q=[[P.x,P.y]]; prev.set(key(P.x,P.y),null);
+ const isGoal=(x,y)=>goals.some(g=>g.x===x&&g.y===y);
+ while(q.length){ const [x,y]=q.shift();
+  if(isGoal(x,y)){ const path=[]; let k=key(x,y); while(k!=null&&k!==key(P.x,P.y)){ path.unshift({x:k%m.W,y:(k/m.W)|0}); k=prev.get(k); } return path; }
+  for(const [dx,dy] of [[0,-1],[1,0],[0,1],[-1,0]]){ const nx=x+dx, ny=y+dy, k=key(nx,ny); if(!prev.has(k)&&walkable(nx,ny)){ prev.set(k,key(x,y)); q.push([nx,ny]); } }
+ }
+ return null;
+}
+const near = o=>Math.abs(o.x-P.x)+Math.abs(o.y-P.y)<=1;
+function goToObj(o){
+ if(near(o)&&!P.moving){ interact(o); return; }
+ const goals=[[0,-1],[1,0],[0,1],[-1,0]].map(([dx,dy])=>({x:o.x+dx,y:o.y+dy})).filter(g=>walkable(g.x,g.y)||(g.x===P.x&&g.y===P.y));
+ if(!o.solid) goals.push({x:o.x,y:o.y});
+ const p=bfs(goals); if(p){ P.path=p; P.pend=o; } else toast('그곳에는 갈 수 없다','r');
+}
+function tryStep(dx,dy){
+ P.dir={x:dx,y:dy}; const nx=P.x+dx, ny=P.y+dy;
+ if(!walkable(nx,ny)) return false;
+ P.sx=P.x; P.sy=P.y; P.x=nx; P.y=ny; P.moving=true; P.prog=0; return true;
+}
+function heldDir(){ const d=held[held.length-1]; return d?{u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]}[d]:null; }
+function updateMove(dt){
+ if(P.moving){
+  P.prog+=dt*MOVE_SPEED; P.bob+=dt*14;
+  if(P.prog>=1){ P.moving=false; P.fx=P.x; P.fy=P.y; onArrive(); }
+  else { P.fx=P.sx+(P.x-P.sx)*P.prog; P.fy=P.sy+(P.y-P.sy)*P.prog; }
+ }
+ if(!P.moving){
+  const d=heldDir();
+  if(d){ P.path=[]; P.pend=null; if(!tryStep(d[0],d[1])){ const o=objAt(P.x+d[0],P.y+d[1]); P.dir={x:d[0],y:d[1]}; } }
+  else if(P.path.length){ const n=P.path.shift(); if(!tryStep(n.x-P.x,n.y-P.y)){ P.path=[]; P.pend=null; } }
+  else if(P.pend){ const o=P.pend; P.pend=null; if(near(o)) interact(o); }
+ }
+ const ta=Math.atan2(P.dir.y,P.dir.x); let da=ta-P.ang; while(da>Math.PI) da-=Math.PI*2; while(da<-Math.PI) da+=Math.PI*2; P.ang+=da*Math.min(1,dt*12);
+}
+function onArrive(){
+ sfx('step');
+ const o=objAt(P.x,P.y);
+ if(o&&o.kind==='battery'){ S.taken[o.id]=1; S.battery=Math.min(100,S.battery+BAT_ITEM); sfx('pick'); toast('건전지를 주웠다! 손전등 충전 +'+BAT_ITEM+'%','g'); S.flags.lowWarn=0; saveGame(); }
+}
+function faceTo(o){ const dx=Math.sign(o.x-P.x), dy=Math.sign(o.y-P.y); if(dx||dy) P.dir=Math.abs(o.x-P.x)>=Math.abs(o.y-P.y)?{x:dx,y:0}:{x:0,y:dy}; }
+function interactTarget(){
+ const c=M().objs.filter(o=>visible(o)&&o.kind!=='battery'&&near(o));
+ if(!c.length) return null;
+ const f=c.find(o=>o.x===P.x+P.dir.x&&o.y===P.y+P.dir.y); if(f) return f;
+ const on=c.find(o=>o.x===P.x&&o.y===P.y); return on||c[0];
+}
+function doInteract(){ if(!canMove()||P.moving) return; const o=interactTarget(); if(o) interact(o); else { toast('주변에 조사할 것이 없다. 반짝이는 곳이나 물건 옆에 서 보자.'); } }
+const nar = t=>({w:'',t}), me = t=>({w:'나',t});
+
+function interact(o){
+ P.path=[]; P.pend=null; faceTo(o);
+ switch(o.kind){
+  case 'clue':{
+   if(o.needPower && !lit()){ say(o.darkText.map(nar)); return; }
+   const c=CLUES[o.clue];
+   if(has(o.clue)){ say([nar(c.x), nar('(이미 수첩에 적어 둔 내용이다.)')]); return; }
+   addClue(o.clue); say([{w:'',t:c.x,tag:c.t}]); return;
+  }
+  case 'deco': sfx('blip'); say(o.text.map(nar)); return;
+  case 'panel':
+   if(lit()){ say([nar(o.name+'. 이 층 전기는 이미 복구했다. 초록 불이 정상이다.')]); return; }
+   openPuzzle(S.floor); return;
+  case 'stairs': openFloorMenu('stairs'); return;
+  case 'elev':
+   if(!S.restored.B1){ sfx('fail'); say([nar('엘리베이터 버튼을 눌러도 반응이 없다.'),me('메인 전원(지하 기계실)이 살아나야 움직이겠어.')]); return; }
+   openFloorMenu('elev'); return;
+  case 'exit': say([nar('현관 밖은 앞이 안 보일 만큼 폭우가 쏟아진다.'),me('이 일을 끝내기 전엔 돌아갈 수 없어!')]); return;
+  case 'npc': talkNPC(o.npc); return;
+  case 'use':
+   if(o.use==='fuses'){
+    if(!S.flags.hasFuses){ S.flags.hasFuses=1; sfx('pick'); toast('예비 퓨즈 세트를 챙겼다','g'); say([nar('공구함을 열었다. 누군가 급하게 뒤진 흔적이 있다.'),nar('그래도 맨 아래 칸에 예비 퓨즈 세트(5A·10A·15A·20A·30A)가 남아 있다!'),me('이걸로 메인 수전반의 빈 퓨즈 칸을 채울 수 있겠어.')]); saveGame(); }
+    else say([nar('공구함. 예비 퓨즈는 이미 챙겼다.')]);
+   } else if(o.use==='cat'){
+    S.taken[o.id]=1; S.flags.cat=1; sfx('meow'); saveGame();
+    say([nar('선반 뒤에 회색 고양이가 겁에 질려 웅크리고 있다. 목걸이에 “번개 — 403호”.'),me('네가 번개구나. 할머니한테 데려다줄게.'),nar('번개를 품에 안았다. (4층 정 할머니께 데려다 드리자)')]);
+   } else if(o.use==='roof'){ sfx('door'); travel('R','stairs'); }
+   return;
+ }
+}
+
+// ===== NPC 대화 =====
+const NPCN={oh:'오 사장',minji:'민지',jung:'정 할머니',kang:'강 박사',junho:'준호',park:'관리인 박 씨'};
+const pick=a=>a[(Math.random()*a.length)|0];
+function talkNPC(id){
+ const F=S.flags, n=NPCN[id], N=t=>({w:n,t}); sfx('blip');
+ if(id==='oh'){
+  if(!has('t_oh')) say([N('어이쿠, 전기 기사님이시군요! 이 빗속에 고생 많으십니다.'),me('혹시 정전 전후로 이상한 걸 보셨나요?'),N('저요? 저녁 내내 집에 있었죠. 한 발짝도 안 나갔어요.'),N('이렇게 낡은 건물이니 정전이 나도 이상할 게 없지요. 내일 안전진단에서 확실히 드러나겠죠, 허허.')],()=>addClue('t_oh'));
+  else if(has('c_umbrella')&&!has('t_oh2')) say([me('202호 앞 우산이 아직 흠뻑 젖어 있던데요? 저녁 내내 집에 계셨다면서요.'),N('어, 그, 그건… 아까 분리수거를… 아니, 집에 있었다니까요!'),nar('오 사장의 이마에 땀이 송골송골 맺혔다.')],()=>addClue('t_oh2'));
+  else say([N(pick(['전기 복구는 언제 됩니까? 아, 아니, 천천히 하셔도 됩니다만…','내일 아침 10시 안전진단, 잊지 마세요. 허허.','저는 정말 아무것도 몰라요.']))]);
+ } else if(id==='minji'){
+  if(!has('t_minji')) say([N('꺄악! …아, 사람이구나. 귀신인 줄 알았잖아요.'),N('저는 “귀신잡는 민지” 채널 운영해요. 오늘 정전 괴담 생방송 중이었는데, 진짜로 정전이 된 거예요!'),N('대본에 “9시 정전 연출”이 있긴 한데… 그건 제 방 스탠드만 끄는 거였어요. 건물 전체를 끈 건 제가 아니에요!'),N('전기만 들어오면 노트북으로 방송 녹화본 보여 드릴게요. 제 결백이 증명될 거예요.')],()=>addClue('t_minji'));
+  else if(lit()) say([N('녹화본 봤어요? 20시 47분 장면 창문에 누가 비쳐요. 검은 우산으로 얼굴을 가린 사람!')]);
+  else say([N('전기만 들어오면 결백을 증명할 수 있는데… 분전반 좀 고쳐 주세요!')]);
+ } else if(id==='jung'){
+  if(F.cat&&!F.catBack){
+   const L=[]; if(!has('t_jung')) L.push(N('아이고, 젊은이.'));
+   L.push(N('번개야! 아이고, 우리 번개를 찾아 줬구먼. 고마워라.'),nar('번개가 할머니 품에서 골골송을 부른다.'),N('그러고 보니 생각났어. 9시 조금 넘어 그 우산 쓴 양반이 계단으로 올라가는 소리가 났는데, 2층 방화문이 “쾅” 닫히더라고.'));
+   if(!has('t_jung')) L.push(N('아, 그리고 8시 반쯤엔 그 양반이 공구 가방 들고 엘리베이터로 지하에 내려갔지. 가슴에 금색 번개 배지가 반짝였어.'));
+   say(L,()=>{ F.catBack=1; addClue('t_jung'); addClue('t_jung2'); });
+  }
+  else if(!has('t_jung')) say([N('아이고, 젊은이 왔구먼. 우리 “번개” 못 봤수? 정전되자마자 겁먹고 어디로 숨었는지…'),N('아까 8시 반쯤 엘리베이터 앞에서 웬 양반을 봤어. 검은 우산 쓰고 공구 가방 들고 지하로 내려가더라고.'),N('얼굴은 우산에 가려서 못 봤는데, 가슴에 금색 번개 모양 배지가 반짝였지.')],()=>addClue('t_jung'));
+  else say([N(F.catBack?'번개가 이제 골골송을 부르네. 고마워, 젊은이.':'우리 번개 보거든 꼭 데려다주구려. 회색 털에 노란 눈이야.')]);
+ } else if(id==='kang'){
+  if(!has('t_kang')){
+   const L=[N('오, 전기 기사 양반! 마침 잘 왔네. 우리 층 회로가 엉망이야.'),N('고백하자면, 8시 50분에 내 “자동 김치찌개 끓이개”를 돌렸다가 5층 차단기가 떨어졌지. 허허.'),N('하지만 건물 전체가 꺼진 건 9시 정각이었어. 시계를 보고 있었으니 확실하네.'),N('초 단위까지 정각이라니, 사람 손이 아니라 타이머 짓이야.'),N('우리 층 분전반은 기기들을 회로 A·B·C에 나눠 꽂아야 해. 내 메모 참고하게.')];
+   if(has('c_timer')){ L.push(N('그 TM-21 타이머? 건너편 “번개철물”에서만 파는 물건이지. 영수증이라도 있으면 산 사람을 알 텐데.')); F.kangTimer=1; }
+   say(L,()=>addClue('t_kang'));
+  } else if(has('c_timer')&&!F.kangTimer){ F.kangTimer=1; say([N('그 TM-21 타이머? 건너편 “번개철물”에서만 파는 물건이지. 영수증이라도 있으면 산 사람을 알 텐데.')]); }
+  else say([N(pick(['과부하는 무서운 거야. 차단기는 생명의 은인이지!','P = V × I. 이것만 알면 세상 전기는 다 내 손안이지, 허허.']))]);
+ } else if(id==='junho'){
+  if(!has('t_junho')) say([N('전기 기사님이에요? 와, 진짜다!'),N('아까 깜깜해진 다음에요, 손전등 든 아저씨가 우리 층 분전반을 열고 스위치를 딸깍딸깍 마구 만졌어요.'),N('우산에서 물이 뚝뚝 떨어지고, 구두가 엄청 컸어요. 그리고 “내일이면 끝이야” 하고 혼잣말했어요.'),N('그리고요, 옥상에서 자꾸 쾅쾅 소리가 나요. 귀신일까요?')],()=>addClue('t_junho'));
+  else say([N(lit()?'우와, 불 들어왔다! 옥상 문도 열렸대요. 쾅쾅 소리 나는 데 가 보세요!':'분전반 고쳐 주세요! 깜깜한 거 무서워요.')]);
+ } else if(id==='park'){
+  const ded={w:n,t:'자, 자네가 모은 단서로 누가, 왜, 어떻게 이 건물 전기를 끊었는지 밝혀 보게. 준비됐나?',ch:[{l:'추리를 시작한다',f:openDeduction},{l:'조금 더 조사한다',f:null}]};
+  if(!has('t_park')){
+   const L=[N('살았다! 정전되자마자 옥상 문 전자 잠금이 걸려서 꼼짝없이 갇혀 있었지 뭔가.'),N('8시 50분에 안테나 점검하러 올라왔다가 이 꼴일세. 고맙네, 젊은이.'),me('아저씨, 누가 일부러 전기를 끊은 것 같아요. 짚이는 거 없으세요?'),N('그러고 보니… 8시 20분쯤 주민 한 사람이 “기계실에서 이상한 소리가 난다”며 기계실 열쇠를 빌려 갔어.'),N('비에 젖은 우산을 들고 있었는데… 누구였는지 일지에 이름을 적어 뒀다네.')];
+   if(has('c_torn')) L.push(me('그 일지 장이 찢겨서 6층 재활용함에 버려져 있었어요.'),N('뭐라고? 바로 그 장이군! 누군가 자기 이름을 감추려고 찢어 버린 게야.'));
+   else L.push(N('일지 그 장이 찢겨 있었다고? 누가 일부러 버렸겠군. 건물 어딘가에 남아 있을지도 몰라.'));
+   addClue('t_park'); L.push(ded); say(L);
+  } else say([ded]);
+ }
+}
+
+// ===== 대화창 =====
+let DQ=[], dCur=null, dShown=0, dDone=null, dChoice=0;
+function say(lines, onDone){ DQ=lines.slice(); dDone=onDone||null; dlgOn=true; P.path=[]; held.length=0; $('#dlg').classList.remove('hide'); nextLine(); }
+function nextLine(){
+ if(!DQ.length){ dlgOn=false; $('#dlg').classList.add('hide'); const f=dDone; dDone=null; if(f) f(); return; }
+ dCur=DQ.shift(); dShown=0; dChoice=0;
+ const w=$('#dWho'); w.textContent=dCur.w||(dCur.tag?'단서 · '+dCur.tag:''); w.className='who'+(dCur.w==='나'?' me':'');
+ $('#dTx').className='dtx'+(dCur.w?'':' nar'); $('#dTx').textContent=''; $('#dCh').innerHTML=''; $('#dNext').classList.remove('hide');
+}
+function finishLine(){
+ dShown=dCur.t.length; $('#dTx').textContent=dCur.t;
+ if(dCur.ch && !$('#dCh').children.length){
+  $('#dNext').classList.add('hide');
+  $('#dCh').innerHTML=dCur.ch.map((c,i)=>`<button class="btn${i===0?' pri sel':''}" data-ci="${i}">${c.l}</button>`).join('');
+ }
+}
+function advanceDlg(){
+ if(!dCur) return;
+ if(dShown<dCur.t.length){ finishLine(); return; }
+ if(dCur.ch){ chooseDlg(dChoice); return; }
+ sfx('click'); nextLine();
+}
+function chooseDlg(i){ const c=dCur.ch[i]; DQ=[]; dCur=null; dlgOn=false; $('#dlg').classList.add('hide'); dDone=null; if(c&&c.f) c.f(); }
+$('#dlg').addEventListener('click',e=>{
+ ensureAudio(); const b=e.target.closest('[data-ci]');
+ if(b){ chooseDlg(+b.dataset.ci); return; }
+ if(dCur&&dCur.ch&&dShown>=dCur.t.length) return;
+ advanceDlg();
+});
+function updDlg(dt){
+ if(!dlgOn||!dCur||dShown>=dCur.t.length) return;
+ const before=dShown|0; dShown=Math.min(dCur.t.length,dShown+dt*55);
+ if((dShown|0)!==before){ $('#dTx').textContent=dCur.t.slice(0,dShown|0); if((dShown|0)%4===0) sfx('talk'); }
+ if(dShown>=dCur.t.length) finishLine();
+}
+
+// ===== 토스트 / 단서 =====
+function toast(msg,cls){ const d=document.createElement('div'); d.className='tst'+(cls?' '+cls:''); d.textContent=msg; const box=$('#toast'); box.appendChild(d); while(box.children.length>3) box.firstChild.remove(); setTimeout(()=>d.remove(),2600); }
+function addClue(id){
+ if(has(id)) return; S.clues.push(id); S.newc.push(id); sfx('clue');
+ const c=CLUES[id]; toast('수첩에 기록: '+c.t+(c.cat==='memo'?' (메모)':c.cat==='ts'?' (증언)':''));
+ updHUD(); saveGame();
+}
+
+// ===== 층 이동 =====
+function isUnlocked(f){ const i=ORDER.indexOf(f); return i===0||!!S.restored[ORDER[i-1]]; }
+function openFloorMenu(via){
+ const list=['R','6F','5F','4F','3F','2F','1F','B1'];
+ openModal(via==='elev'?'엘리베이터':'계단 — 어디로 갈까?', b=>{
+  b.innerHTML='<div class="fl">'+list.map(f=>{
+   const cur=f===S.floor, un=isUnlocked(f), ok=via==='elev'?(f!=='R'&&(lit(f)||cur)):un;
+   const st=cur?'<small style="color:var(--cy)">현재 위치</small>':f==='R'?(un?'<small style="color:var(--cy)">열림</small>':'<small style="color:var(--mu)">잠김</small>'):lit(f)?'<small style="color:var(--gr)">전기 복구</small>':un?'<small style="color:var(--rd)">정전</small>':'<small style="color:var(--mu)">잠김</small>';
+   return `<button class="fbtn${cur?' cur':''}${ok?'':' lock'}" data-f="${f}"><b>${FSHORT[f]}</b><span>${FNAME[f]}</span>${st}</button>`;
+  }).join('')+'</div><div class="pmsg info" id="pmsg">'+(via==='elev'?'엘리베이터는 전기가 복구된 층에만 선다.':'아래층 전기를 살려야 위층 방화문 전자 잠금이 풀린다.')+'</div>';
+  b.querySelectorAll('[data-f]').forEach(el=>el.onclick=()=>{
+   const f=el.dataset.f;
+   if(f===S.floor){ closeModal(); return; }
+   const ok=via==='elev'?(f!=='R'&&lit(f)):isUnlocked(f);
+   if(!ok){ sfx('fail'); const pi=ORDER[ORDER.indexOf(f)-1];
+    pzMsg(via==='elev'?(f==='R'?'엘리베이터는 옥상까지 가지 않는다. 계단을 쓰자.':FNAME[f]+'은(는) 아직 정전이라 엘리베이터가 서지 않는다.'):FNAME[f]+' 방화문이 전자 잠금으로 닫혀 있다. '+FNAME[pi]+' 전기를 먼저 살려야 해.','bad'); return; }
+   closeModal(); sfx(via==='elev'?'ok':'step'); travel(f,via);
+  });
+ });
+}
+function travel(f,via){
+ fading=true; $('#fade').classList.add('on'); saveGame();
+ setTimeout(()=>{
+  S.floor=f; const m=M();
+  const anchor=m.objs.find(o=>o.kind===(via==='elev'?'elev':'stairs'))||m.objs.find(o=>o.kind==='stairs');
+  let sp=null; for(const [dx,dy] of [[0,1],[1,0],[-1,0],[0,-1]]){ if(walkable(anchor.x+dx,anchor.y+dy)){ sp={x:anchor.x+dx,y:anchor.y+dy}; break; } }
+  if(f==='R'&&via!=='elev') sp={x:2,y:5};
+  P.x=P.fx=sp.x; P.y=P.fy=sp.y; P.moving=false; P.path=[]; P.pend=null; P.dir={x:0,y:-1};
+  litAnim=9; snapCam(); updHUD(); saveGame();
+  $('#fade').classList.remove('on');
+  setTimeout(()=>{ fading=false; if(!S.visited[f]){ S.visited[f]=1; if(ENTER[f]) say(ENTER[f].map(nar)); saveGame(); } },280);
+ },300);
+}
+
+// ===== 모달 =====
+function openModal(title, build){ modalName=title; $('#mTitle').textContent=title; const b=$('#mBody'); b.innerHTML=''; b.scrollTop=0; build(b); $('#modal').classList.remove('hide'); held.length=0; P.path=[]; ovl(); }
+function closeModal(){ modalName=null; $('#modal').classList.add('hide'); $('#mBody').innerHTML=''; ovl(); }
+function ovl(){ game.classList.toggle('ovl',!!modalName||nbOpen); }
+$('#mClose').onclick=()=>{ sfx('click'); closeModal(); };
+
+// ===== 퍼즐 =====
+let curPZ=null;
+function pzMsg(t,cls){ const m=$('#pmsg'); if(m){ m.textContent=t; m.className='pmsg '+(cls||''); } if(cls==='bad'&&!RM){ const w=$('#modal .mw'); w.classList.remove('shake'); void w.offsetWidth; w.classList.add('shake'); } }
+function memoHTML(pz){ const id=pz.memo; if(!id) return ''; return has(id)?`<div class="memo"><b>수첩 메모 · ${CLUES[id].t}</b><br>${CLUES[id].x}</div>`:`<div class="memo no">관련 메모가 아직 없다. ${pz.where}</div>`; }
+const pzTop=(intro,pz)=>`<p class="pin">${intro}</p>`+memoHTML(pz);
+const pzBottom=go=>`<div class="pmsg" id="pmsg"></div><div class="prow"><button class="btn ghost" data-act="hint">힌트 보기</button>${go?`<button class="btn pri" data-act="go">${go}</button>`:''}</div><div class="phint hide" id="phint"></div>`;
+function openPuzzle(f){ curPZ=f; const pz=PZ[f]; openModal(pz.t, b=>buildPZ(b)); sfx('door'); }
+function buildPZ(b){
+ const f=curPZ, pz=PZ[f]; pz.build(b);
+ const h=b.querySelector('[data-act=hint]');
+ if(h) h.onclick=()=>{ if(!S.hintUsed[f]){ S.hintUsed[f]=1; S.hints++; } const ph=$('#phint'); ph.textContent='힌트: '+pz.hint; ph.classList.remove('hide'); sfx('page'); };
+}
+function solvePuzzle(){
+ const f=curPZ; closeModal();
+ S.restored[f]=true; litAnim=0; sfx('power');
+ const pn=M().objs.find(o=>o.kind==='panel');
+ if(pn) for(let i=0;i<40;i++){ const a=Math.random()*Math.PI*2, s=1+Math.random()*4; parts.push({x:(pn.x+.5)*T,y:(pn.y+.5)*T,vx:Math.cos(a)*s*T,vy:Math.sin(a)*s*T,l:.6+Math.random()*.6}); }
+ toast(FNAME[f]+' 전기 복구!','g'); updHUD(); saveGame();
+ setTimeout(()=>{ if(screen==='game') say(RESTORE_MSG[f].map(nar)); },1400);
+}
+const PZ={};
+// 1층: 차단기 조합
+PZ['1F']={t:'경비실 비상 분전반',memo:'m_chart',where:'경비실 벽에 붙은 회로표를 찾아보자.',hint:'회로표의 ②·④·⑤만 올리고(ON), 누전 수리 중인 ①·③·⑥은 모두 내려(OFF) 둬.',
+ st:[1,0,1,0,0,1],
+ build(b){
+  const st=this.st, lab=has('m_chart')?['수리 중','로비 조명','수리 중','경비실','비상등','수리 중']:Array(6).fill('(글씨가 지워짐)');
+  b.innerHTML=pzTop('비상 발전기 전원이 들어오는 분전반이다. 누군가 차단기를 뒤죽박죽 올려놓았다. 맞는 차단기만 올리고 [전원 투입]을 누르자. 차단기를 탭하면 올리고 내릴 수 있다.',this)+
+   '<div class="brks">'+st.map((v,i)=>`<button class="brk" data-brk="${i}"><span class="bn">${'①②③④⑤⑥'[i]}</span><span class="lv"><i></i></span><span class="st"></span><span class="bl">${lab[i]}</span></button>`).join('')+'</div>'+pzBottom('전원 투입');
+  const upd=()=>b.querySelectorAll('.brk').forEach((el,i)=>{ el.classList.toggle('on',!!st[i]); el.querySelector('.st').textContent=st[i]?'ON':'OFF'; });
+  upd();
+  b.querySelectorAll('.brk').forEach(el=>el.onclick=()=>{ st[+el.dataset.brk]^=1; upd(); sfx('click'); });
+  b.querySelector('[data-act=go]').onclick=()=>{
+   const bad=[0,2,5].filter(i=>st[i]), miss=[1,3,4].filter(i=>!st[i]);
+   if(bad.length){ pzMsg('탁! 누전 차단기가 바로 떨어졌다. 올리면 안 되는 회로가 섞여 있어!','bad'); sfx('spark'); }
+   else if(miss.length){ pzMsg('아직 불이 안 들어오는 회로가 있다. ('+miss.length+'개 더 올려야 해)','bad'); sfx('fail'); }
+   else solvePuzzle();
+  };
+ }};
+// 지하 1층: 타이머 제거 + 퓨즈 계산
+PZ.B1={t:'메인 수전반',memo:'m_fuse',where:'기계실 벽 안내판을 찾아보자.',hint:'전류 = 전력 ÷ 220V. 예) 급수 펌프 1,980W ÷ 220V = 9A → 9A보다 크면서 가장 작은 10A 퓨즈! 나머지도 똑같이 계산해 보자.',
+ slots:[{n:'급수 펌프',w:1980,a:10},{n:'승강기',w:4180,a:20},{n:'공용 조명',w:660,a:5}], ins:[null,null,null], sel:0,
+ build(b){
+  if(!S.flags.timerRemoved){
+   b.innerHTML=`<p class="pin">수전반 문을 열자… 메인 차단기에 낯선 장치가 테이프로 칭칭 감겨 있다!</p><div class="timer"><div class="tdisp">21:00 <small>OFF</small></div><div class="tlab">디지털 타이머 스위치 · TM-21 · 가격표 “번개철물”</div></div><div class="prow"><button class="btn pri" data-act="rm">타이머 떼어 내기</button></div>`;
+   b.querySelector('[data-act=rm]').onclick=()=>{ S.flags.timerRemoved=1; sfx('spark'); addClue('c_timer'); buildPZ(b); };
+   return;
+  }
+  if(!S.flags.hasFuses){
+   S.flags.fuseSeen=1; updHUD();
+   b.innerHTML=`<p class="pin">타이머는 떼어 냈다. 그런데 퓨즈 꽂이 세 칸이 모두 비어 있다! 누군가 퓨즈를 몽땅 빼 갔다.</p><div class="memo no">예비 퓨즈를 찾아야 한다. 기계실 어딘가에 공구함이 있을 거야.</div><div class="prow"><button class="btn" data-x>알겠어</button></div>`;
+   b.querySelector('[data-x]').onclick=closeModal; return;
+  }
+  const self=this;
+  b.innerHTML=pzTop('빈 퓨즈 칸 3개에 알맞은 퓨즈를 끼우자. 칸을 탭해 고른 뒤, 아래 퓨즈 상자에서 퓨즈를 탭!',this)+
+   `<div class="volt">건물 전압 220V</div><div class="slots">${this.slots.map((s,i)=>`<button class="slot" data-slot="${i}"><b>${s.n}</b><span>${s.w.toLocaleString()}W</span><em></em></button>`).join('')}</div>`+
+   `<div class="tray">${[5,10,15,20,30].map(a=>`<button class="fz" data-fz="${a}">${a}A</button>`).join('')}</div>`+pzBottom('메인 차단기 올리기');
+  const upd=()=>b.querySelectorAll('.slot').forEach((el,i)=>{ el.classList.toggle('sel',i===self.sel); const e=el.querySelector('em'); e.textContent=self.ins[i]?self.ins[i]+'A 퓨즈':'비어 있음'; e.className=self.ins[i]?'f':''; });
+  upd();
+  b.querySelectorAll('.slot').forEach(el=>el.onclick=()=>{ self.sel=+el.dataset.slot; upd(); sfx('click'); });
+  b.querySelectorAll('.fz').forEach(el=>el.onclick=()=>{ self.ins[self.sel]=+el.dataset.fz; sfx('click'); const nx=self.ins.findIndex(v=>v==null); if(nx>=0) self.sel=nx; upd(); });
+  b.querySelector('[data-act=go]').onclick=()=>{
+   if(self.ins.some(v=>v==null)){ pzMsg('아직 빈 퓨즈 칸이 있다.','bad'); sfx('fail'); return; }
+   for(let i=0;i<3;i++){ const s=self.slots[i], v=self.ins[i];
+    if(v<s.a){ pzMsg('펑! '+s.n+' 퓨즈가 끊어졌다 — '+v+'A는 용량이 너무 작아.','bad'); sfx('spark'); self.ins[i]=null; self.sel=i; upd(); return; }
+    if(v>s.a){ pzMsg(s.n+'에 '+v+'A는 너무 커! 과전류를 못 막아 화재 위험 — 안전 점검 불합격.','bad'); sfx('fail'); self.sel=i; upd(); return; } }
+   solvePuzzle();
+  };
+ }};
+// 2층: 전선 색 맞추기
+const WIRES=[{n:'검정',c:'#1a1c20'},{n:'파랑',c:'#3a7bd5'},{n:'초록·노랑',c:'stripe'},{n:'갈색',c:'#8b5a2b'},{n:'회색',c:'#9aa3ad'}];
+const TERMS=['L1','L2','L3','N','PE'], WANS=[1,3,4,0,2];
+PZ['2F']={t:'2층 분전반 — 배선',memo:'m_wire',where:'2층 복도 벽에 포스터가 있었던 것 같다.',hint:'포스터대로: 갈색→L1, 검정→L2, 회색→L3, 파랑→N, 초록·노랑→PE.',
+ conn:[3,0,1,2,4], sel:null,
+ build(b){
+  const self=this;
+  b.innerHTML=pzTop('누군가 전선을 뽑아 엉뚱한 단자에 꽂아 놓았다. 왼쪽 전선을 탭하고, 오른쪽 단자를 탭해 연결하자.',this)+
+   `<div class="wires" id="wires"><svg id="wsvg"></svg>${WIRES.map((w,i)=>`<button class="wl" data-wl="${i}" style="grid-row:${i+1};grid-column:1"><i style="background:${w.c==='stripe'?'repeating-linear-gradient(90deg,#3fae4f 0 5px,#f0d040 5px 10px)':w.c}"></i>${w.n}</button><button class="wr" data-wr="${i}" style="grid-row:${i+1};grid-column:2">${TERMS[i]}</button>`).join('')}</div>`+pzBottom('전원 연결');
+  const sel=()=>{ b.querySelectorAll('.wl').forEach((el,i)=>el.classList.toggle('sel',self.sel===i)); drawWires(); };
+  b.querySelectorAll('.wl').forEach(el=>el.onclick=()=>{ self.sel=+el.dataset.wl; sfx('click'); sel(); });
+  b.querySelectorAll('.wr').forEach(el=>el.onclick=()=>{
+   if(self.sel==null){ pzMsg('먼저 왼쪽 전선을 고르자.','info'); return; }
+   const t=+el.dataset.wr; for(let i=0;i<5;i++) if(self.conn[i]===t) self.conn[i]=-1;
+   self.conn[self.sel]=t; self.sel=null; sfx('spark'); sel();
+  });
+  b.querySelector('[data-act=go]').onclick=()=>{
+   if(self.conn.some(v=>v<0)){ pzMsg('연결되지 않은 전선이 있다.','bad'); sfx('fail'); return; }
+   const ok=self.conn.filter((v,i)=>v===WANS[i]).length;
+   if(ok===5) solvePuzzle(); else { pzMsg('지지직! 5개 중 '+ok+'개만 제자리에 꽂혀 있다.','bad'); sfx('spark'); }
+  };
+  modalName='wire'; requestAnimationFrame(drawWires);
+ }};
+function drawWires(){
+ const box=$('#wires'), svg=$('#wsvg'); if(!box||!svg) return; const pz=PZ['2F'], r0=box.getBoundingClientRect(); let h='';
+ pz.conn.forEach((t,i)=>{ if(t<0) return;
+  const a=box.querySelector(`[data-wl="${i}"]`).getBoundingClientRect(), c=box.querySelector(`[data-wr="${t}"]`).getBoundingClientRect();
+  const x1=a.right-r0.left, y1=a.top+a.height/2-r0.top, x2=c.left-r0.left, y2=c.top+c.height/2-r0.top, mx=(x1+x2)/2;
+  const d=`M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`, w=WIRES[i];
+  if(w.c==='stripe') h+=`<path d="${d}" stroke="#3fae4f" stroke-width="6" fill="none"/><path d="${d}" stroke="#f0d040" stroke-width="6" stroke-dasharray="6 6" fill="none"/>`;
+  else h+=`<path d="${d}" stroke="#fff3" stroke-width="8" fill="none"/><path d="${d}" stroke="${w.c}" stroke-width="5" fill="none"/>`;
+ });
+ svg.innerHTML=h;
+}
+// 3층: 배선 타일 회전 (N1 E2 S4 W8)
+const ROT_SOL=[[6,10,14,5,12],[5,3,6,13,5],[10,14,9,3,10],[3,5,7,10,9],[15,5,6,10,12]];
+const ROT0=[[1,2,0,3,1],[2,1,3,1,2],[3,0,2,1,3],[1,3,1,2,0],[2,0,3,1,2]];
+const rotM=(m,k)=>{ for(let i=0;i<(k&3);i++) m=((m<<1)|(m>>3))&15; return m; };
+function rotPowered(rot){
+ const pw=[...Array(5)].map(()=>Array(5).fill(false)), m=(r,c)=>rotM(ROT_SOL[r][c],rot[r][c]);
+ if(!(m(2,0)&8)) return {pw,out:[false,false,false]};
+ const q=[[2,0]]; pw[2][0]=true; const DIRS=[[1,-1,0,4],[2,0,1,8],[4,1,0,1],[8,0,-1,2]];
+ while(q.length){ const [r,c]=q.shift(), mm=m(r,c); for(const [b,dr,dc,op] of DIRS){ if(!(mm&b)) continue; const nr=r+dr, nc=c+dc; if(nr<0||nc<0||nr>4||nc>4||pw[nr][nc]) continue; if(m(nr,nc)&op){ pw[nr][nc]=true; q.push([nr,nc]); } } }
+ return {pw,out:[pw[0][3]&&!!(m(0,3)&1), pw[2][4]&&!!(m(2,4)&2), pw[4][1]&&!!(m(4,1)&4)]};
+}
+PZ['3F']={t:'3층 분전반 — 배선판',where:'',hint:'전원(왼쪽)에서 출발해 보자. 가운데 줄 둘째 칸의 T자 조각이 아래(303호)와 오른쪽으로 갈라지게 돌리면 길이 보인다.',
+ rot:ROT0.map(r=>r.slice()),
+ build(b){
+  const self=this;
+  let g='';
+  for(let r=0;r<7;r++) for(let c=0;c<7;c++){
+   const ir=r-1, ic=c-1;
+   if(ir>=0&&ir<5&&ic>=0&&ic<5) g+=`<button class="rt" data-r="${ir}" data-c="${ic}" aria-label="배선 조각"></button>`;
+   else { let l=''; if(r===3&&c===0) l='전원<br>▶'; if(r===0&&c===4) l='301호<br>▲'; if(r===3&&c===6) l='302호<br>▶'; if(r===6&&c===2) l='▼<br>303호'; g+=`<div class="rl" data-lab="${l?(r===3&&c===0?'s':r===0?'0':r===3?'1':'2'):''}">${l}</div>`; }
+  }
+  b.innerHTML=`<p class="pin">배선 조각이 엉뚱한 방향으로 돌려져 있다. 조각을 탭해서 돌려, 왼쪽 전원에서 301·302·303호 세 집까지 전기를 이어 주자. (전기가 흐르는 선은 금색)</p><div class="rot">${g}</div>`+pzBottom(null);
+  const draw=()=>{
+   const {pw,out}=rotPowered(self.rot);
+   b.querySelectorAll('.rt').forEach(el=>{ const r=+el.dataset.r, c=+el.dataset.c, m=ROT_SOL[r][c], on=pw[r][c], col=on?'#f2c66d':'#6b7a90';
+    let s=`<svg viewBox="0 0 40 40">`; const L={1:'20,20 20,0',2:'20,20 40,20',4:'20,20 20,40',8:'20,20 0,20'};
+    for(const k of [1,2,4,8]) if(m&k) s+=`<polyline points="${L[k]}" stroke="${col}" stroke-width="7" stroke-linecap="${k?'butt':'round'}" fill="none"${on?' style="filter:drop-shadow(0 0 3px #f2c66d)"':''}/>`;
+    s+=`<circle cx="20" cy="20" r="5" fill="${col}"/></svg>`;
+    el.innerHTML=s; el.firstChild.style.transform='rotate('+(self.rot[r][c]*90)+'deg)'; });
+   b.querySelectorAll('[data-lab]').forEach(el=>{ const k=el.dataset.lab; if(k==='s') el.classList.add('on'); else if(k!=='') el.classList.toggle('on',out[+k]); });
+   const n=out.filter(Boolean).length; pzMsg(n===3?'세 집 모두 연결!':'전기가 닿은 집: '+n+' / 3', n===3?'good':'info');
+   return n===3;
+  };
+  draw();
+  b.querySelectorAll('.rt').forEach(el=>el.onclick=()=>{ if(self.done) return; const r=+el.dataset.r, c=+el.dataset.c; self.rot[r][c]=(self.rot[r][c]+1)&3; sfx('click'); if(draw()){ self.done=1; sfx('ok'); setTimeout(()=>{ self.done=0; solvePuzzle(); },700); } });
+ }};
+// 4층: 멀티미터로 끊어진 곳 찾기
+const SEGN=['전선㉮','등 1','전선㉯','등 2','접속함','전선㉰','등 3'], BROKEN=4, PTN='ABCDEFGH';
+PZ['4F']={t:'4층 분전반 — 복도등 회로',memo:'m_meter',where:'4층 어딘가에 안내문이 붙어 있었다.',hint:'먼저 A와 E 사이를 재 보자. 220V면 끊어진 곳은 A~E 사이, 0V면 E~H 사이. 이렇게 반씩 좁히면 금방 찾는다!',
+ probe:[], log:[], selSeg:null, swaps:0,
+ build(b){
+  const self=this; self.probe=[];
+  const cells=[]; // [row,col,html]
+  const pt=i=>`<button class="pt" data-pt="${i}">${PTN[i]}</button>`;
+  const sg=(i,v)=>`<button class="sg${v?' v':''}" data-sg="${i}"><span>${SEGN[i]}</span></button>`;
+  const grid=[[pt(0),sg(0),pt(1),sg(1),pt(2),sg(2),pt(3)],['<div class="src"><span>220V<br>전원</span></div>','','','','','',sg(3,1)],[pt(7),sg(6),pt(6),sg(5),pt(5),sg(4),pt(4)]];
+  b.innerHTML=pzTop('복도등 7개 부품이 한 줄(직렬)로 이어져 있는데 어딘가 한 곳이 끊어졌다. 두 지점(A~H)을 차례로 탭해 전압을 재고, 끊어진 부품을 찾아 교체하자.',this)+
+   `<div class="mread"><b id="mv">-- V</b><small id="mp">첫 번째 지점을 탭하세요</small></div><div class="chain">${grid.map(r=>r.map(c=>`<div style="display:flex;align-items:stretch;justify-content:center">${c}</div>`).join('')).join('')}</div>`+
+   `<div class="mlog" id="mlog">${self.log.join('<br>')}</div><div class="prow" style="margin-top:8px"><button class="btn" data-act="swap" disabled>선택한 부품 교체</button></div>`+pzBottom(null);
+  b.querySelectorAll('.chain>div').forEach(d=>{ if(d.querySelector('.sg')) { d.style.alignItems='stretch'; d.firstChild.style.width='100%'; } });
+  const upd=()=>{ b.querySelectorAll('.pt').forEach(el=>{ const i=+el.dataset.pt; el.className='pt'+(self.probe[0]===i?' r':self.probe[1]===i?' k':''); });
+   b.querySelectorAll('.sg').forEach(el=>el.classList.toggle('sel',+el.dataset.sg===self.selSeg));
+   const sw=b.querySelector('[data-act=swap]'); sw.disabled=self.selSeg==null; sw.textContent=self.selSeg==null?'교체할 부품을 탭하세요':'「'+SEGN[self.selSeg]+'」 교체하기'; };
+  b.querySelectorAll('.pt').forEach(el=>el.onclick=()=>{
+   const i=+el.dataset.pt; sfx('click');
+   if(self.probe.length!==1){ self.probe=[i]; $('#mv').textContent='-- V'; $('#mp').textContent='빨간 탐침: '+PTN[i]+' — 두 번째 지점을 탭하세요'; }
+   else if(self.probe[0]!==i){ self.probe.push(i); const lo=Math.min(...self.probe), hi=Math.max(...self.probe), v=(BROKEN>=lo&&BROKEN<hi)?220:0;
+    $('#mv').textContent=v+' V'; $('#mp').textContent=PTN[lo]+' ↔ '+PTN[hi]+' 사이 측정'; self.log.unshift(PTN[lo]+'–'+PTN[hi]+': '+v+'V'); if(self.log.length>12) self.log.pop();
+    $('#mlog').innerHTML=self.log.join('<br>'); sfx(v?'blip':'click'); }
+   upd();
+  });
+  b.querySelectorAll('.sg').forEach(el=>el.onclick=()=>{ self.selSeg=+el.dataset.sg; sfx('click'); upd(); });
+  b.querySelector('[data-act=swap]').onclick=()=>{
+   if(self.selSeg==null) return;
+   if(self.selSeg===BROKEN){ sfx('ok'); solvePuzzle(); }
+   else { self.swaps++; pzMsg('「'+SEGN[self.selSeg]+'」을(를) 새것으로 바꿨지만 여전히 깜깜하다. 다른 곳이 끊어져 있어.','bad'); sfx('fail'); self.selSeg=null; upd(); }
+  };
+  upd();
+ }};
+// 5층: 부하 분배 (전력 계산)
+const APS=[['실험용 전기로',3000],['에어컨',2200],['전기 히터',2000],['전기 포트',1500],['전자레인지',1300],['3D 프린터',900],['냉장고',600],['컴퓨터',500],['정수기',400]];
+const LOAD_MAX=4400;
+PZ['5F']={t:'5층 분전반 — 부하 나누기',memo:'m_load',where:'강 박사가 메모를 어딘가 떨어뜨렸다고 했다.',hint:'전기로 3,000W는 가벼운 기기들과(3D 프린터+컴퓨터 = 1,400W), 에어컨과 히터는 둘이서만 한 회로를 쓰면 딱 맞는다. 나머지는 남은 회로로!',
+ asg:[0,0,1,1,1,2,2,2,2],
+ build(b){
+  const self=this;
+  b.innerHTML=pzTop('강 박사의 기기들이 한쪽 회로에 몰려 차단기가 떨어졌다. 기기 9개를 회로 A·B·C에 나눠 꽂자. 차단기 정격은 각각 <b>20A</b>, 전압은 <b>220V</b>.',this)+
+   `<div class="circs">${[0,1,2].map(i=>`<div class="circ" data-ci="${i}">회로 ${'ABC'[i]}<b>0W</b><div class="bar"><i></i></div><small></small></div>`).join('')}</div>`+
+   `<div class="aps">${APS.map((a,i)=>`<div class="ap"><div class="an">${a[0]}<small>${a[1].toLocaleString()}W</small></div>${[0,1,2].map(k=>`<button data-ap="${i}" data-k="${k}">${'ABC'[k]}</button>`).join('')}</div>`).join('')}</div>`+pzBottom('차단기 올리기');
+  const upd=()=>{ const tot=[0,0,0]; self.asg.forEach((k,i)=>{ if(k>=0) tot[k]+=APS[i][1]; });
+   b.querySelectorAll('.circ').forEach((el,i)=>{ el.querySelector('b').textContent=tot[i].toLocaleString()+'W'; el.querySelector('.bar i').style.width=Math.min(100,tot[i]/LOAD_MAX*100)+'%';
+    el.querySelector('small').textContent=S.flags.loadFail?'≈ '+(tot[i]/220).toFixed(1)+'A':''; el.classList.toggle('over',!!S.flags.loadFail&&tot[i]>LOAD_MAX); });
+   b.querySelectorAll('[data-ap]').forEach(el=>el.classList.toggle('on',self.asg[+el.dataset.ap]===+el.dataset.k)); return tot; };
+  upd();
+  b.querySelectorAll('[data-ap]').forEach(el=>el.onclick=()=>{ self.asg[+el.dataset.ap]=+el.dataset.k; sfx('click'); upd(); });
+  b.querySelector('[data-act=go]').onclick=()=>{
+   const tot=upd(), over=[0,1,2].filter(i=>tot[i]>LOAD_MAX);
+   if(over.length){ S.flags.loadFail=1; upd(); const i=over[0]; pzMsg('탁! 차단기 '+'ABC'[i]+' 트립 — '+tot[i].toLocaleString()+'W ÷ 220V ≈ '+(tot[i]/220).toFixed(1)+'A > 20A','bad'); sfx('spark'); }
+   else solvePuzzle();
+  };
+ }};
+// 6층: 스위치 조합
+const SWL=[[0,1],[1,2,4],[2,3],[3,4,5],[0,4],[5,0,2]];
+PZ['6F']={t:'6층 분전반 — 복도등 스위치',where:'',hint:'스위치 하나를 켜면 연결된 전등이 모두 반대로 바뀐다(켜짐↔꺼짐). 2번 스위치는 꼭 켜야 하고, 1번은 꺼야 한다. 나머지는 직접 실험해 보자!',
+ st:[1,0,1,0,0,0],
+ build(b){
+  const self=this;
+  b.innerHTML=`<p class="pin">누군가 스위치 배선을 섞어 놓았다. 스위치 하나가 여러 전등을 동시에 켰다 껐다 한다. 전등 6개를 모두 켜자!</p>`+
+   `<div class="lamps">${[0,1,2,3,4,5].map(i=>`<div><div class="lamp" data-l="${i}">${i+1}</div></div>`).join('')}</div><div style="height:14px"></div>`+
+   `<div class="sws">${SWL.map((l,i)=>`<div><button class="sw" data-sw="${i}"><span class="tg"><i></i></span><b>S${i+1}</b></button><div class="swl">→ ${l.map(x=>x+1).sort().join('·')}</div></div>`).join('')}</div>`+pzBottom(null);
+  const draw=()=>{ const on=[0,0,0,0,0,0]; self.st.forEach((s,i)=>{ if(s) SWL[i].forEach(l=>on[l]^=1); });
+   b.querySelectorAll('.lamp').forEach((el,i)=>el.classList.toggle('on',!!on[i])); b.querySelectorAll('.sw').forEach((el,i)=>el.classList.toggle('on',!!self.st[i]));
+   const n=on.filter(Boolean).length; pzMsg('켜진 전등: '+n+' / 6',n===6?'good':'info'); return n===6; };
+  draw();
+  b.querySelectorAll('.sw').forEach(el=>el.onclick=()=>{ if(self.done) return; self.st[+el.dataset.sw]^=1; sfx('click'); if(draw()){ self.done=1; sfx('ok'); setTimeout(()=>{ self.done=0; solvePuzzle(); },700); } });
+ }};
+
+// ===== 수첩 =====
+let nbTab='ev';
+function openNB(){ if(screen!=='game') return; nbOpen=true; held.length=0; P.path=[]; renderNB(); $('#nb').classList.remove('hide'); ovl(); sfx('page'); }
+function closeNB(){ nbOpen=false; $('#nb').classList.add('hide'); ovl(); updHUD(); }
+function renderNB(){
+ const n=S.clues.filter(id=>CLUES[id].cat!=='memo').length;
+ $('#nbTitle').innerHTML='수첩<small>단서 '+n+' / '+TOTAL_CLUES+'</small>';
+ const tabs=[['ev','증거'],['ts','증언'],['memo','메모'],['prog','진행']];
+ $('#nbTabs').innerHTML=tabs.map(([k,l])=>{ const nw=S.newc.filter(id=>CLUES[id].cat===k).length; return `<button class="tab${nbTab===k?' on':''}" data-tab="${k}">${l}${nw?' <span style="color:var(--rd)">●</span>':''}</button>`; }).join('');
+ $('#nbTabs').querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{ nbTab=el.dataset.tab; sfx('click'); renderNB(); });
+ const body=$('#nbBody');
+ if(nbTab==='prog'){
+  body.innerHTML='<div class="prog">'+['R','6F','5F','4F','3F','2F','1F','B1'].map(f=>{ const st=f==='R'?(isUnlocked('R')?(has('t_park')?'관리인 구출':'열림'):'잠김'):lit(f)?'전기 복구':isUnlocked(f)?'정전':'잠김'; const col=st==='전기 복구'||st==='관리인 구출'?'var(--gr)':st==='정전'?'var(--rd)':st==='열림'?'var(--cy)':'var(--mu)'; return `<div class="pg"><b>${FSHORT[f]} · ${FNAME[f]}</b><span style="color:${col}">${st}</span></div>`; }).join('')+
+   `</div><p class="pin" style="margin-top:12px">플레이 시간 ${fmtTime(S.time)} · 힌트 사용 ${S.hints}회<br>퍼즐 정답은 모두 게임 속 단서(메모)로 알아낼 수 있다.</p>`;
+ } else {
+  const ids=S.clues.filter(id=>CLUES[id].cat===nbTab).slice().reverse();
+  body.innerHTML=ids.length?ids.map(id=>{ const c=CLUES[id]; return `<div class="ni ${c.cat==='ts'?'ts':c.cat==='memo'?'memo2':''}"><h3>${c.t}${S.newc.includes(id)?'<span class="nw">NEW</span>':''}<small>${FSHORT[c.f]}</small></h3><p>${c.x}</p></div>`; }).join(''):'<div class="empty">아직 기록이 없다. 반짝이는 곳을 조사하고, 주민과 이야기해 보자.</div>';
+  S.newc=S.newc.filter(id=>CLUES[id].cat!==nbTab);
+ }
+ body.scrollTop=0;
+ const bd=$('#bDeduce'); bd.disabled=!has('t_park'); bd.textContent=has('t_park')?'추리하기':'추리하기 (옥상에서 관리인을 만난 뒤)';
+}
+$('#bNote').onclick=()=>{ ensureAudio(); if(canMove()) openNB(); };
+$('#nbClose').onclick=()=>{ sfx('click'); closeNB(); };
+$('#bDeduce').onclick=()=>{ closeNB(); openDeduction(); };
+
+// ===== 추리 =====
+const SUS=[['park','관리인 박만수'],['oh','202호 오성태 사장'],['minji','303호 민지'],['jung','403호 정 할머니'],['kang','501호 강 박사'],['junho','601호 준호']];
+const MOT=[['views','공포 방송 조회수를 올리려고'],['exp','발명품 실험 사고를 감추려고'],['redev','내일 안전진단에서 “위험” 판정이 나오게 해 재개발을 밀어붙이려고'],['bill','공용 전기요금을 아끼려고'],['cat','고양이를 찾으려고 어둡게 했다']];
+const MET=[['overload','실험 장치로 과부하를 일으켜 건물 전체 차단기를 떨어뜨렸다'],['bolt','옥상 안테나에 벼락이 떨어져 전기가 나갔다'],['timer','메인 수전반에 타이머 스위치를 달아 9시 정각에 끊고, 층마다 분전반을 망가뜨렸다'],['stream','방송 장비로 전기를 너무 많이 써서 퓨즈가 끊어졌다']];
+const ANS={q1:'oh',q2:'redev',q3:'timer',q4:'c_receipt'};
+const WRONG_WHO={park:'이보게, 난 8시 50분부터 옥상에 갇혀 있었다네! 정전이 나야 문이 잠기는데, 내가 어떻게 끊나?',minji:'민지 학생은 9시 정각에 생방송 중이었다지? 녹화본이 알리바이야. 대본은 방 스탠드만 끄는 연출이었고.',jung:'할머니는 오히려 수상한 사람을 본 목격자 아닌가? 그 사람 가슴에 뭐가 반짝였다고 했지?',kang:'강 박사 실험은 5층 차단기만 떨어뜨렸어. 건물 전체는 9시 “정각”에 꺼졌지.',junho:'준호는 키가 분전반에 닿지도 않아! 준호가 본 아저씨를 떠올려 보게.'};
+function openDeduction(){
+ if(nbOpen) closeNB();
+ const d=S.ded;
+ openModal('추리 노트', b=>{
+  const evs=S.clues.filter(id=>CLUES[id].cat==='ev');
+  const q=(k,title,opts,col)=>`<div class="q"><h3>${title}</h3><div class="opts${col?' col':''}">${opts.map(([v,l])=>`<button class="opt${d[k]===v?' on':''}" data-q="${k}" data-v="${v}">${l}</button>`).join('')}</div></div>`;
+  b.innerHTML=`<p class="pin">누가 별빛맨션의 전기를 끊었을까? 수첩의 단서를 엮어 네 가지를 고르고 추리를 발표하자.${S.wrong?' (지금까지 헛다리 '+S.wrong+'번)':''}</p>`+
+   q('q1','① 범인은 누구?',SUS)+q('q2','② 왜 그랬을까? (동기)',MOT,1)+q('q3','③ 어떻게 끊었을까? (방법)',MET,1)+
+   q('q4','④ 범인과 “타이머”를 직접 이어 주는 결정적 증거는?',evs.map(id=>[id,CLUES[id].t]))+
+   `<div class="pmsg" id="pmsg"></div><div class="prow"><button class="btn" data-act="nb">수첩 보기</button><button class="btn pri" data-act="go">추리 발표!</button></div>`;
+  b.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{ d[el.dataset.q]=el.dataset.v; sfx('click'); b.querySelectorAll(`[data-q="${el.dataset.q}"]`).forEach(x=>x.classList.toggle('on',x===el)); });
+  b.querySelector('[data-act=nb]').onclick=()=>openNB();
+  b.querySelector('[data-act=go]').onclick=submitDeduction;
+ });
+}
+function submitDeduction(){
+ const d=S.ded;
+ if(!d.q1||!d.q2||!d.q3||!d.q4){ pzMsg('네 가지를 모두 골라야 발표할 수 있다.','bad'); sfx('fail'); return; }
+ const N=t=>({w:'관리인 박 씨',t});
+ if(d.q1!==ANS.q1){
+  S.wrong++; sfx('fail'); saveGame();
+  const L=[nar('“범인은 '+SUS.find(s=>s[0]===d.q1)[1]+'!” …관리인 아저씨가 고개를 갸웃한다.'),N(WRONG_WHO[d.q1])];
+  if(S.wrong>=2) L.push(N('금색 번개 배지… 그건 어떤 모임의 배지였지? 2층 게시판 전단 아래쪽을 다시 보게.'));
+  say(L,()=>openDeduction()); return;
+ }
+ const bad=[];
+ if(d.q2!==ANS.q2) bad.push('동기가 어색해. 범인이 원한 건 “내일” 일어날 일과 관계가 있어. 2층 전단을 다시 읽어 보게.');
+ if(d.q3!==ANS.q3) bad.push('방법이 틀렸어. 정전은 9시 “정각”이었지. 기계실 메인 수전반에서 떼어 낸 물건을 떠올려 보게.');
+ if(d.q4!==ANS.q4) bad.push(has('c_receipt')?'그 증거로는 범인이 타이머를 준비했다는 걸 증명하기 어려워. 타이머를 “산” 기록이 있지 않았나?':'타이머를 산 사람을 알려 줄 증거를 아직 못 찾은 것 같군. 1층 로비 쓰레기통을 뒤져 봤나?');
+ if(!bad.length){ finish(S.wrong===0?'A':'B'); return; }
+ S.wrong++; sfx('fail'); saveGame();
+ say([nar('“범인은 오성태 사장!” 오 사장의 얼굴이 하얗게 질렸다. 하지만…'),{w:'오 사장',t:'허, 허허. 증거 있어요? 그렇게 말하면 다 범인이게요?'},...bad.map(N),
+  {w:'관리인 박 씨',t:'범인은 맞힌 것 같은데, 추리가 아직 덜 여물었어. 어떻게 하겠나?',ch:[{l:'다시 생각해 본다',f:openDeduction},{l:'이대로 결론을 내린다',f:()=>finish('C')}]}]);
+}
+
+// ===== 엔딩 / 결과 =====
+const ENDINGS={
+ A:{t:'진실의 불빛',s:'완벽한 추리',p:['“범인은 202호 오성태 사장. 내일 안전진단에서 ‘위험’ 판정을 받게 해 재개발을 밀어붙이려고, 번개철물에서 산 타이머를 메인 수전반에 달아 9시 정각에 전기를 끊고 층마다 분전반을 망가뜨렸습니다!”','오 사장은 결국 고개를 떨궜다. “건물이 위험해 보이면… 재개발이 빨리 될 줄 알았소.”','다음 날 아침, 안전진단 결과는 ‘양호’. 낡았지만 꼼꼼히 관리된 설비 덕분이었다. 주민들은 환하게 불 켜진 로비에 모여 박수를 쳤다. 번개도 “야옹!”','단 한 번의 헛다리도 없이 진실의 스위치를 올렸다. 당신은 이제 별빛맨션의 명탐정 전기기사!']},
+ B:{t:'늦게 켜진 불빛',s:'끈질긴 추리',p:['몇 번 헛다리를 짚었지만, 끝내 모든 단서가 한 줄로 이어졌다.','“타이머 영수증, 금색 배지, 찢긴 일지… 더는 못 숨기겠군요.” 오 사장은 모든 것을 털어놓았다.','다음 날 안전진단 결과는 ‘양호’. 주민들은 지친 전기기사에게 따뜻한 김치찌개를 대접했다. 강 박사표다.','다음엔 헛다리 없이 한 번에 맞혀 볼까?']},
+ C:{t:'반쪽짜리 불빛',s:'일부 추리',p:['“증거 있어요?” 오 사장은 끝까지 버텼다.','범인은 정확히 짚었지만, 동기와 방법, 결정적 증거를 제대로 엮지 못했다.','결국 며칠 뒤 경찰 조사로 모든 것이 밝혀졌다. 건물에는 다시 불이 들어왔지만… 마음 한구석이 조금 어둡다.','수첩을 더 꼼꼼히 엮으면 “진실의 불빛” 엔딩을 볼 수 있다!']}
+};
+function fmtTime(s){ s=Math.floor(s); return Math.floor(s/60)+'분 '+String(s%60).padStart(2,'0')+'초'; }
+function finish(end){
+ closeModal(); if(nbOpen) closeNB(); dlgOn=false; $('#dlg').classList.add('hide');
+ const found=S.clues.filter(id=>CLUES[id].cat!=='memo').length;
+ const score=Math.max(0,1000+found*40+({A:400,B:200,C:0})[end]-S.wrong*60-S.hints*25+Math.max(0,Math.round((2400-S.time)/4)));
+ const best=store.get('best',0), nr=score>best; if(nr) store.set('best',score);
+ const ends=store.get('endings',[]); if(ends.indexOf(end)<0){ ends.push(end); store.set('endings',ends); }
+ store.del('save'); const E=ENDINGS[end];
+ screen='result'; paused=false; rainOff(); sfx('end'); lastEnd=end;
+ $('#hud').classList.add('hide'); $('#ctrl').classList.add('hide');
+ const r=$('#result');
+ r.innerHTML=`<div class="endt">ENDING ${end} · ${E.s}</div><div class="endh">${E.t}</div><div class="story">${E.p.map(t=>'<p>'+t+'</p>').join('')}</div>
+  <div class="stats"><div class="big">점수<b>${score.toLocaleString()}</b>${nr?'<span class="newrec">최고 기록 갱신!</span>':'최고 '+best.toLocaleString()}</div>
+  <div>플레이 시간<b>${fmtTime(S.time)}</b></div><div>모은 단서<b>${found} / ${TOTAL_CLUES}</b></div><div>추리 헛다리<b>${S.wrong}번</b></div><div>퍼즐 힌트<b>${S.hints}번</b></div>
+  <div class="big" style="font-size:13px">모은 엔딩: ${['A','B','C'].map(k=>(ends.indexOf(k)>=0?'● ':'○ ')+ENDINGS[k].t).join(' · ')}</div></div>
+  <div class="menu"><button class="btn pri" id="rAgain">다시 하기</button><button class="btn" id="rTitle">타이틀</button></div>`;
+ r.classList.remove('hide'); r.scrollTop=0;
+ $('#rAgain').onclick=()=>{ r.classList.add('hide'); startGame(null); };
+ $('#rTitle').onclick=()=>{ r.classList.add('hide'); showTitle(); };
+}
+let lastEnd=null;
+
+// ===== HUD / 목표 =====
+function objective(){
+ const f=S.floor;
+ if(f==='R') return has('t_park')?'<b>추리 시작!</b> 관리인과 이야기하거나 수첩의 [추리하기]':'관리인 아저씨에게 말을 걸어 보자';
+ if(!lit()){
+  if(f==='1F') return !has('m_chart')?'<b>경비실</b>(왼쪽 위 방)을 조사해 단서를 찾자':'경비실 <b>비상 분전반</b>(빨간 불빛)을 고쳐 1층 전기를 살리자';
+  if(f==='B1') return S.flags.fuseSeen&&!S.flags.hasFuses?'예비 퓨즈를 찾자 — 기계실 <b>공구함</b>을 뒤져 보자':'기계실 <b>메인 수전반</b>(빨간 불빛)을 살펴보자';
+  return FNAME[f]+' <b>분전반</b>(빨간 불빛)을 찾아 전기를 복구하자';
+ }
+ const left=M().objs.filter(o=>visible(o)&&((o.clue&&!has(o.clue))||(o.npc&&!has('t_'+o.npc)))).length;
+ if(left) return '불이 켜졌다! 아직 조사 안 한 단서 <b>'+left+'개</b> (반짝이는 곳)';
+ if(f==='4F'&&S.flags.cat&&!S.flags.catBack) return '번개를 <b>정 할머니</b>께 데려다 드리자';
+ const nx=ORDER[ORDER.indexOf(f)+1];
+ if(nx) return '<b>계단</b>(초록 비상구 표시)으로 '+FNAME[nx]+'에 가 보자';
+ return '이 층은 다 살펴봤다';
+}
+let lastBat=-1;
+function updHUD(){
+ if(!S) return;
+ $('#flName').textContent=FNAME[S.floor];
+ const fs=$('#flState'); if(S.floor==='R'){ fs.textContent='야외'; fs.className='chip out'; } else if(lit()){ fs.textContent='전기 복구'; fs.className='chip on'; } else { fs.textContent='정전'; fs.className='chip off'; }
+ $('#obj').innerHTML=objective();
+ const nn=S.newc.length; $('#nbNew').textContent=nn?nn:'';
+ const b=Math.ceil(S.battery);
+ if(b!==lastBat){ lastBat=b; const i=$('#batBar'); i.style.width=b+'%'; i.style.background=b>50?'#78e2ae':b>20?'#f2c66d':'#e77d78'; $('#batTx').textContent=b+'%'; }
+ const t=canMove()?interactTarget():null, a=$('#bAct');
+ const lbl=!t?'조사':t.kind==='npc'?'대화':t.kind==='stairs'||t.kind==='elev'?'이동':t.kind==='panel'?'고치기':t.kind==='use'&&t.use==='cat'?'안기':'조사';
+ if(a.textContent!==lbl) a.textContent=lbl; a.classList.toggle('dim',!t);
+}
+
+// ===== 렌더링 =====
+function snapCam(){ updCam(1); }
+function updCam(k){
+ const m=M(), px=P.fx*T+T/2, py=P.fy*T+T/2;
+ let tx=px-CW/2, ty=py-CH*0.47;
+ const mw=m.W*T, mh=m.H*T, top=100, bot=170;
+ if(mw<=CW) tx=(mw-CW)/2; else tx=Math.max(0,Math.min(mw-CW,tx));
+ if(mh+top+bot<=CH) ty=(mh-CH)/2+(bot-top)/2; else ty=Math.max(-top,Math.min(mh-CH+bot,ty));
+ camX+=(tx-camX)*k; camY+=(ty-camY)*k;
+}
+function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+const hsh=(x,y)=>(((x*73856093)^(y*19349663))>>>0)%97;
+function litLevel(){
+ if(S.floor==='R') return 0;
+ if(!lit()) return 0;
+ const t=litAnim; if(t>1.6) return 1;
+ if(t<.25) return .6; if(t<.4) return 0; if(t<.55) return .8; if(t<.75) return .05; return Math.min(1,.5+(t-.75));
+}
+function drawTiles(){
+ const m=M(), th=THEME[FLOORS[S.floor].theme];
+ for(let y=0;y<m.H;y++) for(let x=0;x<m.W;x++){
+  const sx=x*T-camX, sy=y*T-camY; if(sx<-T||sy<-T||sx>CW||sy>CH) continue;
+  const t=m.tiles[y][x];
+  if(t==='#'||t==='w'){
+   ctx.fillStyle=th.wall; ctx.fillRect(sx,sy,T+.5,T+.5);
+   const below=y+1<m.H&&m.tiles[y+1][x]!=='#'&&m.tiles[y+1][x]!=='w';
+   if(below){ ctx.fillStyle=th.face; ctx.fillRect(sx,sy+T*.5,T+.5,T*.5+.5); ctx.fillStyle='rgba(0,0,0,.3)'; ctx.fillRect(sx,sy+T-3,T+.5,3); }
+   ctx.fillStyle=th.top; ctx.fillRect(sx,sy,T+.5,2);
+   if(t==='w'){ ctx.fillStyle=`rgba(${120+flash*130|0},${170+flash*85|0},${230},${.35+flash*.6})`; ctx.fillRect(sx+T*.15,sy+T*.18,T*.7,T*.6); ctx.strokeStyle='#1a2433'; ctx.lineWidth=2; ctx.strokeRect(sx+T*.15,sy+T*.18,T*.7,T*.6); ctx.beginPath(); ctx.moveTo(sx+T*.5,sy+T*.18); ctx.lineTo(sx+T*.5,sy+T*.78); ctx.stroke();
+    ctx.strokeStyle='rgba(180,210,255,.25)'; ctx.lineWidth=1; for(let i=0;i<3;i++){ const rx=sx+T*(.22+i*.22), ry=sy+T*.2+((animT*60+i*13)%(T*.5)); ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx-2,ry+5); ctx.stroke(); } }
+  } else {
+   const th2=FLOORS[S.floor].theme;
+   ctx.fillStyle=(th2==='lobby'?((x+y)&1):(th2==='apt'?(y&1):0))?th.f2:th.f1; ctx.fillRect(sx,sy,T+.5,T+.5);
+   if(th2==='apt'){ ctx.fillStyle='rgba(0,0,0,.18)'; ctx.fillRect(sx,sy+T*.5,T,1); ctx.fillRect(sx+((y*7)%3)*T/3,sy,1,T*.5); }
+   else if(th2==='b1'){ const h=hsh(x,y); if(h<20){ ctx.fillStyle='rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(sx+T*(.3+h%5*.1),sy+T*.6,T*.2,T*.1,0,0,7); ctx.fill(); } ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.strokeRect(sx,sy,T,T); }
+   else if(th2==='roof'){ ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.strokeRect(sx+.5,sy+.5,T-1,T-1); ctx.fillStyle='rgba(140,180,255,.07)'; if(hsh(x,y)<25){ ctx.beginPath(); ctx.ellipse(sx+T/2,sy+T/2,T*.3,T*.15,0,0,7); ctx.fill(); } }
+   else { ctx.strokeStyle='rgba(255,255,255,.03)'; ctx.strokeRect(sx+.5,sy+.5,T-1,T-1); }
+   if(t==='E'){
+    const open=lit(); ctx.fillStyle='#4a5566';
+    if(open){ ctx.fillRect(sx,sy+T*.35,T*.12,T*.3); ctx.fillRect(sx+T*.88,sy+T*.35,T*.12,T*.3); }
+    else { ctx.fillRect(sx,sy+T*.32,T,T*.36); ctx.fillStyle='#2e3846'; ctx.fillRect(sx+T*.49,sy+T*.32,2,T*.36); ctx.fillStyle='#e77d78'; ctx.fillRect(sx+T*.42,sy+T*.24,T*.16,T*.07); }
+   }
+  }
+ }
+}
+function person(o,cx,cy,col,hair,opt){
+ const s=T*(opt&&opt.kid?.8:1);
+ ctx.fillStyle='rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(cx,cy+s*.36,s*.28,s*.09,0,0,7); ctx.fill();
+ ctx.fillStyle=col; rr(cx-s*.22,cy-s*.05,s*.44,s*.42,s*.12); ctx.fill();
+ if(opt&&opt.coat){ ctx.fillStyle='#9ab'; ctx.fillRect(cx-1,cy-s*.04,2,s*.38); }
+ if(opt&&opt.badge){ ctx.fillStyle='#f2c66d'; ctx.beginPath(); ctx.arc(cx-s*.1,cy+s*.06,s*.045,0,7); ctx.fill(); }
+ ctx.fillStyle='#f1cfa8'; ctx.beginPath(); ctx.arc(cx,cy-s*.2,s*.19,0,7); ctx.fill();
+ ctx.fillStyle=hair; ctx.beginPath(); ctx.arc(cx,cy-s*.24,s*.19,Math.PI*1.05,Math.PI*1.95); ctx.fill();
+ if(opt&&opt.cap){ ctx.fillStyle='#3d4a2a'; ctx.fillRect(cx-s*.2,cy-s*.39,s*.4,s*.1); ctx.fillRect(cx-s*.05,cy-s*.32,s*.3,s*.05); }
+ if(opt&&opt.helmet){ ctx.fillStyle='#f2c66d'; ctx.beginPath(); ctx.arc(cx,cy-s*.25,s*.21,Math.PI,0); ctx.fill(); ctx.fillRect(cx-s*.24,cy-s*.26,s*.48,s*.05); }
+ ctx.fillStyle='#222'; ctx.fillRect(cx-s*.08,cy-s*.2,s*.04,s*.05); ctx.fillRect(cx+s*.04,cy-s*.2,s*.04,s*.05);
+}
+function drawObj(o){
+ const x=o.x*T-camX, y=o.y*T-camY, L=lit(); if(x<-T||y<-T||x>CW||y>CH) return;
+ const c=T/2; ctx.save(); ctx.translate(x,y);
+ switch(o.look){
+  case 'desk': ctx.fillStyle='#5a4330'; rr(T*.06,T*.18,T*.88,T*.62,4); ctx.fill(); ctx.fillStyle='#e8e4d8'; ctx.fillRect(T*.22,T*.3,T*.32,T*.26); ctx.fillStyle='#8a2d2d'; ctx.fillRect(T*.6,T*.32,T*.2,T*.24); break;
+  case 'chart': ctx.fillStyle='#3a4658'; ctx.fillRect(T*.1,T*.08,T*.8,T*.8); ctx.fillStyle='#ecebe2'; ctx.fillRect(T*.18,T*.14,T*.64,T*.66); ctx.fillStyle='#555'; for(let i=0;i<4;i++) ctx.fillRect(T*.25,T*(.24+i*.13),T*.5,2); break;
+  case 'panel': case 'mainpanel': { const w=o.look==='mainpanel'?.86:.72; ctx.fillStyle='#7d8796'; rr(T*(1-w)/2,T*.1,T*w,T*.8,4); ctx.fill(); ctx.strokeStyle='#4d5563'; ctx.lineWidth=2; ctx.stroke(); ctx.fillStyle='#f2c66d'; ctx.beginPath(); ctx.moveTo(c,T*.28); ctx.lineTo(c+T*.14,T*.62); ctx.lineTo(c-T*.14,T*.62); ctx.closePath(); ctx.fill(); ctx.fillStyle='#222'; ctx.font='800 '+(T*.2|0)+'px system-ui'; ctx.textAlign='center'; ctx.fillText('!',c,T*.58); break; }
+  case 'stairs': ctx.fillStyle='#1d2633'; ctx.fillRect(T*.06,T*.06,T*.88,T*.88); ctx.fillStyle='#4a5a70'; for(let i=0;i<5;i++) ctx.fillRect(T*.1,T*(.12+i*.16),T*.8,T*.08); break;
+  case 'steps': ctx.fillStyle='rgba(120,170,220,.45)'; for(let i=0;i<3;i++){ ctx.beginPath(); ctx.ellipse(T*(.3+(i&1)*.35),T*(.85-i*.3),T*.09,T*.14,0,0,7); ctx.fill(); } break;
+  case 'mailbox': ctx.fillStyle='#6a7484'; ctx.fillRect(T*.1,T*.15,T*.8,T*.7); ctx.fillStyle='#3d4553'; for(let i=0;i<3;i++) for(let j=0;j<3;j++) ctx.fillRect(T*(.15+i*.25),T*(.2+j*.21),T*.2,T*.16); break;
+  case 'sofa': ctx.fillStyle='#6b2f2f'; rr(T*.05,T*.2,T*.9,T*.65,8); ctx.fill(); ctx.fillStyle='#843c3c'; rr(T*.15,T*.35,T*.7,T*.4,6); ctx.fill(); break;
+  case 'board': ctx.fillStyle='#4a3622'; ctx.fillRect(T*.1,T*.1,T*.8,T*.68); ctx.fillStyle='#b58a52'; ctx.fillRect(T*.15,T*.15,T*.7,T*.58); ctx.fillStyle='#eee'; ctx.fillRect(T*.22,T*.22,T*.25,T*.3); ctx.fillStyle='#f2c66d'; ctx.fillRect(T*.52,T*.28,T*.26,T*.22); ctx.fillStyle='#555'; ctx.fillRect(T*.45,T*.78,T*.1,T*.16); break;
+  case 'shelf': ctx.fillStyle='#4b3a29'; ctx.fillRect(T*.05,T*.1,T*.9,T*.8); ctx.fillStyle='#b48a5a'; ctx.fillRect(T*.12,T*.18,T*.32,T*.28); ctx.fillRect(T*.5,T*.52,T*.36,T*.3); ctx.fillRect(T*.15,T*.55,T*.26,T*.26); break;
+  case 'elev': ctx.fillStyle='#5f6a7a'; ctx.fillRect(T*.05,T*.05,T*.9,T*.9); ctx.fillStyle='#9aa6b6'; ctx.fillRect(T*.12,T*.18,T*.37,T*.74); ctx.fillRect(T*.51,T*.18,T*.37,T*.74); ctx.fillStyle=S.restored.B1?'#f2c66d':'#333'; ctx.fillRect(T*.4,T*.07,T*.2,T*.08); break;
+  case 'trash': ctx.fillStyle='#4a5160'; rr(T*.25,T*.2,T*.5,T*.65,6); ctx.fill(); ctx.fillStyle='#6a7384'; ctx.fillRect(T*.2,T*.18,T*.6,T*.1); ctx.fillStyle='#ddd'; ctx.fillRect(T*.4,T*.1,T*.16,T*.1); break;
+  case 'frontdoor': ctx.fillStyle='#24384e'; ctx.fillRect(T*.05,T*.1,T*.9,T*.85); ctx.fillStyle=`rgba(120,170,230,${.35+flash*.5})`; ctx.fillRect(T*.12,T*.18,T*.35,T*.72); ctx.fillRect(T*.53,T*.18,T*.35,T*.72); break;
+  case 'badge': ctx.fillStyle='#f2c66d'; ctx.beginPath(); ctx.moveTo(c+T*.06,c-T*.2); ctx.lineTo(c-T*.1,c+T*.03); ctx.lineTo(c,c+T*.03); ctx.lineTo(c-T*.06,c+T*.2); ctx.lineTo(c+T*.12,c-T*.04); ctx.lineTo(c+T*.02,c-T*.04); ctx.closePath(); ctx.fill(); break;
+  case 'toolbox': ctx.fillStyle='#b8392f'; rr(T*.12,T*.35,T*.76,T*.45,4); ctx.fill(); ctx.strokeStyle='#ddd'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(T*.35,T*.35); ctx.lineTo(T*.35,T*.22); ctx.lineTo(T*.65,T*.22); ctx.lineTo(T*.65,T*.35); ctx.stroke(); break;
+  case 'sign': ctx.fillStyle='#666'; ctx.fillRect(c-2,T*.5,4,T*.45); ctx.fillStyle='#e9e2c8'; ctx.fillRect(T*.12,T*.1,T*.76,T*.45); ctx.fillStyle='#3a6ea5'; ctx.fillRect(T*.12,T*.1,T*.76,T*.1); ctx.fillStyle='#777'; ctx.fillRect(T*.2,T*.28,T*.6,2); ctx.fillRect(T*.2,T*.38,T*.5,2); break;
+  case 'box': ctx.fillStyle='#a77d4c'; ctx.fillRect(T*.18,T*.3,T*.64,T*.55); ctx.fillStyle='#8a6438'; ctx.fillRect(T*.18,T*.3,T*.64,T*.1); ctx.fillStyle='#e3d4b5'; ctx.fillRect(T*.3,T*.5,T*.3,T*.15); break;
+  case 'car': ctx.fillStyle='#3a6ea5'; rr(T*.08,T*.15,T*.84,T*.72,10); ctx.fill(); ctx.fillStyle='#9cc4e8'; ctx.fillRect(T*.2,T*.25,T*.6,T*.18); ctx.fillStyle='#111'; ctx.fillRect(T*.04,T*.25,T*.06,T*.15); ctx.fillRect(T*.9,T*.25,T*.06,T*.15); ctx.fillRect(T*.04,T*.6,T*.06,T*.15); ctx.fillRect(T*.9,T*.6,T*.06,T*.15); break;
+  case 'bike': ctx.strokeStyle='#8a8f98'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(T*.28,T*.62,T*.18,0,7); ctx.stroke(); ctx.beginPath(); ctx.arc(T*.72,T*.62,T*.18,0,7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(T*.28,T*.62); ctx.lineTo(T*.5,T*.38); ctx.lineTo(T*.72,T*.62); ctx.stroke(); break;
+  case 'poster': ctx.fillStyle='#ecebe2'; ctx.fillRect(T*.15,T*.08,T*.7,T*.78); ['#8b5a2b','#1a1c20','#9aa3ad','#3a7bd5','#3fae4f'].forEach((cc,i)=>{ ctx.fillStyle=cc; ctx.fillRect(T*.22,T*(.16+i*.13),T*.56,T*.07); }); ctx.fillStyle='#f0d040'; ctx.fillRect(T*.5,T*.68,T*.1,T*.07); break;
+  case 'door': ctx.fillStyle='#5b3e2a'; ctx.fillRect(T*.12,T*.06,T*.76,T*.9); ctx.fillStyle='#6e4c34'; ctx.fillRect(T*.18,T*.12,T*.64,T*.8); ctx.fillStyle='#d4b36a'; ctx.beginPath(); ctx.arc(T*.72,T*.55,T*.05,0,7); ctx.fill(); ctx.fillStyle='#d9dde3'; ctx.fillRect(T*.3,T*.18,T*.4,T*.17); ctx.fillStyle='#222'; ctx.font='700 '+(T*.15|0)+'px system-ui'; ctx.textAlign='center'; ctx.fillText(o.label,c,T*.32); break;
+  case 'umbrella': ctx.fillStyle='#2a2f38'; ctx.fillRect(T*.3,T*.5,T*.4,T*.4); ctx.fillStyle='#111'; ctx.beginPath(); ctx.moveTo(c,T*.1); ctx.lineTo(T*.62,T*.6); ctx.lineTo(T*.38,T*.6); ctx.closePath(); ctx.fill(); ctx.fillStyle='rgba(120,180,255,.7)'; ctx.beginPath(); ctx.ellipse(c,T*.93,T*.3,T*.06,0,0,7); ctx.fill(); break;
+  case 'bag': ctx.fillStyle='#2f2a24'; rr(T*.15,T*.35,T*.7,T*.5,6); ctx.fill(); ctx.strokeStyle='#5c5345'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(c,T*.38,T*.15,Math.PI,0); ctx.stroke(); ctx.fillStyle='#f2c66d'; ctx.fillRect(T*.42,T*.5,T*.16,T*.08); break;
+  case 'laptop': ctx.fillStyle='#555d6a'; ctx.fillRect(T*.18,T*.2,T*.64,T*.42); ctx.fillStyle=L?'#64ceeb':'#111'; ctx.fillRect(T*.22,T*.24,T*.56,T*.34); ctx.fillStyle='#7a8392'; ctx.fillRect(T*.1,T*.62,T*.8,T*.14); break;
+  case 'paper': ctx.fillStyle='#ecebe2'; ctx.save(); ctx.translate(c,c); ctx.rotate(.3); ctx.fillRect(-T*.2,-T*.25,T*.4,T*.5); ctx.fillStyle='#777'; for(let i=0;i<4;i++) ctx.fillRect(-T*.14,-T*.15+i*T*.1,T*.28,1.5); ctx.restore(); break;
+  case 'card': ctx.fillStyle='#f4f1e6'; ctx.save(); ctx.translate(c,c); ctx.rotate(-.25); ctx.fillRect(-T*.18,-T*.11,T*.36,T*.22); ctx.fillStyle='#222'; ctx.fillRect(-T*.14,-T*.05,T*.2,2); ctx.fillStyle='#f2c66d'; ctx.fillRect(T*.08,-T*.08,T*.06,T*.06); ctx.restore(); break;
+  case 'plant': ctx.fillStyle='#7a4a2a'; ctx.fillRect(T*.3,T*.55,T*.4,T*.35); ctx.fillStyle='#2f6b3c'; for(let i=0;i<5;i++){ ctx.beginPath(); ctx.ellipse(c+Math.cos(i*1.3)*T*.18,T*.38+Math.sin(i*1.3)*T*.12,T*.14,T*.08,i,0,7); ctx.fill(); } break;
+  case 'monitor': ctx.fillStyle='#3a4250'; ctx.fillRect(T*.1,T*.12,T*.8,T*.56); ctx.fillStyle=L?'#2b6e5a':'#0b0e12'; ctx.fillRect(T*.16,T*.18,T*.68,T*.44); if(L){ ctx.fillStyle='#9cf7c6'; ctx.fillRect(T*.2,T*.22,T*.2,T*.04); } ctx.fillStyle='#3a4250'; ctx.fillRect(T*.42,T*.68,T*.16,T*.2); break;
+  case 'table': ctx.fillStyle='#6a5038'; rr(T*.06,T*.2,T*.88,T*.6,4); ctx.fill(); ctx.fillStyle='#e8e4d8'; ctx.fillRect(T*.2,T*.3,T*.36,T*.36); ctx.fillStyle='#3a7bd5'; ctx.fillRect(T*.62,T*.32,T*.14,T*.3); break;
+  case 'machine': ctx.fillStyle='#6b7280'; rr(T*.12,T*.15,T*.76,T*.72,6); ctx.fill(); ctx.fillStyle='#c44'; ctx.beginPath(); ctx.arc(c,T*.48,T*.2,0,7); ctx.fill(); ctx.strokeStyle='#f2c66d'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(c,T*.48,T*.26,0,7); ctx.stroke(); break;
+  case 'cat': { const b2=Math.sin(animT*3)*1.5; ctx.fillStyle='#7d8590'; ctx.beginPath(); ctx.ellipse(c,T*.62,T*.22,T*.15,0,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(c+T*.14,T*.45+b2,T*.13,0,7); ctx.fill(); ctx.beginPath(); ctx.moveTo(c+T*.05,T*.36+b2); ctx.lineTo(c+T*.08,T*.24+b2); ctx.lineTo(c+T*.14,T*.34+b2); ctx.moveTo(c+T*.16,T*.34+b2); ctx.lineTo(c+T*.22,T*.24+b2); ctx.lineTo(c+T*.25,T*.38+b2); ctx.fill(); ctx.fillStyle='#f2e04d'; ctx.fillRect(c+T*.08,T*.43+b2,3,3); ctx.fillRect(c+T*.17,T*.43+b2,3,3); break; }
+  case 'recycle': ctx.fillStyle='#2e6fb0'; rr(T*.18,T*.2,T*.64,T*.68,5); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='700 '+(T*.3|0)+'px system-ui'; ctx.textAlign='center'; ctx.fillText('♻',c,T*.66); break;
+  case 'roofdoor': ctx.fillStyle='#5f6a7a'; ctx.fillRect(T*.1,T*.05,T*.8,T*.9); ctx.fillStyle='#8893a3'; ctx.fillRect(T*.18,T*.12,T*.64,T*.76); ctx.fillStyle=L?'#78e2ae':'#e77d78'; ctx.fillRect(T*.66,T*.45,T*.1,T*.1); ctx.fillStyle='#222'; ctx.font='700 '+(T*.17|0)+'px system-ui'; ctx.textAlign='center'; ctx.fillText('옥상',c*0.9,T*.32); break;
+  case 'tank': ctx.fillStyle='#3b6b8a'; ctx.beginPath(); ctx.arc(c,c,T*.42,0,7); ctx.fill(); ctx.strokeStyle='#5d8fb0'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(c,c,T*.3,0,7); ctx.stroke(); break;
+  case 'antenna': ctx.strokeStyle='#9aa3ad'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(c,T*.9); ctx.lineTo(c,T*.1); for(let i=0;i<4;i++){ ctx.moveTo(c-T*(.35-i*.06),T*(.2+i*.15)); ctx.lineTo(c+T*(.35-i*.06),T*(.2+i*.15)); } ctx.stroke(); break;
+  case 'battery': { const g=.6+.4*Math.sin(animT*4); ctx.fillStyle='#222'; rr(T*.32,T*.22,T*.36,T*.56,4); ctx.fill(); ctx.fillStyle=`rgba(120,226,174,${g})`; ctx.fillRect(T*.36,T*.36,T*.28,T*.38); ctx.fillStyle='#ccc'; ctx.fillRect(T*.43,T*.16,T*.14,T*.07); break; }
+  case 'npc': { const bob=Math.sin(animT*2+o.x)*1.2; person(o,c,c+bob,o.col,o.hair,o); break; }
+ }
+ ctx.restore();
+}
+function drawPlayer(){
+ const cx=P.fx*T+T/2-camX, cy=P.fy*T+T/2-camY+(P.moving?Math.abs(Math.sin(P.bob))*-2:0);
+ person(null,cx,cy,'#2d5d8a','#3a2a1e',{helmet:true});
+ ctx.fillStyle='#ddd'; ctx.beginPath(); ctx.arc(cx+Math.cos(P.ang)*T*.28,cy+Math.sin(P.ang)*T*.28+T*.05,T*.06,0,7); ctx.fill();
+}
+function hole(x,y,r,s){ const g=dctx.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0,`rgba(0,0,0,${s})`); g.addColorStop(.55,`rgba(0,0,0,${s*.8})`); g.addColorStop(1,'rgba(0,0,0,0)'); dctx.fillStyle=g; dctx.beginPath(); dctx.arc(x,y,r,0,7); dctx.fill(); }
+function lightR(){ let R=(S.battery>0?LIGHT_R:LIGHT_R_LOW); if(S.battery>0&&S.battery<15&&Math.sin(animT*23)>.85) R*=.75; return R*T; }
+function drawDark(lv){
+ const outdoor=S.floor==='R';
+ let a=outdoor?.74:(.965-.7*lv); a-=flash*(RM?.12:.45); a=Math.max(.08,a);
+ dctx.setTransform(DS,0,0,DS,0,0); dctx.globalCompositeOperation='source-over'; dctx.clearRect(0,0,CW,CH);
+ dctx.fillStyle=`rgba(2,5,11,${a})`; dctx.fillRect(0,0,CW,CH);
+ dctx.globalCompositeOperation='destination-out';
+ const px=P.fx*T+T/2-camX, py=P.fy*T+T/2-camY, R=lightR();
+ hole(px,py,R*.8,1);
+ const g=dctx.createRadialGradient(px,py,0,px,py,R*1.75); g.addColorStop(0,'rgba(0,0,0,.95)'); g.addColorStop(.7,'rgba(0,0,0,.6)'); g.addColorStop(1,'rgba(0,0,0,0)');
+ dctx.fillStyle=g; dctx.beginPath(); dctx.moveTo(px,py); dctx.arc(px,py,R*1.75,P.ang-.5,P.ang+.5); dctx.closePath(); dctx.fill();
+ if(lv>0) for(const l of M().lamps) hole(l.x*T+T/2-camX,l.y*T+T/2-camY,2.9*T,lv*.95);
+ for(const o of M().objs){ if(o.kind==='panel'||o.kind==='stairs') hole(o.x*T+T/2-camX,o.y*T+T/2-camY,T*.9,.45); }
+ ctx.drawImage(dark,0,0,CW,CH);
+}
+function star(x,y,r,a){ ctx.fillStyle=`rgba(255,226,140,${a})`; ctx.beginPath(); for(let i=0;i<8;i++){ const rr2=i%2?r*.35:r, an=i*Math.PI/4-Math.PI/2; ctx.lineTo(x+Math.cos(an)*rr2,y+Math.sin(an)*rr2); } ctx.closePath(); ctx.fill(); }
+function drawBeacons(lv){
+ const m=M(), px=P.fx, py=P.fy, R=lightR()/T+.4;
+ ctx.save(); ctx.globalCompositeOperation='lighter';
+ for(const o of m.objs){ if(!visible(o)) continue;
+  const cx=o.x*T+T/2-camX, cy=o.y*T+T/2-camY;
+  if(o.kind==='panel'){ const on=lit(); const bl=on?1:(.5+.5*Math.sin(animT*5)); const col=on?'120,226,174':'255,90,80';
+   const g=ctx.createRadialGradient(cx+T*.25,cy-T*.3,0,cx+T*.25,cy-T*.3,T*.9); g.addColorStop(0,`rgba(${col},${.55*bl})`); g.addColorStop(1,`rgba(${col},0)`); ctx.fillStyle=g; ctx.fillRect(cx-T,cy-T*1.3,T*2.5,T*2);
+   ctx.fillStyle=`rgba(${col},${bl})`; ctx.beginPath(); ctx.arc(cx+T*.25,cy-T*.3,T*.07,0,7); ctx.fill(); }
+  if(o.kind==='stairs'){ ctx.fillStyle='rgba(60,220,120,.9)'; ctx.fillRect(cx-T*.3,cy-T*.5,T*.6,T*.18); const g=ctx.createRadialGradient(cx,cy-T*.4,0,cx,cy-T*.4,T); g.addColorStop(0,'rgba(60,220,120,.35)'); g.addColorStop(1,'rgba(60,220,120,0)'); ctx.fillStyle=g; ctx.fillRect(cx-T,cy-T*1.4,T*2,T*2);
+   ctx.fillStyle='#eafff0'; ctx.font='800 '+Math.max(8,T*.13|0)+'px system-ui'; ctx.textAlign='center'; ctx.fillText('비상구',cx,cy-T*.37); }
+  const unfound=(o.clue&&!has(o.clue)&&!(o.needPower&&!lit()))||(o.npc&&!has('t_'+o.npc))||(o.kind==='use'&&o.use==='cat')||(o.use==='fuses'&&!S.flags.hasFuses);
+  if(unfound){ const dd=Math.hypot(o.x-px,o.y-py); if(lv>.5||S.floor==='R'||dd<=R){ const a=.55+.45*Math.sin(animT*4+o.x); star(cx+T*.3,cy-T*.36,T*.13,a); } }
+ }
+ ctx.restore();
+ // 근처 NPC 이름
+ for(const o of m.objs){ if(o.kind!=='npc'||!visible(o)) continue; if(Math.hypot(o.x-px,o.y-py)<2.6||lv>.5){ const cx=o.x*T+T/2-camX, cy=o.y*T-camY;
+  ctx.font='700 '+Math.max(11,T*.26|0)+'px system-ui'; ctx.textAlign='center'; const w=ctx.measureText(o.name).width+10; ctx.fillStyle='rgba(10,19,32,.8)'; rr(cx-w/2,cy-T*.42,w,T*.32,6); ctx.fill(); ctx.fillStyle='#eaf1fb'; ctx.fillText(o.name,cx,cy-T*.18); } }
+ // 조사 대상 표시
+ const t=canMove()&&!P.moving?interactTarget():null;
+ if(t){ const cx=t.x*T+T/2-camX, cy=t.y*T-camY-T*.15+Math.sin(animT*6)*3; ctx.fillStyle='#f2c66d'; ctx.beginPath(); ctx.arc(cx,cy-T*.2,T*.17,0,7); ctx.fill(); ctx.fillStyle='#1b1405'; ctx.font='900 '+(T*.24|0)+'px system-ui'; ctx.textAlign='center'; ctx.fillText('!',cx,cy-T*.12); }
+ if(tapMark&&tapMark.l>0){ ctx.strokeStyle=`rgba(100,206,235,${tapMark.l})`; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(tapMark.x*T+T/2-camX,tapMark.y*T+T/2-camY,T*(.45-tapMark.l*.2),0,7); ctx.stroke(); }
+ // 불꽃
+ ctx.save(); ctx.globalCompositeOperation='lighter';
+ for(const p of parts){ ctx.fillStyle=`rgba(255,220,120,${Math.min(1,p.l*1.5)})`; ctx.fillRect(p.x-camX-1.5,p.y-camY-1.5,3,3); }
+ ctx.restore();
+}
+function render(){
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+ ctx.fillStyle='#04070c'; ctx.fillRect(0,0,CW,CH);
+ if(screen!=='game'||!S) return;
+ const lv=litLevel();
+ drawTiles();
+ const m=M(); const objs=m.objs.filter(visible).sort((a,b)=>a.y-b.y);
+ for(const o of objs) if(o.y<=P.fy) drawObj(o);
+ drawPlayer();
+ for(const o of objs) if(o.y>P.fy) drawObj(o);
+ if(lv>0){ ctx.save(); ctx.globalCompositeOperation='lighter'; for(const l of m.lamps){ const x=l.x*T+T/2-camX, y=l.y*T+T/2-camY; const g=ctx.createRadialGradient(x,y,0,x,y,T*2.2); g.addColorStop(0,`rgba(255,214,140,${.09*lv})`); g.addColorStop(1,'rgba(255,214,140,0)'); ctx.fillStyle=g; ctx.fillRect(x-T*2.2,y-T*2.2,T*4.4,T*4.4); } ctx.restore(); }
+ drawDark(lv);
+ drawBeacons(lv);
+ if(flash>0){ ctx.fillStyle=`rgba(200,220,255,${flash*(RM?.05:.18)})`; ctx.fillRect(0,0,CW,CH); }
+}
+
+// ===== 업데이트 루프 =====
+let last=0;
+function update(dt){
+ animT+=dt;
+ if(screen!=='game'||!S) return;
+ if(!paused) S.time+=dt;
+ if(paused) return;
+ updDlg(dt);
+ if(canMove()) updateMove(dt);
+ if(!lit()&&S.floor!=='R'&&!modalName&&!dlgOn&&!nbOpen){ S.battery=Math.max(0,S.battery-BAT_DRAIN*dt); if(S.battery<20&&!S.flags.lowWarn){ S.flags.lowWarn=1; toast('손전등 배터리가 얼마 안 남았다! 건전지를 찾자','r'); } }
+ lightT-=dt; if(lightT<=0){ lightT=12+Math.random()*16; if(!lit()||S.floor==='R'){ flash=1; setTimeout(()=>{ if(screen==='game') sfx('thunder'); },350+Math.random()*700); } }
+ flash=Math.max(0,flash-dt*(flash>.5?6:2));
+ if(litAnim<9) litAnim+=dt;
+ for(let i=parts.length-1;i>=0;i--){ const p=parts[i]; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=T*6*dt; p.l-=dt; if(p.l<=0) parts.splice(i,1); }
+ if(tapMark) tapMark.l-=dt*1.5;
+ updCam(Math.min(1,dt*10));
+ saveT+=dt; if(saveT>5){ saveT=0; saveGame(); }
+ hudT+=dt; if(hudT>.15){ hudT=0; updHUD(); }
+}
+function frame(ts){
+ requestAnimationFrame(frame);
+ let dt=(ts-last)/1000; last=ts; if(!(dt>0)) dt=0; dt=Math.min(dt,.05);
+ update(dt); render();
+}
+
+// ===== 입력 =====
+const KEYDIR={ArrowUp:'u',KeyW:'u',ArrowDown:'d',KeyS:'d',ArrowLeft:'l',KeyA:'l',ArrowRight:'r',KeyD:'r'};
+window.addEventListener('keydown',e=>{
+ ensureAudio();
+ if(screen!=='game') return;
+ const k=e.code;
+ if(k==='Tab') e.preventDefault();
+ if(k==='Escape'){ e.preventDefault(); if(paused) resume(); else pause(); return; }
+ if(paused) return;
+ if(dlgOn){
+  if(dCur&&dCur.ch&&dShown>=dCur.t.length&&(k==='ArrowUp'||k==='ArrowDown'||k==='KeyW'||k==='KeyS')){ e.preventDefault(); dChoice=(dChoice+(k==='ArrowUp'||k==='KeyW'?-1:1)+dCur.ch.length)%dCur.ch.length; $('#dCh').querySelectorAll('button').forEach((b,i)=>b.classList.toggle('sel',i===dChoice)); return; }
+  if(k==='Space'||k==='KeyE'||k==='Enter'){ e.preventDefault(); if(!e.repeat) advanceDlg(); }
+  return;
+ }
+ if(k==='Tab'||k==='KeyN'){ if(nbOpen) closeNB(); else if(!modalName) openNB(); return; }
+ if(nbOpen||modalName) return;
+ if(KEYDIR[k]){ e.preventDefault(); const d=KEYDIR[k]; if(held.indexOf(d)<0) held.push(d); return; }
+ if(k==='Space'||k==='KeyE'||k==='Enter'){ e.preventDefault(); if(!e.repeat) doInteract(); }
+});
+window.addEventListener('keyup',e=>{ const d=KEYDIR[e.code]; if(d){ const i=held.indexOf(d); if(i>=0) held.splice(i,1); } });
+window.addEventListener('blur',()=>{ held.length=0; });
+cv.addEventListener('pointerdown',e=>{
+ ensureAudio(); if(!canMove()) return; e.preventDefault();
+ const r=cv.getBoundingClientRect(), tx=Math.floor((e.clientX-r.left+camX)/T), ty=Math.floor((e.clientY-r.top+camY)/T);
+ const o=objAt(tx,ty); tapMark={x:tx,y:ty,l:1};
+ if(o&&o.kind!=='battery'){ goToObj(o); return; }
+ if(tx===P.x&&ty===P.y&&!P.moving){ doInteract(); return; }
+ if(walkable(tx,ty)){ const p=bfs([{x:tx,y:ty}]); if(p){ P.path=p; P.pend=null; } }
+});
+document.querySelectorAll('.dpad button').forEach(b=>{
+ const d=b.dataset.d;
+ const on=e=>{ e.preventDefault(); ensureAudio(); if(held.indexOf(d)<0) held.push(d); b.classList.add('on'); try{ b.setPointerCapture(e.pointerId); }catch(_){} };
+ const off=()=>{ const i=held.indexOf(d); if(i>=0) held.splice(i,1); b.classList.remove('on'); };
+ b.addEventListener('pointerdown',on); b.addEventListener('pointerup',off); b.addEventListener('pointercancel',off); b.addEventListener('lostpointercapture',off);
+});
+$('#bAct').addEventListener('pointerdown',e=>{ e.preventDefault(); ensureAudio(); doInteract(); });
+$('#bPause').onclick=()=>{ ensureAudio(); pause(); };
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&screen==='game'){ pause(); saveGame(); } });
+window.addEventListener('pagehide',()=>saveGame());
+game.addEventListener('contextmenu',e=>e.preventDefault());
+
+// ===== 화면 전환 =====
+function pause(){ if(screen!=='game'||paused) return; paused=true; held.length=0; $('#pause').classList.remove('hide'); saveGame(); }
+function resume(){ paused=false; $('#pause').classList.add('hide'); }
+$('#pResume').onclick=()=>{ sfx('click'); resume(); };
+$('#pNote').onclick=()=>{ resume(); if(!modalName&&!dlgOn) openNB(); };
+$('#pSound').onclick=()=>{ setSound(!soundOn); ensureAudio(); };
+$('#pRestart').onclick=()=>{ if(confirm('진행 상황이 지워지고 처음부터 시작합니다. 괜찮을까요?')){ resume(); startGame(null); } };
+$('#pTitle').onclick=()=>{ saveGame(); resume(); showTitle(); };
+function resetUI(){ closeModal(); nbOpen=false; $('#nb').classList.add('hide'); dlgOn=false; DQ=[]; dCur=null; $('#dlg').classList.add('hide'); $('#toast').innerHTML=''; held.length=0; fading=false; $('#fade').classList.remove('on'); }
+function showTitle(){
+ resetUI(); screen='title'; paused=false; rainOff();
+ ['#hud','#ctrl','#pause','#howto','#result'].forEach(s=>$(s).classList.add('hide')); $('#title').classList.remove('hide');
+ const sv=loadSave(); $('#tCont').classList.toggle('hide',!sv); $('#tStart').textContent=sv?'처음부터':'게임 시작'; $('#tStart').className='btn '+(sv?'':'pri');
+ const best=store.get('best',0), ends=store.get('endings',[]);
+ $('#tRec').innerHTML=(best?'최고 점수 <b>'+best.toLocaleString()+'</b>':'아직 기록 없음')+' · 엔딩 <b>'+ends.length+' / 3</b>'+(sv?'<br>저장된 진행: '+FNAME[sv.floor]+' · '+fmtTime(sv.time):'');
+}
+function startGame(saved){
+ resetUI(); ['#title','#howto','#result','#pause'].forEach(s=>$(s).classList.add('hide'));
+ S=saved||newState(); PZ['1F'].st=[1,0,1,0,0,1]; PZ.B1.ins=[null,null,null]; PZ.B1.sel=0; PZ['2F'].conn=[3,0,1,2,4]; PZ['3F'].rot=ROT0.map(r=>r.slice()); PZ['4F'].log=[]; PZ['4F'].selSeg=null; PZ['5F'].asg=[0,0,1,1,1,2,2,2,2]; PZ['6F'].st=[1,0,1,0,0,0];
+ screen='game'; paused=false; litAnim=9; lastBat=-1;
+ P.x=P.fx=S.x; P.y=P.fy=S.y; P.dir={x:S.dir[0],y:S.dir[1]}; P.ang=Math.atan2(P.dir.y,P.dir.x); P.moving=false; P.path=[]; P.pend=null;
+ if(!walkable(P.x,P.y)){ const st=M().objs.find(o=>o.kind==='stairs'); P.x=P.fx=st.x+1; P.y=P.fy=st.y; }
+ $('#hud').classList.remove('hide'); $('#ctrl').classList.remove('hide');
+ resize(); snapCam(); updHUD(); ensureAudio();
+ if(!saved){ saveGame(); say([nar('비가 억수같이 쏟아지는 밤, 9시 40분.'),nar('견습 전기기사인 나는 “별빛맨션 전체가 정전됐다”는 관리인 아저씨의 다급한 전화를 받고 달려왔다.'),nar('그런데… 경비실에 아무도 없다. 다시 걸어 본 전화도 받지 않는다.'),me('누군가 일부러 전기를 끊은 걸까? 손전등을 켜고 1층 경비실(왼쪽 위)부터 살펴보자.'),{w:'안내',t:'가고 싶은 곳을 탭하면 걸어가요. 물건이나 사람을 탭하면 다가가서 조사해요.\n키보드: 방향키·WASD 이동, E/Space 조사, Tab 수첩, Esc 일시정지'}]); }
+ else toast('이어하기 — '+FNAME[S.floor],'g');
+}
+$('#tStart').onclick=()=>{ ensureAudio(); sfx('ok'); if(loadSave()&&!confirm('저장된 진행이 있습니다. 처음부터 시작할까요?')) return; store.del('save'); startGame(null); };
+$('#tCont').onclick=()=>{ ensureAudio(); sfx('ok'); const s=loadSave(); if(s) startGame(s); };
+$('#tHow').onclick=()=>{ ensureAudio(); sfx('click'); $('#title').classList.add('hide'); $('#howto').classList.remove('hide'); $('#howto').scrollTop=0; };
+$('#hOk').onclick=$('#hBack').onclick=e=>{ e.preventDefault(); sfx('click'); $('#howto').classList.add('hide'); $('#title').classList.remove('hide'); };
+$('#tSound').onclick=()=>{ setSound(!soundOn); ensureAudio(); sfx('click'); };
+
+// 타이틀 건물 창문
+(function(){ let h=''; for(let r=0;r<7;r++) for(let c=0;c<4;c++){ const x=55+c*25, y=56+r*20; h+=`<rect class="${r===3&&c===2?'flk':'wn'}" x="${x}" y="${y}" width="15" height="11" rx="1"/>`; } $('#wins').innerHTML=h; })();
+
+// ===== 테스트용 읽기 훅 =====
+window.__game={
+ state:()=>S?({screen,paused,dlg:dlgOn,notebook:nbOpen,modal:modalName,floor:S.floor,x:P.x,y:P.y,moving:P.moving,restored:Object.assign({},S.restored),clues:S.clues.slice(),battery:Math.round(S.battery),time:Math.round(S.time),wrong:S.wrong,hints:S.hints,flags:Object.assign({},S.flags),objective:$('#obj').textContent}):{screen},
+ objects:()=>S?M().objs.filter(visible).map(o=>({id:o.id,kind:o.kind,name:o.name,x:o.x,y:o.y,clue:o.clue||null})):[],
+ screenOf:(x,y)=>{ const r=cv.getBoundingClientRect(); return {x:r.left+x*T+T/2-camX, y:r.top+y*T+T/2-camY}; },
+ walkable:(x,y)=>S?walkable(x,y):false
+};
+
+setSound(soundOn);
+resize(); showTitle(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

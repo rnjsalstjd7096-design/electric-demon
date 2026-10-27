@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1320">
+<title>번개 피하기 서바이벌</title>
+<style>
+:root{
+  --bg:#0a1320; --bg2:#101923; --panel:#152238; --line:#2c415b; --text:#eaf1fb; --dim:#a5b7ca;
+  --cyan:#64ceeb; --gold:#f2c66d; --green:#78e2ae; --red:#e77d78; --purple:#c79bff;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+  --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+  font-family:system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;overscroll-behavior:none}
+body{position:fixed;inset:0}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{position:fixed;inset:0;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,#14243a 0%,var(--bg) 60%)}
+#cv{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
+#safeProbe{position:absolute;visibility:hidden;pointer-events:none;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.hidden{display:none !important}
+
+/* ---------- HUD ---------- */
+#hud{position:absolute;left:0;right:0;top:0;height:calc(50px + var(--sat));padding:var(--sat) calc(8px + var(--sar)) 0 calc(8px + var(--sal));
+  display:flex;align-items:center;gap:8px;background:linear-gradient(#0d1828,#0d182800);z-index:5}
+#hud .hb{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;flex:none}
+#hud .hb:active{transform:scale(.94)}
+#hudMid{flex:1;text-align:center;font-weight:700;font-size:15px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hudMid small{color:var(--dim);font-weight:500;font-size:12px;margin-left:6px}
+svg.ic{width:22px;height:22px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Touch controls ---------- */
+#touch{position:absolute;inset:0;pointer-events:none;z-index:4}
+.zone{position:absolute;pointer-events:auto;touch-action:none;border-radius:18px;
+  background:linear-gradient(180deg,rgba(100,206,235,.04),rgba(100,206,235,.09));border:1px dashed rgba(100,206,235,.22)}
+.zone .zl{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:12px;color:var(--dim);pointer-events:none}
+.jbase{position:absolute;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;
+  border:2px solid rgba(100,206,235,.45);background:radial-gradient(circle,rgba(100,206,235,.12),rgba(100,206,235,.03));pointer-events:none}
+.jknob{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#9fe6f8,#3b9ab8);box-shadow:0 0 14px rgba(100,206,235,.6)}
+.tbtn{position:absolute;pointer-events:auto;touch-action:none;border-radius:50%;border:2px solid var(--line);
+  background:radial-gradient(circle at 40% 30%,#22395a,#152238);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;line-height:1.1;user-select:none;-webkit-user-select:none;padding:0}
+.tbtn.place{border-color:#8c7440;color:var(--gold)}
+.tbtn.place.has{box-shadow:0 0 18px rgba(242,198,109,.55);border-color:var(--gold)}
+.tbtn.dash{color:var(--cyan)}
+.tbtn.dash.cd{opacity:.5}
+.tbtn b{font-size:11px;color:var(--text);opacity:.85;margin-top:2px}
+.tbtn:active{transform:scale(.93)}
+.tbtn.p2{border-style:dashed}
+#ffBtn{position:absolute;z-index:6;padding:10px 16px;min-height:44px;border-radius:22px;border:1px solid var(--cyan);
+  background:rgba(21,34,56,.92);color:var(--cyan);font-weight:700;font-size:14px;transform:translateX(-50%)}
+
+/* ---------- Screens ---------- */
+.scr{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;
+  overflow-y:auto;overflow-x:hidden;padding:calc(16px + var(--sat)) calc(16px + var(--sar)) calc(20px + var(--sab)) calc(16px + var(--sal))}
+.scr.dim{background:rgba(6,12,22,.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.wrap{width:100%;max-width:520px;margin:auto 0;display:flex;flex-direction:column;align-items:stretch;gap:12px}
+.back{position:absolute;left:calc(12px + var(--sal));top:calc(10px + var(--sat));color:var(--dim);text-decoration:none;font-size:14px;
+  padding:10px 12px;min-height:44px;display:flex;align-items:center;border-radius:10px;background:rgba(21,34,56,.6);border:1px solid var(--line);z-index:2}
+.back:active{color:var(--text)}
+.ttl{font-size:clamp(30px,9vw,46px);font-weight:900;text-align:center;margin:28px 0 0;line-height:1.15;letter-spacing:-.01em;
+  background:linear-gradient(180deg,#fff7d6,#f2c66d 55%,#e7a64a);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 14px rgba(242,198,109,.45))}
+.ttl span{display:block;font-size:.5em;letter-spacing:.3em;color:var(--cyan);-webkit-text-fill-color:var(--cyan);filter:drop-shadow(0 0 8px rgba(100,206,235,.6));margin-bottom:4px}
+.sub{text-align:center;color:var(--dim);margin:0 0 6px;font-size:15px;line-height:1.5}
+.btn{min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--panel);font-size:17px;font-weight:700;padding:10px 16px}
+.btn.main{background:linear-gradient(180deg,#f6d27f,#e2a94a);color:#1b1305;border-color:#f2c66d;box-shadow:0 0 22px rgba(242,198,109,.35)}
+.btn.cy{border-color:var(--cyan);color:var(--cyan)}
+.btn:active{transform:scale(.97)}
+.row{display:flex;gap:10px}
+.row>.btn{flex:1}
+.panel{background:rgba(21,34,56,.92);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.best{font-size:14px;color:var(--dim);line-height:1.7}
+.best b{color:var(--gold)}
+.best .lbl{color:var(--text);font-weight:700;display:block;margin-bottom:2px}
+h2{margin:6px 0 2px;font-size:22px;text-align:center}
+h3{margin:0 0 8px;font-size:15px;color:var(--cyan)}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{flex:1 1 auto;min-height:46px;border-radius:12px;border:1px solid var(--line);background:#0f1a2b;color:var(--dim);font-size:14px;font-weight:700;padding:8px 10px}
+.seg button.on{border-color:var(--gold);color:var(--text);background:#2a2614;box-shadow:inset 0 0 0 1px rgba(242,198,109,.4)}
+.note{font-size:13px;color:var(--dim);margin:8px 0 0;line-height:1.5}
+.how p{margin:0;font-size:14px;line-height:1.6;color:var(--text)}
+.how .it{display:flex;gap:12px;align-items:flex-start}
+.how .it svg{flex:none;width:46px;height:46px}
+.how .it+.it{margin-top:10px}
+.how em{font-style:normal;color:var(--gold);font-weight:700}
+.how .k{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:12px;background:#0f1a2b;margin:0 1px}
+table.res{width:100%;border-collapse:collapse;font-size:14px}
+table.res th{color:var(--dim);font-weight:600;font-size:12px;text-align:center;padding:4px}
+table.res td{padding:8px 4px;text-align:center;border-top:1px solid var(--line)}
+table.res td:first-child{text-align:left}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.newrec{display:inline-block;margin:4px auto 0;padding:6px 14px;border-radius:20px;background:#3a2c0c;color:var(--gold);font-weight:800;
+  border:1px solid var(--gold);animation:glow 1.2s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 0 4px rgba(242,198,109,.3)}to{box-shadow:0 0 20px rgba(242,198,109,.8)}}
+@media (prefers-reduced-motion:reduce){.newrec{animation:none}}
+.bigres{font-size:44px;font-weight:900;text-align:center;color:var(--gold);text-shadow:0 0 18px rgba(242,198,109,.6);margin:2px 0}
+.center{text-align:center}
+.sndt{position:absolute;right:calc(12px + var(--sar));top:calc(10px + var(--sat));width:44px;height:44px;border-radius:10px;border:1px solid var(--line);
+  background:rgba(21,34,56,.6);display:flex;align-items:center;justify-content:center;z-index:2}
+</style>
+<meta name="description" content="예고된 자리에 떨어지는 낙뢰를 피하고 피뢰침으로 버티는 서바이벌. 맵 4개, 낙뢰 패턴 8가지, CPU·2인 대전."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/lightning-survival/"><meta property="og:title" content="번개 피하기 서바이벌"><meta property="og:description" content="예고된 자리에 떨어지는 낙뢰를 피하고 피뢰침으로 버티는 서바이벌. 맵 4개, 낙뢰 패턴 8가지, CPU·2인 대전."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;right:60px;top:max(8px,env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="번개 피하기 서바이벌",D="예고된 자리에 떨어지는 낙뢰를 피하고 피뢰침으로 버티는 서바이벌. 맵 4개, 낙뢰 패턴 8가지, CPU·2인 대전.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/lightning-survival/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <canvas id="cv"></canvas>
+  <div id="safeProbe"></div>
+
+  <div id="hud" class="hidden">
+    <button class="hb" id="btnPause" aria-label="일시정지"><svg class="ic" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
+    <div id="hudMid"></div>
+    <button class="hb sndBtn" aria-label="소리 켜기/끄기"></button>
+  </div>
+  <div id="touch" class="hidden"></div>
+  <button id="ffBtn" class="hidden">관전 중 · 빨리 감기 ▶▶</button>
+
+  <!-- 타이틀 -->
+  <section class="scr" id="scrTitle">
+    <a class="back" href="../">← 게임 목록</a>
+    <button class="sndt sndBtn" aria-label="소리 켜기/끄기"></button>
+    <div class="wrap">
+      <h1 class="ttl"><span>LIGHTNING</span>번개 피하기<br>서바이벌</h1>
+      <p class="sub">바닥의 낙뢰 예고를 읽고 끝까지 살아남아라!<br>피뢰침으로 낙뢰를 끌어와 상대를 감전시켜라.</p>
+      <button class="btn main" id="btnStart">게임 시작</button>
+      <button class="btn cy" id="btnHow">방법 보기</button>
+      <div class="panel best" id="bestBox"></div>
+    </div>
+  </section>
+
+  <!-- 설정 -->
+  <section class="scr dim hidden" id="scrSetup">
+    <div class="wrap">
+      <h2>경기 설정</h2>
+      <div class="panel">
+        <h3>모드</h3>
+        <div class="seg" id="segMode">
+          <button data-v="cpu">CPU 대전<br><small>나 vs CPU 3</small></button>
+          <button data-v="duo">2인 대전<br><small>같은 기기</small></button>
+          <button data-v="solo">혼자 생존<br><small>기록 도전</small></button>
+        </div>
+        <p class="note" id="modeNote"></p>
+      </div>
+      <div class="panel" id="diffPanel">
+        <h3 id="diffTitle">CPU 난이도</h3>
+        <div class="seg" id="segDiff">
+          <button data-v="easy">쉬움</button><button data-v="normal">보통</button><button data-v="hard">어려움</button>
+        </div>
+      </div>
+      <div class="panel" id="cpuPanel">
+        <h3>CPU 함께하기</h3>
+        <div class="seg" id="segDuoCpu"><button data-v="1">CPU 2명 추가</button><button data-v="0">둘이서만</button></div>
+      </div>
+      <div class="panel">
+        <h3>경기장</h3>
+        <div class="seg" id="segMap">
+          <button data-v="-1">라운드마다 순환</button>
+          <button data-v="0">변전소 광장</button>
+          <button data-v="1">좁아지는 철탑장</button>
+          <button data-v="2">물웅덩이 공장</button>
+          <button data-v="3">폭풍 교차로</button>
+        </div>
+        <p class="note" id="mapNote"></p>
+      </div>
+      <div class="row"><button class="btn" id="btnSetupBack">뒤로</button><button class="btn main" id="btnGo">출발!</button></div>
+    </div>
+  </section>
+
+  <!-- 방법 -->
+  <section class="scr dim hidden" id="scrHow">
+    <div class="wrap">
+      <h2>방법 보기</h2>
+      <div class="panel how">
+        <div class="it">
+          <svg viewBox="0 0 46 46"><rect x="3" y="3" width="40" height="40" rx="6" fill="#3a1f1f" stroke="#e77d78" stroke-width="2"/><circle cx="23" cy="23" r="12" fill="none" stroke="#f2c66d" stroke-width="3" stroke-dasharray="52 80" transform="rotate(-90 23 23)"/><text x="23" y="28" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">1.2</text></svg>
+          <p><em>낙뢰 예고</em> — 바닥이 노랑→빨강으로 진해지고 숫자 링이 줄어들어요. 0이 되면 번개가 떨어집니다. <b>그 칸 밖으로 피하세요!</b></p>
+        </div>
+        <div class="it">
+          <svg viewBox="0 0 46 46"><circle cx="23" cy="26" r="17" fill="none" stroke="#64ceeb" stroke-dasharray="3 3"/><rect x="21" y="10" width="4" height="26" fill="#9aa9b8"/><circle cx="23" cy="9" r="4.5" fill="#f2c66d"/><rect x="15" y="35" width="16" height="4" rx="2" fill="#5b6b7d"/></svg>
+          <p><em>피뢰침</em> — 주워서 <span class="k">설치</span>하면 반경 안의 낙뢰를 끌어와요. <b>설치한 사람은 안전</b>, 대신 피뢰침 바로 곁의 상대는 <b>감전 탈락</b>, 조금 떨어진 상대는 <b>마비</b>!</p>
+        </div>
+        <div class="it">
+          <svg viewBox="0 0 46 46"><path d="M8 30c4-10 8 4 12-6s8 4 12-6 6 2 7 0" fill="none" stroke="#e08a4a" stroke-width="3.5" stroke-linecap="round"/><path d="M12 36h22" stroke="#e08a4a" stroke-width="2"/></svg>
+          <p><em>구리 전선</em> — 다음에 설치하는 피뢰침의 끌어오는 범위·감전 범위가 넓어져요.</p>
+        </div>
+        <div class="it">
+          <svg viewBox="0 0 46 46"><path d="M12 10h10v16l12 4v6H12z" fill="#2b2f36" stroke="#78e2ae" stroke-width="2" stroke-linejoin="round"/></svg>
+          <p><em>고무 신발</em> — 낙뢰나 감전을 <b>1번</b> 막아 줘요. (게임 속 규칙! 진짜 낙뢰는 고무 신발로 못 막아요)</p>
+        </div>
+        <div class="it">
+          <svg viewBox="0 0 46 46"><path d="M6 23h20M10 15h14M10 31h14" stroke="#64ceeb" stroke-width="3" stroke-linecap="round"/><circle cx="33" cy="23" r="8" fill="#64ceeb"/></svg>
+          <p><em>대시</em> — 순간적으로 빠르게 달려요(2초마다). 위급할 때 쓰세요.</p>
+        </div>
+      </div>
+      <div class="panel how">
+        <p><em>CPU 대전</em>: 4명 중 마지막까지 살아남으면 라운드 승리. <b>3승</b>을 먼저 하면 우승!<br>
+        <em>2인 대전</em>: 한 기기로 둘이서(가로 화면 추천). <em>혼자 생존</em>: 체력 3, 시간이 갈수록 빨라져요.</p>
+        <p class="note">키보드 — 이동 <span class="k">WASD</span>/<span class="k">방향키</span> · 설치 <span class="k">Space</span> · 대시 <span class="k">Shift</span> · 일시정지 <span class="k">Esc</span><br>
+        2인: P1 <span class="k">WASD</span> <span class="k">F</span>설치 <span class="k">G</span>대시 / P2 <span class="k">방향키</span> <span class="k">Enter</span>설치 <span class="k">/</span>대시<br>
+        터치 — 왼쪽 영역을 끌어 이동, 오른쪽 버튼으로 설치·대시</p>
+      </div>
+      <button class="btn main" id="btnHowBack">알겠어요</button>
+    </div>
+  </section>
+
+  <!-- 일시정지 -->
+  <section class="scr dim hidden" id="scrPause">
+    <div class="wrap">
+      <h2>일시정지</h2>
+      <button class="btn main" id="btnResume">계속하기</button>
+      <button class="btn" id="btnRestart">처음부터 다시</button>
+      <button class="btn" id="btnPauseHow">방법 보기</button>
+      <button class="btn" id="btnQuit">타이틀로</button>
+    </div>
+  </section>
+
+  <!-- 결과 -->
+  <section class="scr dim hidden" id="scrResult">
+    <div class="wrap">
+      <h2 id="resTitle">결과</h2>
+      <div class="bigres" id="resBig"></div>
+      <div class="center" id="resRec"></div>
+      <div class="panel" id="resBody"></div>
+      <div class="row"><button class="btn" id="btnResTitle">타이틀</button><button class="btn main" id="btnAgain">다시 하기</button></div>
+    </div>
+  </section>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+ * 번개 피하기 서바이벌 (게임 08)
+ * 구조
+ *  1) 상수·맵·AI 난이도 설정       2) 저장(localStorage)·효과음(Web Audio)
+ *  3) 게임 상태 G · 경기/라운드 흐름  4) 낙뢰 패턴 생성 · 판정(resolve: 피뢰침 유도/물웅덩이 전파)
+ *  5) 피뢰침·아이템·피해 처리         6) CPU AI (위험 지도 + 다익스트라 경로 + 피뢰침 전략)
+ *  7) 입력(키보드·가상 조이스틱)      8) 렌더링(캔버스)   9) 화면 UI   10) 테스트 훅 window.__game
+ * 좌표: 경기장은 N×N 타일, 위치는 타일 단위 실수(0..N). 낙뢰 판정은 플레이어 중심이 있는 타일 기준.
+ * ===================================================================== */
+
+// ---------- 1) 상수 ----------
+const N = 11;                       // 경기장 타일 수(정사각)
+const STEP = 1 / 60;                // 고정 시뮬레이션 간격
+const MOVE_SPEED = 3.3;             // 타일/초
+const DASH_SPEED = 9.5, DASH_TIME = 0.17, DASH_CD = 2.0;
+const P_R = 0.3;                    // 플레이어 반지름(타일)
+const ROD_ATTRACT = 2.6;            // 피뢰침이 낙뢰를 끌어오는 반경
+const ROD_KILL = 1.35;              // 방전: 이 안의 상대는 탈락
+const ROD_STUN = 2.35;              // 방전: 이 안의 상대는 마비
+const WIRE_BONUS = 0.9;             // 구리 전선 보너스(반경 증가)
+const ROD_CHARGES = 3, ROD_LIFE = 32, ROD_MAX_PER = 2, ROD_CARRY = 2;
+const STUN_TIME = 1.4;
+const MAX_ITEMS = 3;
+const WIN_TARGET = 3, MAX_ROUNDS = 7;
+const SOLO_HP = 3;
+const COLORS = ['#64ceeb', '#78e2ae', '#e77d78', '#c79bff'];
+const SPAWNS = [[1, 1], [9, 9], [9, 1], [1, 9]];
+
+const MAPS = [
+  { name: '변전소 광장', desc: '변압기 4대가 놓인 기본 경기장. 변압기 뒤로 돌아 피하세요.', shrink: false, grid: [
+    '...........',
+    '...........',
+    '..#.....#..',
+    '...........',
+    '...........',
+    '...........',
+    '...........',
+    '...........',
+    '..#.....#..',
+    '...........',
+    '...........'] },
+  { name: '좁아지는 철탑장', desc: '시간이 지나면 바깥 테두리부터 전기가 흘러 경기장이 좁아져요.', shrink: true, grid: [
+    '...........', '...........', '...........', '...........', '...........', '...........',
+    '...........', '...........', '...........', '...........', '...........'] },
+  { name: '물웅덩이 공장', desc: '물웅덩이에 낙뢰가 한 칸이라도 떨어지면 웅덩이 전체가 감전돼요!', shrink: false,
+    spawns: [[0, 0], [10, 10], [10, 0], [0, 10]], grid: [
+    '...........',
+    '.~~.....~~.',
+    '.~~..#..~~.',
+    '...........',
+    '....~~~....',
+    '..#.~~~.#..',
+    '....~~~....',
+    '...........',
+    '.~~..#..~~.',
+    '.~~.....~~.',
+    '...........'] },
+  { name: '폭풍 교차로', desc: '벽이 길을 막는 좁은 교차로. 낙뢰가 더 자주 쏟아져요.', shrink: false, storm: true,
+    spawns: [[0, 0], [10, 10], [10, 0], [0, 10]], grid: [
+    '...........',
+    '...........',
+    '..##...##..',
+    '..#.....#..',
+    '...........',
+    '.....~.....',
+    '...........',
+    '..#.....#..',
+    '..##...##..',
+    '...........',
+    '...........'] },
+];
+
+// CPU 난이도: 반응 지연, 예고 인지 확률, 생각 간격, 속도 배율, 경로 여유, 대시 사용률, 피뢰침 전략, 판단 잡음
+const AI_CFG = {
+  easy:   { react: 0.55, perceive: 0.82, think: 0.32, speed: 0.85, margin: 0.22, dash: 0.2, rod: 0.3, noise: 1.6, item: 0.6, name: '쉬움' },
+  normal: { react: 0.28, perceive: 0.96, think: 0.2,  speed: 0.94, margin: 0.33, dash: 0.6, rod: 0.65, noise: 0.7, item: 1.0, name: '보통' },
+  hard:   { react: 0.1,  perceive: 1.0,  think: 0.12, speed: 1.0,  margin: 0.42, dash: 1.0, rod: 1.0, noise: 0.25, item: 1.3, name: '어려움' },
+};
+const DIFF_NAME = { easy: '쉬움', normal: '보통', hard: '어려움' };
+
+// 맵 파싱
+for (const m of MAPS) {
+  m.wall = new Uint8Array(N * N); m.water = new Uint8Array(N * N); m.comp = new Int16Array(N * N).fill(-1); m.comps = [];
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const c = m.grid[y][x]; if (c === '#') m.wall[y * N + x] = 1; if (c === '~') m.water[y * N + x] = 1;
+  }
+  for (let i = 0; i < N * N; i++) {          // 물웅덩이 연결 요소
+    if (!m.water[i] || m.comp[i] >= 0) continue;
+    const id = m.comps.length, list = [], st = [i]; m.comp[i] = id;
+    while (st.length) {
+      const j = st.pop(); list.push(j); const x = j % N, y = (j / N) | 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
+        const k = ny * N + nx; if (m.water[k] && m.comp[k] < 0) { m.comp[k] = id; st.push(k); }
+      }
+    }
+    m.comps.push(list);
+  }
+  m.spawns = m.spawns || SPAWNS;
+}
+
+// ---------- 2) 저장 · 효과음 ----------
+const Store = {
+  get(k, d) { try { const v = localStorage.getItem('edgames.08.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('edgames.08.' + k, JSON.stringify(v)); } catch (e) { /* 저장 불가여도 진행 */ } },
+};
+const best = Object.assign({ solo: 0, soloMap: '', wins: { easy: 0, normal: 0, hard: 0 }, rodKO: 0, duo: [0, 0], plays: 0 }, Store.get('best', {}));
+best.wins = Object.assign({ easy: 0, normal: 0, hard: 0 }, best.wins || {});
+
+const Snd = {
+  ctx: null, master: null, on: Store.get('sound', true) !== false, last: {}, nb: null,
+  ensure() {
+    if (!this.ctx) {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+        this.ctx = new AC(); this.master = this.ctx.createGain(); this.master.gain.value = 0.55; this.master.connect(this.ctx.destination);
+        const len = this.ctx.sampleRate * 1.5, b = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = b.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+        this.nb = b;
+      } catch (e) { this.ctx = null; return; }
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+  },
+  ok(name, gap) {
+    if (!this.on || !this.ctx || this.ctx.state !== 'running') return false;
+    const t = this.ctx.currentTime; if (this.last[name] != null && t - this.last[name] < gap) return false;
+    this.last[name] = t; return true;
+  },
+  tone(f, d, type = 'sine', v = 0.2, f2 = 0, delay = 0) {
+    const c = this.ctx, t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + d + 0.03);
+  },
+  noise(d, v, freq, ft = 'lowpass', f2 = 0, delay = 0) {
+    const c = this.ctx, t = c.currentTime + delay, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = this.nb; f.type = ft; f.frequency.setValueAtTime(freq, t); if (f2) f.frequency.exponentialRampToValueAtTime(f2, t + d);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    s.connect(f); f.connect(g); g.connect(this.master); s.start(t); s.stop(t + d + 0.03);
+  },
+  play(name) {
+    const gaps = { thunder: 0.07, warn: 0.12, zap: 0.05, tick: 0.05 };
+    if (!this.ok(name, gaps[name] || 0.03)) return;
+    switch (name) {
+      case 'thunder': this.noise(0.1, 0.55, 5000, 'highpass'); this.noise(1.2, 0.5, 1600, 'lowpass', 90); this.tone(75, 0.7, 'sine', 0.35, 32); break;
+      case 'warn': this.tone(920, 0.06, 'square', 0.04); break;
+      case 'zap': this.tone(1500, 0.3, 'sawtooth', 0.13, 80); this.noise(0.3, 0.25, 2600, 'bandpass'); this.tone(2200, 0.1, 'square', 0.05, 900, 0.05); break;
+      case 'pick': this.tone(660, 0.08, 'triangle', 0.16); this.tone(990, 0.14, 'triangle', 0.16, 0, 0.07); break;
+      case 'place': this.tone(200, 0.16, 'square', 0.1, 90); this.noise(0.09, 0.25, 900); this.tone(1200, 0.12, 'triangle', 0.06, 0, 0.08); break;
+      case 'dash': this.noise(0.2, 0.18, 500, 'bandpass', 2600); break;
+      case 'out': this.tone(520, 0.55, 'sawtooth', 0.12, 55); break;
+      case 'hurt': this.tone(300, 0.25, 'square', 0.12, 120); break;
+      case 'shield': this.tone(300, 0.25, 'triangle', 0.16, 900); break;
+      case 'stun': this.tone(900, 0.4, 'square', 0.05, 300); break;
+      case 'win': [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.25, 'triangle', 0.16, 0, i * 0.11)); break;
+      case 'lose': [392, 330, 262, 196].forEach((f, i) => this.tone(f, 0.28, 'triangle', 0.14, 0, i * 0.14)); break;
+      case 'click': this.tone(720, 0.05, 'triangle', 0.08); break;
+      case 'tick': this.tone(600, 0.12, 'square', 0.07); break;
+      case 'go': this.tone(1000, 0.25, 'square', 0.08); this.tone(1500, 0.2, 'triangle', 0.06, 0, 0.05); break;
+      case 'buzz': this.tone(140, 0.15, 'square', 0.08); break;
+      case 'zone': this.noise(0.5, 0.2, 300, 'lowpass'); this.tone(110, 0.5, 'sawtooth', 0.06); break;
+    }
+  },
+};
+
+// ---------- 3) 게임 상태 ----------
+const setup = Object.assign({ mode: 'cpu', diff: 'normal', map: -1, duoCpu: 1 }, Store.get('setup', {}));
+const G = {
+  screen: 'title', mode: 'cpu', diff: 'normal', mapSel: -1, duoCpu: true,
+  map: MAPS[0], mapIdx: 0, players: [], rods: [], items: [], pats: [],
+  fx: { strikes: [], dis: [], parts: [], texts: [] },
+  round: 0, phase: 'idle', phaseT: 0, rt: 0, spawnT: 0, itemT: 0,
+  shrink: { level: 0, next: 0, warning: false, target: 0 },
+  deathOrder: [], events: [], flash: 0, shake: 0, speedMul: 1, spectating: false,
+  tipQ: [], tip: null, tipsShown: {}, banner: null, matchWinner: null, roundWinner: null,
+  stats: { rodKOs: 0, strikes: 0 }, sudden: false, lastWarnSound: 0, rodSeq: 1, patSeq: 1, result: null,
+};
+let RM = false;
+try { const mq = matchMedia('(prefers-reduced-motion: reduce)'); RM = mq.matches; mq.addEventListener && mq.addEventListener('change', e => { RM = e.matches; }); } catch (e) {}
+
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[(Math.random() * a.length) | 0];
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+const tIdx = p => clamp(Math.floor(p.y), 0, N - 1) * N + clamp(Math.floor(p.x), 0, N - 1);
+const ringOf = i => { const x = i % N, y = (i / N) | 0; return Math.min(x, y, N - 1 - x, N - 1 - y); };
+const isDead = i => G.map.shrink && ringOf(i) < G.shrink.level;
+const isWarnDead = i => G.map.shrink && G.shrink.warning && ringOf(i) < G.shrink.target && !isDead(i);
+const blocked = i => G.map.wall[i] === 1;
+
+function makePlayer(id, name, human, slot, diff) {
+  return {
+    id, name, color: COLORS[id], human, slot, x: 0, y: 0, vx: 0, vy: 0, fx: 0, fy: 1,
+    alive: true, hp: SOLO_HP, rods: 0, wire: false, shoes: false, stun: 0, invuln: 0, dashT: 0, dashCd: 0, dx: 0, dy: 0,
+    wins: 0, rodKOs: 0, roundsSurvived: 0, survived: 0, rank: 0,
+    input: { x: 0, y: 0, place: false, dash: false },
+    ai: human ? null : { diff, timer: Math.random() * 0.2, path: [], target: -1, holdT: 0, noise: new Float32Array(N * N), noiseT: 0, T: new Float32Array(N * N), lastBest: 0 },
+  };
+}
+
+function startMatch(opts) {
+  if (opts) Object.assign(setup, opts);
+  G.mode = setup.mode; G.diff = setup.diff; G.mapSel = +setup.map; G.duoCpu = !!+setup.duoCpu;
+  G.players = [];
+  if (G.mode === 'solo') G.players.push(makePlayer(0, '나', true, 0));
+  else if (G.mode === 'cpu') {
+    G.players.push(makePlayer(0, '나', true, 0));
+    for (let i = 1; i < 4; i++) G.players.push(makePlayer(i, 'CPU ' + i, false, -1, G.diff));
+  } else {
+    G.players.push(makePlayer(0, 'P1', true, 0)); G.players.push(makePlayer(1, 'P2', true, 1));
+    if (G.duoCpu) for (let i = 2; i < 4; i++) G.players.push(makePlayer(i, 'CPU ' + (i - 1), false, -1, G.diff));
+  }
+  G.round = 0; G.events = []; G.stats = { rodKOs: 0, strikes: 0 }; G.matchWinner = null; G.result = null;
+  best.plays = (best.plays || 0) + 1; Store.set('best', best);
+  showScreen('play'); layout(); startRound();
+}
+
+function startRound() {
+  G.round++;
+  G.mapIdx = G.mapSel >= 0 ? G.mapSel : (G.mode === 'solo' ? rnd(0, MAPS.length - 1) : (G.round - 1) % MAPS.length);
+  G.map = MAPS[G.mapIdx]; floorCache = null;
+  G.rods = []; G.items = []; G.pats = []; G.fx.strikes = []; G.fx.dis = []; G.deathOrder = [];
+  G.rt = 0; G.spawnT = 1.2; G.itemT = 2.5; G.sudden = false; G.speedMul = 1; G.spectating = false; G.roundWinner = null;
+  G.shrink = { level: 0, next: G.mode === 'solo' ? 16 : 13, warning: false, target: 0 };
+  const sp = G.mode === 'solo' ? [[5, 5]] : G.map.spawns;
+  const order = G.players.length === 2 ? [0, 1] : [0, 1, 2, 3];
+  G.players.forEach((p, k) => {
+    const s = sp[order[k] % sp.length];
+    Object.assign(p, { x: s[0] + 0.5, y: s[1] + 0.5, vx: 0, vy: 0, alive: true, hp: SOLO_HP, rods: 0, wire: false, shoes: false,
+      stun: 0, invuln: 0, dashT: 0, dashCd: 0, survived: 0, rank: 0, input: { x: 0, y: 0, place: false, dash: false } });
+    p.fx = 5.5 - p.x; p.fy = 5.5 - p.y;
+    if (p.ai) Object.assign(p.ai, { path: [], target: -1, holdT: 0, timer: Math.random() * 0.2 });
+  });
+  // 처음 아이템: 가운데 피뢰침 1개(대전), 생존 모드는 근처에 1개
+  if (G.mode === 'solo') spawnItem('rod', 5 * N + 7); else { spawnItem('rod', 5 * N + 5); }
+  G.phase = 'countdown'; G.phaseT = 3.0; G._lastCount = 4;
+  G.banner = { big: G.mode === 'solo' ? '혼자 생존' : '라운드 ' + G.round, small: G.map.name, t: 3 };
+  // 안내 문구
+  if (G.round === 1) queueTip('start', '노랗다가 빨개지는 바닥 = 곧 낙뢰! 숫자가 0이 되기 전에 그 칸 밖으로 피하세요.');
+  if (G.map.water[0] !== undefined && G.map.comps.length) queueTip('water', '물웅덩이에 낙뢰가 한 칸이라도 떨어지면 웅덩이 전체가 감전돼요!');
+  if (G.map.storm) queueTip('storm', '폭풍 교차로: 낙뢰가 더 자주 떨어져요. 벽에 막히지 않게 길을 보세요!');
+}
+
+function endRound() {
+  const alive = G.players.filter(p => p.alive);
+  const w = alive.length === 1 ? alive[0] : null;
+  G.roundWinner = w;
+  if (w) { w.wins++; w.roundsSurvived++; }
+  const champ = G.players.find(p => p.wins >= WIN_TARGET);
+  const over = !!champ || G.round >= MAX_ROUNDS;
+  G.phase = 'roundEnd'; G.phaseT = 2.8; G.spectating = false; G.speedMul = 1;
+  const humanW = w && w.human;
+  G.banner = { big: w ? (w.name === '나' ? '라운드 승리!' : w.name + ' 승리') : '무승부', small: w ? '' : '모두 감전됐어요', t: 2.8, color: w ? w.color : '#a5b7ca' };
+  Snd.play(humanW ? 'win' : (G.players.some(p => p.human && p.alive) ? 'win' : 'lose'));
+  if (over) {
+    let mw = champ;
+    if (!mw) { const s = [...G.players].sort((a, b) => b.wins - a.wins || b.rodKOs - a.rodKOs); mw = s[0].wins > (s[1] ? s[1].wins : -1) ? s[0] : null; }
+    G.matchWinner = mw; G.matchOver = true;
+  } else G.matchOver = false;
+}
+
+function finishMatch() {
+  const r = { mode: G.mode, newRec: false, lines: [] };
+  if (G.mode === 'solo') {
+    const p = G.players[0]; r.time = p.survived;
+    if (p.survived > best.solo + 0.001) { best.solo = +p.survived.toFixed(1); best.soloMap = G.map.name; r.newRec = true; }
+  } else {
+    const mw = G.matchWinner; r.winner = mw;
+    if (G.mode === 'cpu') {
+      const me = G.players[0];
+      if (mw === me) { best.wins[G.diff] = (best.wins[G.diff] || 0) + 1; r.newRec = true; r.recText = DIFF_NAME[G.diff] + ' 우승 ' + best.wins[G.diff] + '회째!'; }
+      if (me.rodKOs > (best.rodKO || 0)) { best.rodKO = me.rodKOs; r.newRec = true; r.recText = (r.recText ? r.recText + ' · ' : '') + '피뢰침 감전 최고 ' + me.rodKOs + '회'; }
+    } else if (mw && mw.human) best.duo[mw.id] = (best.duo[mw.id] || 0) + 1;
+  }
+  Store.set('best', best);
+  G.result = r;
+  showResult(r);
+}
+
+// ---------- 4) 낙뢰 패턴 ----------
+function level() {
+  if (G.mode === 'solo') {
+    const st = { easy: 0, normal: 0.15, hard: 0.32 }[G.diff] || 0;
+    return st + G.rt / 95;
+  }
+  return Math.min(1.25, G.rt / 65 + (G.round - 1) * 0.04 + (G.map.storm ? 0.15 : 0));
+}
+
+function genMask(kind, lv) {
+  const k = G.map.shrink ? G.shrink.level : 0, lo = k, hi = N - 1 - k, span = hi - lo + 1;
+  const m = new Uint8Array(N * N);
+  const set = (x, y) => { if (x >= lo && x <= hi && y >= lo && y <= hi) m[y * N + x] = 1; };
+  const alive = G.players.filter(p => p.alive);
+  const focus = () => {
+    if (alive.length && Math.random() < 0.6) { const t = pick(alive); return [clamp(Math.floor(t.x) + rnd(-1, 1), lo, hi), clamp(Math.floor(t.y) + rnd(-1, 1), lo, hi)]; }
+    return [rnd(lo, hi), rnd(lo, hi)];
+  };
+  switch (kind) {
+    case 'circle': {
+      const [cx, cy] = focus(), r = 1.0 + Math.random() * (0.6 + Math.min(lv, 1) * 1.1);
+      for (let y = lo; y <= hi; y++) for (let x = lo; x <= hi; x++) if (Math.hypot(x - cx, y - cy) <= r + 0.01) set(x, y);
+      break;
+    }
+    case 'line': {
+      const th = Math.random() < 0.25 + lv * 0.4 ? 2 : 1, hz = Math.random() < 0.5;
+      const s = alive.length && Math.random() < 0.5 ? clamp(Math.floor(hz ? pick(alive).y : pick(alive).x), lo, hi - th + 1) : rnd(lo, hi - th + 1);
+      for (let i = 0; i < th; i++) for (let j = lo; j <= hi; j++) hz ? set(j, s + i) : set(s + i, j);
+      break;
+    }
+    case 'lines': {
+      const hz = Math.random() < 0.5, gap = rnd(2, 3), off = rnd(0, gap);
+      for (let s = lo + off; s <= hi; s += gap + 1) for (let j = lo; j <= hi; j++) hz ? set(j, s) : set(s, j);
+      break;
+    }
+    case 'cross': {
+      const [cx, cy] = focus();
+      for (let j = lo; j <= hi; j++) { set(cx, j); set(j, cy); }
+      break;
+    }
+    case 'zone': {
+      const w = rnd(3, Math.max(3, Math.min(5, span - 2))), h = rnd(3, Math.max(3, Math.min(5, span - 2)));
+      const x0 = rnd(lo, Math.max(lo, hi - w + 1)), y0 = rnd(lo, Math.max(lo, hi - h + 1));
+      for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) set(x, y);
+      break;
+    }
+    case 'ring': {
+      const cx = 5 + rnd(-1, 1), cy = 5 + rnd(-1, 1), r = 1.8 + Math.random() * 1.8;
+      for (let y = lo; y <= hi; y++) for (let x = lo; x <= hi; x++) if (Math.abs(Math.hypot(x - cx, y - cy) - r) <= 0.6) set(x, y);
+      break;
+    }
+    case 'diag': {
+      const anti = Math.random() < 0.5, off = rnd(-4, 4);
+      for (let y = lo; y <= hi; y++) for (let x = lo; x <= hi; x++) { const d = anti ? x + y - (N - 1) - off : x - y - off; if (Math.abs(d) <= 1) set(x, y); }
+      break;
+    }
+    case 'checker': {
+      const par = rnd(0, 1);
+      for (let y = lo; y <= hi; y++) for (let x = lo; x <= hi; x++) if ((x + y) % 2 === par) set(x, y);
+      break;
+    }
+  }
+  for (let i = 0; i < N * N; i++) if (blocked(i)) m[i] = 0;
+  return m;
+}
+
+function spawnPattern() {
+  const lv = level();
+  const tutorial = G.mode !== 'solo' && G.round === 1 && G.rt < 9;
+  const kinds = tutorial ? [['circle', 1]] : [
+    ['circle', 3], ['line', lv > 0.05 ? 2 : 0], ['cross', lv > 0.15 ? 1.4 : 0], ['zone', lv > 0.2 ? 1.4 : 0],
+    ['ring', lv > 0.3 ? 1 : 0], ['diag', lv > 0.35 ? 1 : 0], ['lines', lv > 0.45 ? 1 : 0], ['checker', lv > 0.6 ? 0.7 : 0]];
+  const tot = kinds.reduce((s, k) => s + k[1], 0);
+  // 아직 안전한 칸 수 확인용
+  const union = new Uint8Array(N * N); let aliveTiles = 0;
+  for (const p of G.pats) for (let i = 0; i < N * N; i++) if (p.mask[i]) union[i] = 1;
+  for (let i = 0; i < N * N; i++) if (!blocked(i) && !isDead(i)) aliveTiles++;
+  for (let tries = 0; tries < 6; tries++) {
+    let r = Math.random() * tot, kind = 'circle';
+    for (const k of kinds) { r -= k[1]; if (r <= 0) { kind = k[0]; break; } }
+    const mask = genMask(kind, lv);
+    let cnt = 0, safe = 0, sx = 0, sy = 0;
+    for (let i = 0; i < N * N; i++) {
+      if (mask[i]) { cnt++; sx += i % N; sy += (i / N) | 0; }
+      if (!blocked(i) && !isDead(i) && !mask[i] && !union[i]) safe++;
+    }
+    if (cnt < 2 || cnt > aliveTiles * 0.62 || safe < aliveTiles * 0.3) continue;
+    let warn = tutorial ? 2.2 : (G.mode === 'solo' ? Math.max(0.72, lerp(1.75, 0.95, lv)) : Math.max(0.85, lerp(1.75, 0.95, Math.min(lv, 1.1))));
+    if (kind === 'checker' || kind === 'lines') warn += 0.3;
+    // 중심(카운트다운 링 위치): 마스크 칸 중 무게중심에 가장 가까운 칸
+    const mx = sx / cnt, my = sy / cnt; let bi = -1, bd = 1e9;
+    for (let i = 0; i < N * N; i++) if (mask[i]) { const d = Math.hypot(i % N - mx, ((i / N) | 0) - my); if (d < bd) { bd = d; bi = i; } }
+    const pat = { id: G.patSeq++, kind, mask, t: 0, warn, cx: bi % N + 0.5, cy: ((bi / N) | 0) + 0.5, seen: {}, res: null };
+    pat.res = resolve(pat);
+    G.pats.push(pat);
+    Snd.play('warn');
+    return true;
+  }
+  return false;
+}
+
+// 낙뢰 판정: 피뢰침이 끌어온 칸(div), 실제로 맞는 칸(hit), 방전할 피뢰침 목록(rodHits)
+function resolve(pat) {
+  const hit = new Uint8Array(N * N), div = new Int32Array(N * N).fill(-1), rodHits = [];
+  const comps = G.map.comps.length ? new Uint8Array(G.map.comps.length) : null;
+  for (let i = 0; i < N * N; i++) {
+    if (!pat.mask[i]) continue;
+    const tx = i % N + 0.5, ty = ((i / N) | 0) + 0.5;
+    let br = null, bd = 1e9;
+    for (const r of G.rods) { const d = Math.hypot(tx - r.x, ty - r.y); if (d <= r.attract && d < bd) { bd = d; br = r; } }
+    if (br) { div[i] = br.id; if (!rodHits.includes(br.id)) rodHits.push(br.id); }
+    else { hit[i] = 1; if (comps && G.map.water[i]) comps[G.map.comp[i]] = 1; }
+  }
+  if (comps) for (let c = 0; c < comps.length; c++) if (comps[c]) for (const j of G.map.comps[c]) if (div[j] < 0 && !isDead(j)) hit[j] = 1;
+  return { hit, div, rodHits };
+}
+
+function strike(pat) {
+  const res = resolve(pat);
+  G.stats.strikes++;
+  // 연출: 번개 줄기
+  const targets = []; const hits = [];
+  for (let i = 0; i < N * N; i++) if (res.hit[i]) hits.push(i);
+  if (hits.length) {
+    targets.push([pat.cx, pat.cy]);
+    const nb = Math.min(5, Math.ceil(hits.length / 5));
+    for (let k = 0; k < nb; k++) { const i = pick(hits); targets.push([i % N + 0.5 + (Math.random() - 0.5) * 0.4, ((i / N) | 0) + 0.5 + (Math.random() - 0.5) * 0.4]); }
+  }
+  const bolts = targets.map(t => makeBolt(t[0] + (Math.random() - 0.5) * 3, -4, t[0], t[1]));
+  for (const rid of res.rodHits) { const r = G.rods.find(q => q.id === rid); if (r) bolts.push(makeBolt(r.x + (Math.random() - 0.5) * 2, -4, r.x, r.y - 0.75, true)); }
+  G.fx.strikes.push({ mask: res.hit, bolts, life: 0.55, max: 0.55 });
+  for (const t of targets.slice(0, 4)) sparks(t[0], t[1], 10, '#fff4c2', 4);
+  G.flash = Math.max(G.flash, RM ? 0.1 : 0.42);
+  if (!RM) G.shake = Math.min(14, G.shake + 7);
+  Snd.play('thunder');
+  // 판정
+  for (const p of G.players) if (p.alive && res.hit[tIdx(p)]) damage(p, 'bolt');
+  for (const rid of res.rodHits) { const r = G.rods.find(q => q.id === rid); if (r) discharge(r); }
+}
+
+// ---------- 5) 피뢰침 · 아이템 · 피해 ----------
+function makeBolt(x0, y0, x1, y1, toRod) {
+  const pts = [[x0, y0]], segs = 12;
+  for (let i = 1; i < segs; i++) {
+    const t = i / segs;
+    pts.push([lerp(x0, x1, t) + (Math.random() - 0.5) * 0.9 * (1 - t * 0.6), lerp(y0, y1, t) + (Math.random() - 0.5) * 0.3]);
+  }
+  pts.push([x1, y1]);
+  const br = [];
+  for (let b = 0; b < 2; b++) {
+    const s = rnd(3, segs - 3), [bx, by] = pts[s], q = [[bx, by]]; let cx = bx, cy = by;
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    for (let i = 0; i < 4; i++) { cx += dir * (0.2 + Math.random() * 0.4); cy += 0.3 + Math.random() * 0.4; q.push([cx, cy]); }
+    br.push(q);
+  }
+  return { pts, br, rod: !!toRod };
+}
+
+function placeRod(p) {
+  if (p.rods <= 0) { if (p.human) Snd.play('buzz'); return false; }
+  const ti = tIdx(p);
+  if (G.rods.some(r => r.ti === ti) || isDead(ti)) { if (p.human) { Snd.play('buzz'); floatText(p.x, p.y - 0.8, '여기엔 설치 불가', '#e77d78'); } return false; }
+  const mine = G.rods.filter(r => r.owner === p.id);
+  if (mine.length >= ROD_MAX_PER) removeRod(mine[0], false);
+  const w = p.wire ? WIRE_BONUS : 0;
+  const rod = { id: G.rodSeq++, owner: p.id, ti, x: ti % N + 0.5, y: ((ti / N) | 0) + 0.5, attract: ROD_ATTRACT + w * 0.8, kill: ROD_KILL + w * 0.55,
+    stun: ROD_STUN + w, charges: ROD_CHARGES, life: ROD_LIFE, wired: p.wire, t: 0, threat: 0 };
+  p.rods--; p.wire = false;
+  G.rods.push(rod);
+  sparks(rod.x, rod.y - 0.6, 12, '#f2c66d', 3);
+  floatText(rod.x, rod.y - 1.1, '피뢰침 설치!', p.color);
+  Snd.play('place');
+  if (p.ai) p.ai.holdT = 0;
+  return true;
+}
+function removeRod(r, fx = true) {
+  G.rods = G.rods.filter(q => q !== r);
+  if (fx) { sparks(r.x, r.y - 0.4, 10, '#a5b7ca', 2.5); floatText(r.x, r.y - 1, '피뢰침 소진', '#a5b7ca'); }
+}
+
+function discharge(r) {
+  const victims = [];
+  for (const p of G.players) {
+    if (!p.alive || p.id === r.owner) continue;
+    const d = Math.hypot(p.x - r.x, p.y - r.y);
+    if (d <= r.kill) { victims.push(p); damage(p, 'rod', G.players[r.owner]); }
+    else if (d <= r.stun) { victims.push(p); stunP(p); }
+  }
+  G.fx.dis.push({ x: r.x, y: r.y, r: r.stun, k: r.kill, life: 0.7, max: 0.7, color: G.players[r.owner] ? G.players[r.owner].color : '#f2c66d',
+    arcs: victims.map(v => makeArc(r.x, r.y, v.x, v.y)).concat(Array.from({ length: 6 }, (_, i) => { const a = i / 6 * Math.PI * 2 + Math.random(); return makeArc(r.x, r.y, r.x + Math.cos(a) * r.kill, r.y + Math.sin(a) * r.kill); })) });
+  sparks(r.x, r.y, 22, '#f2c66d', 5);
+  Snd.play('zap');
+  r.charges--;
+  if (r.charges <= 0) removeRod(r);
+}
+function makeArc(x0, y0, x1, y1) {
+  const pts = [[x0, y0]], n = 6;
+  for (let i = 1; i < n; i++) { const t = i / n; pts.push([lerp(x0, x1, t) + (Math.random() - 0.5) * 0.35, lerp(y0, y1, t) + (Math.random() - 0.5) * 0.35]); }
+  pts.push([x1, y1]); return pts;
+}
+
+function damage(p, cause, by) {
+  if (!p.alive || p.invuln > 0) return false;
+  if (p.shoes) {
+    p.shoes = false; p.invuln = 0.9; floatText(p.x, p.y - 0.9, '고무신발이 막았다!', '#78e2ae'); sparks(p.x, p.y, 12, '#78e2ae', 3); Snd.play('shield');
+    return false;
+  }
+  if (G.mode === 'solo') {
+    p.hp--; p.invuln = 1.6; Snd.play('hurt'); floatText(p.x, p.y - 0.9, '-1', '#e77d78');
+    if (!RM) G.shake = Math.min(16, G.shake + 8);
+    if (p.hp > 0) return true;
+  }
+  kill(p, cause, by);
+  return true;
+}
+function kill(p, cause, by) {
+  p.alive = false; p.survived = G.rt; p.stun = 0; p.dashT = 0;
+  G.deathOrder.push(p);
+  sparks(p.x, p.y, 26, p.color, 5); sparks(p.x, p.y, 14, '#ffffff', 3);
+  let msg = '감전!';
+  if (cause === 'rod' && by) { by.rodKOs++; G.stats.rodKOs++; msg = by.name + '의 피뢰침!'; }
+  else if (cause === 'zone') msg = '전기 구역!';
+  floatText(p.x, p.y - 0.9, msg, cause === 'rod' ? '#f2c66d' : '#e77d78');
+  G.events.push({ type: 'ko', round: G.round, t: +G.rt.toFixed(2), victim: p.name, cause, by: by ? by.name : null });
+  Snd.play(p.human ? 'lose' : 'out');
+}
+function stunP(p) {
+  if (!p.alive || p.invuln > 0) return;
+  p.stun = STUN_TIME; p.dashT = 0; floatText(p.x, p.y - 0.9, '마비!', '#f2c66d'); Snd.play('stun');
+  G.events.push({ type: 'stun', round: G.round, t: +G.rt.toFixed(2), victim: p.name });
+}
+
+function spawnItem(type, at) {
+  if (at == null) {
+    const cands = [];
+    for (let i = 0; i < N * N; i++) {
+      if (blocked(i) || isDead(i) || isWarnDead(i) || G.items.some(it => it.ti === i) || G.rods.some(r => r.ti === i)) continue;
+      const x = i % N + 0.5, y = ((i / N) | 0) + 0.5;
+      if (G.players.some(p => p.alive && Math.hypot(p.x - x, p.y - y) < 1.6)) continue;
+      cands.push(i);
+    }
+    if (!cands.length) return;
+    at = pick(cands);
+  }
+  if (!type) { const r = Math.random(); type = r < 0.56 ? 'rod' : r < 0.78 ? 'shoes' : 'wire'; }
+  G.items.push({ type, ti: at, x: at % N + 0.5, y: ((at / N) | 0) + 0.5, t: 0 });
+  if (type === 'rod') queueTip('rodItem', '금색 막대 = 피뢰침! 위로 지나가 주운 뒤 [피뢰침 설치] 버튼(Space)으로 세우세요.');
+}
+function pickup(p) {
+  for (const it of G.items) {
+    if (Math.hypot(p.x - it.x, p.y - it.y) > 0.6) continue;
+    if (it.type === 'rod' && p.rods >= ROD_CARRY) continue;
+    if (it.type === 'shoes' && p.shoes) continue;
+    if (it.type === 'wire' && p.wire) continue;
+    if (it.type === 'rod') p.rods++; else if (it.type === 'shoes') p.shoes = true; else p.wire = true;
+    G.items = G.items.filter(q => q !== it);
+    floatText(it.x, it.y - 0.8, { rod: '피뢰침 +1', shoes: '고무 신발', wire: '구리 전선' }[it.type], '#f2c66d');
+    sparks(it.x, it.y, 8, '#f2c66d', 2.5);
+    Snd.play('pick');
+    if (p.human && it.type === 'rod') queueTip('holdRod', '설치하면 반경 안 낙뢰를 끌어와요. 나는 안전, 피뢰침 곁의 상대는 감전! 상대 근처에 세워 보세요.');
+    if (p.human && it.type === 'wire') queueTip('wire', '구리 전선: 다음 피뢰침의 범위가 넓어져요.');
+    if (p.human && it.type === 'shoes') queueTip('shoes', '고무 신발: 낙뢰·감전을 한 번 막아 줘요. (게임 속 규칙! 진짜 낙뢰는 고무로 못 막아요)');
+    return;
+  }
+}
+
+// ---------- 시뮬레이션 ----------
+function step(dt) {
+  updateFx(dt);
+  if (G.tip) { G.tip.t -= dt; if (G.tip.t <= 0) G.tip = null; }
+  if (!G.tip && G.tipQ.length) G.tip = { text: G.tipQ.shift(), t: 4.2 };
+  if (G.banner) { G.banner.t -= dt; if (G.banner.t <= 0) G.banner = null; }
+  if (G.phase === 'countdown') {
+    G.phaseT -= dt;
+    const c = Math.ceil(G.phaseT);
+    if (c !== G._lastCount && c > 0) { G._lastCount = c; Snd.play('tick'); }
+    if (G.phaseT <= 0) { G.phase = 'live'; Snd.play('go'); G.banner = { big: '시작!', small: '', t: 0.8 }; }
+    for (const p of G.players) readInput(p);
+    return;
+  }
+  if (G.phase === 'roundEnd') {
+    G.phaseT -= dt;
+    if (G.phaseT <= 0) { if (G.matchOver) finishMatch(); else startRound(); }
+    return;
+  }
+  if (G.phase === 'over') { G.phaseT -= dt; if (G.phaseT <= 0) { G.phase = 'done'; finishMatch(); } return; }
+  if (G.phase !== 'live') return;
+
+  G.rt += dt;
+  const lv = level();
+  // 낙뢰 생성
+  G.spawnT -= dt;
+  if (G.spawnT <= 0) {
+    const tutorial = G.mode !== 'solo' && G.round === 1 && G.rt < 9;
+    const ok = spawnPattern();
+    let iv = tutorial ? 2.3 : Math.max(G.mode === 'solo' ? 0.42 : 0.5, lerp(2.0, 0.6, Math.min(lv, 1.15)));
+    if (G.map.storm) iv *= 0.85;
+    if (ok && lv > 0.55 && Math.random() < (lv - 0.5) * 0.5) spawnPattern();
+    G.spawnT = ok ? iv : 0.25;
+  }
+  if (G.mode !== 'solo' && !G.sudden && G.rt > 70) { G.sudden = true; G.banner = { big: '서든데스!', small: '낙뢰가 쏟아집니다', t: 1.6, color: '#e77d78' }; }
+  // 아이템
+  G.itemT -= dt;
+  if (G.itemT <= 0) { if (G.items.length < MAX_ITEMS) spawnItem(); G.itemT = G.mode === 'solo' ? 5.5 + Math.random() * 3 : 4 + Math.random() * 3; }
+  for (const it of G.items) it.t += dt;
+  // 좁아지는 맵
+  if (G.map.shrink) {
+    const s = G.shrink; s.next -= dt;
+    if (!s.warning && s.next <= 3 && s.level < 3) { s.warning = true; s.target = s.level + 1; Snd.play('zone'); queueTip('shrink', '바깥 테두리가 깜빡이면 곧 전기 구역! 안쪽으로 들어가세요.'); }
+    if (s.next <= 0) {
+      if (s.level < 3) { s.level = s.target; s.warning = false; s.next = s.level < 3 ? 11 : 14; Snd.play('thunder'); G.flash = Math.max(G.flash, RM ? 0.08 : 0.3); }
+      else { s.level = 0; s.next = 12; floatText(5.5, 5.5, '전력 복구! 경기장이 넓어졌어요', '#78e2ae'); }
+      G.items = G.items.filter(it => !isDead(it.ti)); G.rods = G.rods.filter(r => !isDead(r.ti));
+    }
+  }
+  // 피뢰침
+  for (const r of G.rods) { r.t += dt; r.life -= dt; r.threat = 0; }
+  for (const r of [...G.rods]) if (r.life <= 0) removeRod(r);
+  // 패턴 진행
+  for (const p of G.pats) {
+    p.t += dt; p.res = resolve(p);
+    for (const rid of p.res.rodHits) { const r = G.rods.find(q => q.id === rid); if (r) r.threat = Math.max(r.threat, p.t / p.warn); }
+  }
+  const due = G.pats.filter(p => p.t >= p.warn);
+  if (due.length) { G.pats = G.pats.filter(p => p.t < p.warn); for (const p of due) strike(p); }
+  // 남의 피뢰침 위험 안내
+  for (const r of G.rods) if (r.threat > 0) for (const p of G.players) if (p.human && p.alive && p.id !== r.owner && Math.hypot(p.x - r.x, p.y - r.y) < r.stun + 0.5)
+    queueTip('enemyRod', '주황 고리가 깜빡이는 피뢰침 = 곧 방전! 남의 피뢰침 곁에서 떨어지세요.');
+  // 플레이어
+  for (const p of G.players) {
+    if (!p.alive) continue;
+    if (p.ai) aiUpdate(p, dt); else readInput(p);
+    movePlayer(p, dt);
+    pickup(p);
+    if (p.input.place) { p.input.place = false; placeRod(p); }
+    if (p.invuln > 0) p.invuln -= dt;
+    if (isDead(tIdx(p))) damage(p, 'zone');
+    if (p.alive) p.survived = G.rt;
+  }
+  // 종료 판정
+  const alive = G.players.filter(p => p.alive);
+  if (G.mode === 'solo') {
+    if (!alive.length) { G.phase = 'over'; G.phaseT = 1.4; G.banner = { big: G.players[0].survived.toFixed(1) + '초', small: '생존 기록', t: 1.4 }; }
+  } else {
+    if (alive.length <= 1 || G.rt > 150) endRound();
+    else if (!alive.some(p => p.human) && !G.spectating) { G.spectating = true; }
+  }
+}
+
+function movePlayer(p, dt) {
+  if (p.dashCd > 0) p.dashCd -= dt;
+  if (p.stun > 0) { p.stun -= dt; p.input.dash = false; return; }
+  let ix = p.input.x, iy = p.input.y; const m = Math.hypot(ix, iy);
+  if (m > 1) { ix /= m; iy /= m; }
+  if (m > 0.1) { p.fx = ix; p.fy = iy; }
+  if (p.input.dash) {
+    p.input.dash = false;
+    if (p.dashCd <= 0) {
+      const dm = Math.hypot(ix, iy) > 0.1 ? Math.hypot(ix, iy) : 0;
+      p.dx = dm ? ix / dm : p.fx / (Math.hypot(p.fx, p.fy) || 1); p.dy = dm ? iy / dm : p.fy / (Math.hypot(p.fx, p.fy) || 1);
+      p.dashT = DASH_TIME; p.dashCd = DASH_CD; Snd.play('dash');
+    }
+  }
+  let vx, vy;
+  const spd = MOVE_SPEED * (p.ai ? AI_CFG[p.ai.diff].speed : 1);
+  if (p.dashT > 0) { p.dashT -= dt; vx = p.dx * DASH_SPEED; vy = p.dy * DASH_SPEED; if (Math.random() < 0.7) G.fx.parts.push({ x: p.x, y: p.y, vx: 0, vy: 0, life: 0.25, max: 0.25, c: p.color, s: 0.22 }); }
+  else { vx = ix * spd; vy = iy * spd; }
+  const nx = p.x + vx * dt; if (!collides(nx, p.y)) p.x = nx;
+  const ny = p.y + vy * dt; if (!collides(p.x, ny)) p.y = ny;
+  p.vx = vx; p.vy = vy;
+}
+function collides(x, y) {
+  if (x - P_R < 0 || y - P_R < 0 || x + P_R > N || y + P_R > N) return true;
+  for (let ty = Math.floor(y - P_R); ty <= Math.floor(y + P_R); ty++) for (let tx = Math.floor(x - P_R); tx <= Math.floor(x + P_R); tx++) {
+    if (tx < 0 || ty < 0 || tx >= N || ty >= N || !blocked(ty * N + tx)) continue;
+    const cx = clamp(x, tx, tx + 1), cy = clamp(y, ty, ty + 1);
+    if ((x - cx) ** 2 + (y - cy) ** 2 < P_R * P_R) return true;
+  }
+  return false;
+}
+
+// ---------- 6) CPU AI ----------
+const NB8 = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, 1.414], [1, -1, 1.414], [-1, 1, 1.414], [-1, -1, 1.414]];
+function aiUpdate(p, dt) {
+  const c = AI_CFG[p.ai.diff], ai = p.ai;
+  ai.timer -= dt; ai.noiseT -= dt;
+  if (p.rods > 0) ai.holdT += dt;
+  if (ai.timer <= 0) { ai.timer = c.think * (0.8 + Math.random() * 0.4); aiThink(p, c); }
+  // 경로 따라가기
+  p.input.x = 0; p.input.y = 0;
+  while (ai.path.length) {
+    const w = ai.path[0], wx = w % N + 0.5, wy = ((w / N) | 0) + 0.5, dx = wx - p.x, dy = wy - p.y, d = Math.hypot(dx, dy);
+    if (d < 0.12) { ai.path.shift(); continue; }
+    const s = ai.path.length === 1 ? Math.min(1, d * 4) : 1;
+    p.input.x = dx / d * s; p.input.y = dy / d * s; break;
+  }
+}
+
+function aiThink(p, c) {
+  const ai = p.ai, T = ai.T, me = tIdx(p);
+  T.fill(1e9);
+  // 위험 지도: 칸마다 낙뢰가 떨어질 때까지 남은 시간
+  for (const pt of G.pats) {
+    if (pt.t < c.react) continue;
+    if (pt.seen[p.id] === undefined) pt.seen[p.id] = Math.random() < c.perceive;
+    if (!pt.seen[p.id]) continue;
+    const tl = pt.warn - pt.t, r = pt.res;
+    for (let i = 0; i < N * N; i++) if (r.hit[i] && tl < T[i]) T[i] = tl;
+    for (const rid of r.rodHits) {
+      const rod = G.rods.find(q => q.id === rid); if (!rod || rod.owner === p.id) continue;
+      const rad = (c.rod > 0.5 ? rod.stun : rod.kill) + 0.35;
+      for (let i = 0; i < N * N; i++) if (Math.hypot(i % N + 0.5 - rod.x, ((i / N) | 0) + 0.5 - rod.y) <= rad && tl < T[i]) T[i] = tl;
+    }
+  }
+  if (G.map.shrink) for (let i = 0; i < N * N; i++) { if (isDead(i)) T[i] = -1; else if (isWarnDead(i)) T[i] = Math.min(T[i], G.shrink.next); }
+  if (ai.noiseT <= 0) { ai.noiseT = 2.5; for (let i = 0; i < N * N; i++) ai.noise[i] = Math.random() * c.noise; }
+  // 다익스트라: 도착 시각이 낙뢰 시각과 겹치는 칸은 통과 불가
+  const spd = MOVE_SPEED * c.speed, dist = new Float32Array(N * N).fill(1e9), prev = new Int16Array(N * N).fill(-1), done = new Uint8Array(N * N);
+  dist[me] = 0;
+  for (;;) {
+    let u = -1, bd = 1e9;
+    for (let i = 0; i < N * N; i++) if (!done[i] && dist[i] < bd) { bd = dist[i]; u = i; }
+    if (u < 0) break;
+    done[u] = 1;
+    const ux = u % N, uy = (u / N) | 0;
+    for (const [dx, dy, w] of NB8) {
+      const nx = ux + dx, ny = uy + dy; if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
+      const v = ny * N + nx; if (blocked(v) || T[v] < 0) continue;
+      if (dx && dy && (blocked(uy * N + nx) || blocked(ny * N + ux))) continue;
+      const nd = dist[u] + w, at = nd / spd;
+      if (T[v] < 1e8 && at > T[v] - c.margin && at < T[v] + 0.15) continue;
+      if (nd < dist[v]) { dist[v] = nd; prev[v] = u; }
+    }
+  }
+  const opps = G.players.filter(o => o.alive && o !== p);
+  let bestI = me, bestC = 1e9;
+  for (let v = 0; v < N * N; v++) {
+    if (dist[v] >= 1e9) continue;
+    const vx = v % N + 0.5, vy = ((v / N) | 0) + 0.5, at = dist[v] / spd;
+    let cost = at * 1.2 + Math.hypot(vx - 5.5, vy - 5.5) * 0.18 + ai.noise[v];
+    if (T[v] < 1e8) cost += T[v] < 3 ? 40 : 6;
+    if (G.map.water[v]) cost += 0.8 * (c.rod);            // 물 위는 위험
+    for (const r of G.rods) if (r.owner !== p.id && Math.hypot(vx - r.x, vy - r.y) < r.stun + 0.3) cost += 2.5 * c.rod;
+    for (const o of opps) { const d = Math.hypot(vx - o.x, vy - o.y); if (d < 1) cost += 0.6; if (p.rods > 0 && c.rod > 0.5 && d < 1.3) cost -= 1.6 * c.rod; }
+    const it = G.items.find(q => q.ti === v);
+    if (it) { const want = it.type === 'rod' ? (p.rods < ROD_CARRY ? 3 : 0) : it.type === 'shoes' ? (p.shoes ? 0 : 2.5) : (p.wire ? 0 : 1.5); cost -= want * c.item; }
+    if (v === ai.target) cost -= 0.45;
+    if (cost < bestC) { bestC = cost; bestI = v; }
+  }
+  ai.target = bestI; ai.lastBest = bestC;
+  const path = []; let k = bestI;
+  while (k !== me && k >= 0) { path.unshift(k); k = prev[k]; }
+  ai.path = path;
+  const danger = T[me] < 1e8 ? T[me] : 99;
+  const need = dist[bestI] / spd;
+  // 대시
+  if (danger < 99 && need > danger - 0.2 && p.dashCd <= 0 && Math.random() < c.dash) p.input.dash = true;
+  // 피뢰침 전략
+  if (p.rods > 0) {
+    const trapped = danger < 0.75 && (bestC > 30 || need > danger - 0.05);
+    let soon = false;
+    for (const pt of G.pats) { if (pt.t < c.react) continue; const tl = pt.warn - pt.t; if (tl > 1.6) continue;
+      for (let i = 0; i < N * N && !soon; i++) if (pt.mask[i] && Math.hypot(i % N + 0.5 - (Math.floor(p.x) + 0.5), ((i / N) | 0) + 0.5 - (Math.floor(p.y) + 0.5)) <= ROD_ATTRACT + (p.wire ? WIRE_BONUS * 0.8 : 0)) soon = true; }
+    const ko = opps.filter(o => Math.hypot(o.x - (Math.floor(p.x) + 0.5), o.y - (Math.floor(p.y) + 0.5)) <= ROD_KILL + (p.wire ? WIRE_BONUS * 0.55 : 0) - 0.05).length;
+    const st = opps.filter(o => Math.hypot(o.x - p.x, o.y - p.y) <= ROD_STUN).length;
+    let place = false;
+    if (trapped && Math.random() < c.rod + 0.25) place = true;
+    else if (soon && ko > 0 && Math.random() < c.rod) place = true;
+    else if (soon && st > 0 && Math.random() < c.rod * 0.4) place = true;
+    else if (ai.holdT > (p.rods >= 2 ? 4 : 9) && Math.random() < 0.15 + (1 - c.rod) * 0.2) place = true;
+    if (place) p.input.place = true;
+  }
+}
+
+// ---------- 7) 입력 ----------
+const keys = new Set();
+const pads = [{ x: 0, y: 0, act: false, place: false, dash: false }, { x: 0, y: 0, act: false, place: false, dash: false }];
+const KEYMAP = {
+  one: { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'],
+    place: ['Space', 'KeyF', 'KeyJ', 'Enter', 'NumpadEnter'], dash: ['ShiftLeft', 'ShiftRight', 'KeyG', 'KeyK'] },
+  p1: { up: ['KeyW'], down: ['KeyS'], left: ['KeyA'], right: ['KeyD'], place: ['KeyF', 'Space'], dash: ['KeyG', 'ShiftLeft'] },
+  p2: { up: ['ArrowUp'], down: ['ArrowDown'], left: ['ArrowLeft'], right: ['ArrowRight'], place: ['Enter', 'NumpadEnter', 'Slash', 'Numpad0'], dash: ['Period', 'ShiftRight', 'Numpad1'] },
+};
+function humanCount() { return G.players.filter(p => p.human).length; }
+function mapFor(slot) { return humanCount() >= 2 ? (slot === 0 ? KEYMAP.p1 : KEYMAP.p2) : KEYMAP.one; }
+function readInput(p) {
+  const km = mapFor(p.slot), any = a => a.some(k => keys.has(k));
+  let x = (any(km.right) ? 1 : 0) - (any(km.left) ? 1 : 0), y = (any(km.down) ? 1 : 0) - (any(km.up) ? 1 : 0);
+  const pd = pads[p.slot];
+  if (pd && pd.act) { x = pd.x; y = pd.y; }
+  if (G.phase !== 'live') { x = 0; y = 0; }
+  p.input.x = x; p.input.y = y;
+  if (pd && pd.place) { pd.place = false; if (G.phase === 'live') p.input.place = true; }
+  if (pd && pd.dash) { pd.dash = false; if (G.phase === 'live') p.input.dash = true; }
+}
+addEventListener('keydown', e => {
+  Snd.ensure();
+  if (e.code === 'Escape' || e.code === 'KeyP') {
+    if (G.screen === 'play') pauseGame(); else if (G.screen === 'pause') resumeGame();
+    e.preventDefault(); return;
+  }
+  if (G.screen !== 'play') return;
+  if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Slash', 'Enter'].includes(e.code)) e.preventDefault();
+  if (e.repeat) { keys.add(e.code); return; }
+  keys.add(e.code);
+  if (G.phase !== 'live') return;
+  for (const p of G.players) {
+    if (!p.human || !p.alive) continue;
+    const km = mapFor(p.slot);
+    if (km.place.includes(e.code)) p.input.place = true;
+    if (km.dash.includes(e.code)) p.input.dash = true;
+  }
+});
+addEventListener('keyup', e => keys.delete(e.code));
+addEventListener('blur', () => keys.clear());
+
+// 가상 조이스틱 / 버튼 생성
+const touchEl = document.getElementById('touch');
+const padEls = [0, 1].map(s => {
+  const zone = document.createElement('div'); zone.className = 'zone';
+  zone.innerHTML = '<div class="jbase"><div class="jknob"></div></div><div class="zl">' + (s ? 'P2 ' : '') + '끌어서 이동</div>';
+  const bp = document.createElement('button'); bp.className = 'tbtn place' + (s ? ' p2' : ''); bp.innerHTML = '피뢰침<br>설치<b>0개</b>';
+  const bd = document.createElement('button'); bd.className = 'tbtn dash' + (s ? ' p2' : ''); bd.innerHTML = '대시';
+  bp.setAttribute('aria-label', (s ? 'P2 ' : '') + '피뢰침 설치'); bd.setAttribute('aria-label', (s ? 'P2 ' : '') + '대시');
+  touchEl.append(zone, bp, bd);
+  const base = zone.querySelector('.jbase'), knob = zone.querySelector('.jknob');
+  const st = { zone, bp, bd, base, knob, id: null, cx: 0, cy: 0, rest: [0, 0] };
+  const R = 46;
+  const setKnob = (dx, dy) => { knob.style.transform = `translate(${dx}px,${dy}px)`; };
+  zone.addEventListener('pointerdown', e => {
+    Snd.ensure(); e.preventDefault();
+    if (st.id !== null) return;
+    st.id = e.pointerId; try { zone.setPointerCapture(e.pointerId); } catch (_) {}
+    const rc = zone.getBoundingClientRect();
+    st.cx = clamp(e.clientX - rc.left, 40, rc.width - 40); st.cy = clamp(e.clientY - rc.top, 40, rc.height - 40);
+    base.style.left = st.cx + 'px'; base.style.top = st.cy + 'px';
+    pads[s].act = true; move(e);
+  });
+  const move = e => {
+    if (e.pointerId !== st.id) return;
+    const rc = zone.getBoundingClientRect();
+    let dx = e.clientX - rc.left - st.cx, dy = e.clientY - rc.top - st.cy; const d = Math.hypot(dx, dy);
+    if (d > R) { dx = dx / d * R; dy = dy / d * R; }
+    setKnob(dx, dy);
+    const m = Math.hypot(dx, dy) / R;
+    pads[s].x = m < 0.15 ? 0 : dx / R; pads[s].y = m < 0.15 ? 0 : dy / R;
+  };
+  const up = e => {
+    if (e.pointerId !== st.id) return;
+    st.id = null; pads[s].act = false; pads[s].x = pads[s].y = 0; setKnob(0, 0);
+    base.style.left = st.rest[0] + 'px'; base.style.top = st.rest[1] + 'px';
+  };
+  zone.addEventListener('pointermove', move);
+  zone.addEventListener('pointerup', up); zone.addEventListener('pointercancel', up); zone.addEventListener('lostpointercapture', up);
+  bp.addEventListener('pointerdown', e => { e.preventDefault(); Snd.ensure(); pads[s].place = true; });
+  bd.addEventListener('pointerdown', e => { e.preventDefault(); Snd.ensure(); pads[s].dash = true; });
+  for (const b of [bp, bd]) b.addEventListener('contextmenu', e => e.preventDefault());
+  return st;
+});
+let touchUI = false;
+try { touchUI = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0; } catch (e) {}
+addEventListener('touchstart', () => { if (!touchUI) { touchUI = true; layout(); } Snd.ensure(); }, { passive: true });
+addEventListener('pointerdown', () => Snd.ensure());
+
+// ---------- 8) 렌더링 ----------
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+let L = { W: 0, H: 0, dpr: 1, ax: 0, ay: 0, as: 100, ts: 10, topH: 50, chipY: 52, chipH: 36, hintY: 0, touch: false };
+let floorCache = null;
+
+function readSafe() {
+  const cs = getComputedStyle(document.getElementById('safeProbe'));
+  return { t: parseFloat(cs.paddingTop) || 0, r: parseFloat(cs.paddingRight) || 0, b: parseFloat(cs.paddingBottom) || 0, l: parseFloat(cs.paddingLeft) || 0 };
+}
+function layout() {
+  const W = innerWidth, H = innerHeight, dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  const sf = readSafe(), topH = 50 + sf.t, chipH = 38, inGame = ['play', 'pause'].includes(G.screen);
+  const humans = G.players.length ? humanCount() : 1;
+  const portrait = H >= W * 0.95;
+  const show = touchUI && inGame;
+  let as, ax, ay; const chipY = topH + 2;
+  const place = (el, x, y, w, h) => { el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = h + 'px'; };
+  padEls.forEach((p, i) => { const vis = show && i < humans; p.zone.classList.toggle('hidden', !vis); p.bp.classList.toggle('hidden', !vis); p.bd.classList.toggle('hidden', !vis); });
+  let hintY = 0;
+  if (touchUI && portrait) {
+    const minCtrl = 170 + sf.b;
+    as = Math.floor(Math.min(W - 16 - sf.l - sf.r, H - topH - chipH - minCtrl - 10));
+    ax = Math.round((W - as) / 2); ay = topH + chipH + 4;
+    const cy0 = ay + as + 10, ch = H - cy0 - sf.b - 8, cw = W - sf.l - sf.r - 16, cx0 = 8 + sf.l;
+    if (humans >= 2) {
+      const hw = (cw - 10) / 2;
+      for (let s = 0; s < 2; s++) {
+        const x0 = cx0 + s * (hw + 10), bw = Math.min(64, hw * 0.36), zw = hw - bw - 8;
+        const zx = s === 0 ? x0 : x0 + bw + 8, bx = s === 0 ? x0 + zw + 8 : x0;
+        place(padEls[s].zone, zx, cy0, zw, ch);
+        const b1 = Math.max(52, Math.min(bw, ch / 2 - 8));
+        place(padEls[s].bp, bx + (bw - b1) / 2, cy0 + ch / 2 - b1 - 4, b1, b1);
+        place(padEls[s].bd, bx + (bw - b1) / 2, cy0 + ch / 2 + 4, b1, b1);
+      }
+    } else {
+      const bw = Math.min(170, cw * 0.42), zw = cw - bw - 10;
+      place(padEls[0].zone, cx0, cy0, zw, ch);
+      const bpS = Math.min(84, ch * 0.6, bw * 0.55), bdS = Math.min(66, ch * 0.45);
+      const bx = cx0 + zw + 10;
+      place(padEls[0].bp, bx + bw - bpS - 4, cy0 + ch - bpS - 8, bpS, bpS);
+      place(padEls[0].bd, bx + 4, cy0 + Math.max(4, ch - bpS - bdS - 2), bdS, bdS);
+    }
+  } else if (touchUI) {
+    const side = Math.min(220, Math.max(150, W * 0.24));
+    as = Math.floor(Math.min(H - topH - chipH - 8 - sf.b, W - side * 2 - sf.l - sf.r - 12));
+    ax = Math.round((W - as) / 2); ay = topH + chipH + 2;
+    const top = topH + 4, h = H - top - sf.b - 8;
+    if (humans >= 2) {
+      for (let s = 0; s < 2; s++) {
+        const x0 = s === 0 ? 6 + sf.l : W - side - sf.r - 6 + 6, w = side - 12, zh = h * 0.62, b = Math.min(60, (h - zh) - 8, w / 2 - 6);
+        place(padEls[s].zone, x0, top, w, zh);
+        place(padEls[s].bp, x0 + (s === 0 ? w - b * 2 - 6 : 0), top + zh + 8, b, b);
+        place(padEls[s].bd, x0 + (s === 0 ? w - b : b + 6), top + zh + 8, b, b);
+      }
+    } else {
+      place(padEls[0].zone, 6 + sf.l, top + h * 0.2, side - 12, h * 0.8);
+      const bpS = Math.min(86, side * 0.5), bdS = Math.min(68, side * 0.4), rx = W - sf.r - 10;
+      place(padEls[0].bp, rx - bpS, top + h - bpS - 6, bpS, bpS);
+      place(padEls[0].bd, rx - bpS - bdS - 10, top + h - bdS - bpS * 0.5, bdS, bdS);
+    }
+  } else {
+    as = Math.floor(Math.min(W - 32, H - topH - chipH - 40, 760));
+    ax = Math.round((W - as) / 2); ay = topH + chipH + 4; hintY = ay + as + 20;
+  }
+  padEls.forEach((p, i) => {
+    const w = parseFloat(p.zone.style.width) || 120, h = parseFloat(p.zone.style.height) || 120;
+    p.rest = [w / 2, Math.max(52, h / 2 - 6)];
+    if (p.id === null) { p.base.style.left = p.rest[0] + 'px'; p.base.style.top = p.rest[1] + 'px'; }
+  });
+  const chipW = touchUI && !portrait ? Math.max(as, W - 2 * Math.min(220, Math.max(150, W * 0.24)) - 8) : W - 16 - sf.l - sf.r;
+  L = { W, H, dpr, ax, ay, as, ts: as / N, topH, chipY, chipH, chipW, hintY, touch: show, portrait };
+  const ff = document.getElementById('ffBtn'); ff.style.left = (ax + as / 2) + 'px'; ff.style.top = (ay + as - 60) + 'px';
+  floorCache = null;
+}
+addEventListener('resize', () => layout());
+addEventListener('orientationchange', () => setTimeout(layout, 120));
+
+const AX = x => L.ax + x * L.ts, AY = y => L.ay + y * L.ts;
+
+function buildFloor() {
+  const c = document.createElement('canvas'), ts = L.ts, d = L.dpr;
+  c.width = Math.ceil(L.as * d) + 2; c.height = Math.ceil(L.as * d) + 2;
+  const g = c.getContext('2d'); g.scale(d, d);
+  const m = G.map;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const i = y * N + x, px = x * ts, py = y * ts;
+    if (m.water[i]) {
+      const gr = g.createLinearGradient(px, py, px + ts, py + ts); gr.addColorStop(0, '#123d63'); gr.addColorStop(1, '#0d2c4a');
+      g.fillStyle = gr; g.fillRect(px, py, ts + 0.5, ts + 0.5);
+    } else {
+      g.fillStyle = (x + y) % 2 ? '#132033' : '#111c2d'; g.fillRect(px, py, ts, ts);
+      g.strokeStyle = 'rgba(100,206,235,.07)'; g.lineWidth = 1; g.strokeRect(px + 0.5, py + 0.5, ts - 1, ts - 1);
+      g.fillStyle = 'rgba(100,206,235,.08)'; g.fillRect(px + ts * 0.47, py + ts * 0.47, ts * 0.06, ts * 0.06);
+    }
+  }
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const i = y * N + x; if (!m.wall[i]) continue;
+    const px = x * ts, py = y * ts, p = ts * 0.08;
+    g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(px + p + 3, py + p + 4, ts - p * 2, ts - p * 2);
+    const gr = g.createLinearGradient(px, py, px, py + ts); gr.addColorStop(0, '#3a5576'); gr.addColorStop(1, '#22344c');
+    g.fillStyle = gr; g.fillRect(px + p, py + p, ts - p * 2, ts - p * 2);
+    g.strokeStyle = '#4d6a8d'; g.lineWidth = 1.5; g.strokeRect(px + p, py + p, ts - p * 2, ts - p * 2);
+    g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1;
+    for (let k = 1; k < 4; k++) { g.beginPath(); g.moveTo(px + p + 3, py + p + k * (ts - 2 * p) / 4); g.lineTo(px + ts - p - 3, py + p + k * (ts - 2 * p) / 4); g.stroke(); }
+    // 번개 마크
+    g.fillStyle = '#f2c66d'; g.beginPath();
+    const cx = px + ts / 2, cy = py + ts / 2, s = ts * 0.22;
+    g.moveTo(cx + s * 0.2, cy - s); g.lineTo(cx - s * 0.5, cy + s * 0.1); g.lineTo(cx, cy + s * 0.1); g.lineTo(cx - s * 0.2, cy + s); g.lineTo(cx + s * 0.5, cy - s * 0.1); g.lineTo(cx, cy - s * 0.1); g.closePath(); g.fill();
+  }
+  floorCache = c;
+}
+
+function updateFx(dt) {
+  const f = G.fx;
+  for (const s of f.strikes) s.life -= dt;
+  f.strikes = f.strikes.filter(s => s.life > 0);
+  for (const s of f.dis) s.life -= dt;
+  f.dis = f.dis.filter(s => s.life > 0);
+  for (const p of f.parts) { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.92; p.vy *= 0.92; }
+  f.parts = f.parts.filter(p => p.life > 0);
+  for (const t of f.texts) { t.life -= dt; t.y -= dt * 0.6; }
+  f.texts = f.texts.filter(t => t.life > 0);
+  G.flash = Math.max(0, G.flash - dt * 2.6);
+  G.shake = Math.max(0, G.shake - dt * 40);
+}
+function sparks(x, y, n, c, sp) {
+  if (G.fx.parts.length > 500) return;
+  for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, v = sp * (0.3 + Math.random()); G.fx.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.3 + Math.random() * 0.4, max: 0.7, c, s: 0.06 + Math.random() * 0.05 }); }
+}
+function floatText(x, y, text, c) { G.fx.texts.push({ x, y, text, c, life: 1.3, max: 1.3 }); }
+function queueTip(key, text) {
+  if (G.tipsShown[key]) return; G.tipsShown[key] = 1;
+  if (!G.players.some(p => p.human)) return;
+  G.tipQ.push(text);
+}
+
+let titleBolts = [], titleT = 0, titleNext = 0.5;
+function render(dt) {
+  const { W, H, dpr } = L;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  if (!['play', 'pause', 'result'].includes(G.screen) || !G.players.length) { renderTitleBg(dt); return; }
+  if (!floorCache) buildFloor();
+  const now = performance.now() / 1000;
+  ctx.save();
+  if (G.shake > 0 && !RM) ctx.translate((Math.random() - 0.5) * G.shake, (Math.random() - 0.5) * G.shake);
+  const ts = L.ts;
+  // 경기장 테두리 빛
+  ctx.shadowColor = 'rgba(100,206,235,.35)'; ctx.shadowBlur = 24; ctx.fillStyle = '#0c1626';
+  ctx.fillRect(L.ax - 4, L.ay - 4, L.as + 8, L.as + 8); ctx.shadowBlur = 0;
+  ctx.drawImage(floorCache, L.ax, L.ay, floorCache.width / dpr, floorCache.height / dpr);
+  ctx.strokeStyle = '#2c415b'; ctx.lineWidth = 2; ctx.strokeRect(L.ax - 1, L.ay - 1, L.as + 2, L.as + 2);
+  // 물 반짝임
+  if (G.map.comps.length) {
+    ctx.strokeStyle = 'rgba(140,210,255,.18)'; ctx.lineWidth = 1;
+    for (let i = 0; i < N * N; i++) if (G.map.water[i]) {
+      const x = AX(i % N), y = AY((i / N) | 0), o = (Math.sin(now * 2 + i) * 0.5 + 0.5) * ts * 0.5;
+      ctx.beginPath(); ctx.moveTo(x + ts * 0.15 + o * 0.3, y + ts * 0.35 + o * 0.2); ctx.lineTo(x + ts * 0.45 + o * 0.3, y + ts * 0.35 + o * 0.2); ctx.stroke();
+    }
+  }
+  // 전기 구역(좁아지는 맵)
+  if (G.map.shrink) {
+    for (let i = 0; i < N * N; i++) {
+      const x = AX(i % N), y = AY((i / N) | 0);
+      if (isDead(i)) {
+        ctx.fillStyle = `rgba(242,198,109,${0.22 + 0.1 * Math.sin(now * 9 + i)})`; ctx.fillRect(x, y, ts, ts);
+        ctx.strokeStyle = 'rgba(255,240,180,.5)'; ctx.lineWidth = 1.2; ctx.beginPath();
+        ctx.moveTo(x + ts * 0.2, y + ts * 0.3); ctx.lineTo(x + ts * 0.5, y + ts * (0.5 + 0.2 * Math.sin(now * 20 + i))); ctx.lineTo(x + ts * 0.8, y + ts * 0.6); ctx.stroke();
+      } else if (isWarnDead(i)) {
+        if (Math.sin(now * 14) > -0.2) { ctx.strokeStyle = 'rgba(242,198,109,.85)'; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, ts - 4, ts - 4); }
+      }
+    }
+  }
+  // 낙뢰 예고
+  for (const pt of G.pats) drawTelegraph(pt, now);
+  // 아이템
+  for (const it of G.items) drawItem(it, now);
+  // 피뢰침
+  for (const r of G.rods) drawRod(r, now);
+  // 플레이어 (죽은 사람 먼저)
+  for (const p of G.players) if (!p.alive) drawPlayer(p, now);
+  for (const p of G.players) if (p.alive) drawPlayer(p, now);
+  // 낙뢰 연출
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (const s of G.fx.strikes) drawStrike(s);
+  for (const d of G.fx.dis) drawDischarge(d);
+  for (const p of G.fx.parts) { ctx.globalAlpha = Math.max(0, p.life / p.max); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(AX(p.x), AY(p.y), p.s * ts, 0, 7); ctx.fill(); }
+  ctx.restore(); ctx.globalAlpha = 1;
+  for (const t of G.fx.texts) {
+    ctx.globalAlpha = Math.min(1, t.life / t.max * 2); ctx.font = `800 ${Math.max(12, ts * 0.38)}px system-ui,'Malgun Gothic',sans-serif`;
+    ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(5,10,20,.85)'; ctx.strokeText(t.text, AX(t.x), AY(t.y)); ctx.fillStyle = t.c; ctx.fillText(t.text, AX(t.x), AY(t.y));
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  drawChips(now);
+  drawOverlayText(now);
+  if (L.hintY && L.hintY < L.H - 8) {
+    ctx.font = `500 13px system-ui,'Malgun Gothic',sans-serif`; ctx.textAlign = 'center'; ctx.fillStyle = '#a5b7ca';
+    const h = humanCount() >= 2 ? 'P1: WASD 이동 · F 설치 · G 대시   |   P2: 방향키 이동 · Enter 설치 · / 대시   |   Esc 일시정지'
+      : '이동 WASD/방향키 · 피뢰침 설치 Space · 대시 Shift · 일시정지 Esc';
+    ctx.fillText(h, L.W / 2, L.hintY);
+  }
+  if (G.flash > 0) { ctx.fillStyle = `rgba(230,240,255,${G.flash})`; ctx.fillRect(0, 0, L.W, L.H); }
+}
+
+function mixColor(t) { // 노랑 → 빨강
+  const a = [242, 198, 109], b = [231, 90, 84];
+  return `${Math.round(lerp(a[0], b[0], t))},${Math.round(lerp(a[1], b[1], t))},${Math.round(lerp(a[2], b[2], t))}`;
+}
+function drawTelegraph(pt, now) {
+  const ts = L.ts, p = clamp(pt.t / pt.warn, 0, 1), res = pt.res, col = mixColor(p);
+  const blink = p > 0.7 ? (Math.sin(now * 30) * 0.5 + 0.5) * 0.25 : 0;
+  ctx.fillStyle = `rgba(${col},${0.14 + p * 0.42 + blink})`;
+  ctx.strokeStyle = `rgba(${col},${0.5 + p * 0.5})`; ctx.lineWidth = 1.5;
+  for (let i = 0; i < N * N; i++) {
+    if (!res.hit[i]) continue;
+    const x = AX(i % N), y = AY((i / N) | 0);
+    ctx.fillRect(x + 1, y + 1, ts - 2, ts - 2);
+    const ins = ts * 0.5 * (1 - p) * 0.8;   // 안쪽에서 바깥으로 차오르는 사각형
+    ctx.strokeRect(x + 2 + ins * 0.4, y + 2 + ins * 0.4, ts - 4 - ins * 0.8, ts - 4 - ins * 0.8);
+  }
+  // 피뢰침이 끌어간 칸: 금색 점선 + 피뢰침으로 가는 선
+  const seen = new Set();
+  ctx.setLineDash([3, 3]); ctx.strokeStyle = 'rgba(242,198,109,.55)'; ctx.lineWidth = 1;
+  for (let i = 0; i < N * N; i++) {
+    if (res.div[i] < 0) continue;
+    const x = AX(i % N), y = AY((i / N) | 0);
+    ctx.strokeRect(x + 3, y + 3, ts - 6, ts - 6);
+    if (!seen.has(res.div[i])) {
+      seen.add(res.div[i]); const r = G.rods.find(q => q.id === res.div[i]);
+      if (r) { ctx.beginPath(); ctx.moveTo(x + ts / 2, y + ts / 2); ctx.lineTo(AX(r.x), AY(r.y - 0.7)); ctx.stroke(); }
+    }
+  }
+  ctx.setLineDash([]);
+  // 카운트다운 링
+  let any = false; for (let i = 0; i < N * N; i++) if (res.hit[i]) { any = true; break; }
+  if (!any) return;
+  const cx = AX(pt.cx), cy = AY(pt.cy), rr = ts * 0.42, left = Math.max(0, pt.warn - pt.t);
+  ctx.fillStyle = 'rgba(10,16,28,.72)'; ctx.beginPath(); ctx.arc(cx, cy, rr, 0, 7); ctx.fill();
+  ctx.strokeStyle = `rgb(${col})`; ctx.lineWidth = Math.max(2.5, ts * 0.09);
+  ctx.beginPath(); ctx.arc(cx, cy, rr, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - p)); ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.font = `800 ${Math.max(10, ts * 0.3)}px system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(left.toFixed(1), cx, cy + 1); ctx.textBaseline = 'alphabetic';
+}
+function drawItem(it, now) {
+  const ts = L.ts, x = AX(it.x), y = AY(it.y) + Math.sin(now * 3 + it.ti) * ts * 0.06;
+  const glow = it.type === 'rod' ? '242,198,109' : it.type === 'shoes' ? '120,226,174' : '224,138,74';
+  const gr = ctx.createRadialGradient(x, y, 0, x, y, ts * 0.5); gr.addColorStop(0, `rgba(${glow},.45)`); gr.addColorStop(1, `rgba(${glow},0)`);
+  ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, ts * 0.5, 0, 7); ctx.fill();
+  ctx.save(); ctx.translate(x, y); const s = ts * 0.3;
+  if (it.type === 'rod') {
+    ctx.rotate(-0.6); ctx.fillStyle = '#b8c4d0'; ctx.fillRect(-s * 0.12, -s, s * 0.24, s * 1.9);
+    ctx.fillStyle = '#f2c66d'; ctx.beginPath(); ctx.moveTo(0, -s * 1.35); ctx.lineTo(s * 0.25, -s * 0.9); ctx.lineTo(-s * 0.25, -s * 0.9); ctx.fill();
+    ctx.fillStyle = '#5b6b7d'; ctx.fillRect(-s * 0.4, s * 0.85, s * 0.8, s * 0.2);
+  } else if (it.type === 'shoes') {
+    ctx.fillStyle = '#2b2f36'; ctx.strokeStyle = '#78e2ae'; ctx.lineWidth = 1.5; ctx.beginPath();
+    ctx.moveTo(-s * 0.7, -s * 0.8); ctx.lineTo(-s * 0.05, -s * 0.8); ctx.lineTo(0, s * 0.1); ctx.lineTo(s * 0.8, s * 0.35); ctx.lineTo(s * 0.8, s * 0.75); ctx.lineTo(-s * 0.7, s * 0.75); ctx.closePath(); ctx.fill(); ctx.stroke();
+  } else {
+    ctx.strokeStyle = '#e08a4a'; ctx.lineWidth = Math.max(2, s * 0.22); ctx.beginPath();
+    for (let a = 0; a < Math.PI * 4; a += 0.2) { const r = s * (0.25 + a / (Math.PI * 4) * 0.6); const px = Math.cos(a) * r, py = Math.sin(a) * r * 0.8; a ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawRod(r, now) {
+  const ts = L.ts, x = AX(r.x), y = AY(r.y), owner = G.players[r.owner], col = owner ? owner.color : '#f2c66d';
+  // 범위 원
+  ctx.setLineDash([5, 5]); ctx.lineDashOffset = -now * 12; ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = r.wired ? 2.5 : 1.5;
+  ctx.beginPath(); ctx.arc(x, y, r.attract * ts, 0, 7); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  // 방전 예고(주황 고리)
+  if (r.threat > 0) {
+    const pulse = 0.5 + 0.5 * Math.sin(now * 18);
+    ctx.fillStyle = `rgba(231,125,120,${0.12 + r.threat * 0.22 + pulse * 0.08})`; ctx.beginPath(); ctx.arc(x, y, r.kill * ts, 0, 7); ctx.fill();
+    ctx.strokeStyle = `rgba(240,150,80,${0.5 + pulse * 0.4})`; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y, r.stun * ts, 0, 7); ctx.stroke();
+    ctx.strokeStyle = `rgba(231,90,84,${0.6 + pulse * 0.4})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r.kill * ts, 0, 7); ctx.stroke();
+  }
+  // 받침 · 기둥 · 끝
+  ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x, y + ts * 0.12, ts * 0.32, ts * 0.12, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#5b6b7d'; ctx.fillRect(x - ts * 0.26, y + ts * 0.02, ts * 0.52, ts * 0.12);
+  ctx.fillStyle = col; ctx.fillRect(x - ts * 0.26, y + ts * 0.12, ts * 0.52, ts * 0.04);
+  const gr = ctx.createLinearGradient(x - ts * 0.05, 0, x + ts * 0.05, 0); gr.addColorStop(0, '#d5dde6'); gr.addColorStop(1, '#7d8b99');
+  ctx.fillStyle = gr; ctx.fillRect(x - ts * 0.045, y - ts * 0.72, ts * 0.09, ts * 0.76);
+  if (r.wired) { ctx.strokeStyle = '#e08a4a'; ctx.lineWidth = 2; ctx.beginPath(); for (let k = 0; k < 5; k++) { ctx.moveTo(x - ts * 0.07, y - ts * 0.1 - k * ts * 0.1); ctx.lineTo(x + ts * 0.07, y - ts * 0.15 - k * ts * 0.1); } ctx.stroke(); }
+  const tg = ctx.createRadialGradient(x, y - ts * 0.76, 0, x, y - ts * 0.76, ts * 0.35); tg.addColorStop(0, 'rgba(255,240,180,.95)'); tg.addColorStop(1, 'rgba(242,198,109,0)');
+  ctx.fillStyle = tg; ctx.beginPath(); ctx.arc(x, y - ts * 0.76, ts * 0.35, 0, 7); ctx.fill();
+  ctx.fillStyle = '#f2c66d'; ctx.beginPath(); ctx.moveTo(x, y - ts * 0.92); ctx.lineTo(x + ts * 0.08, y - ts * 0.7); ctx.lineTo(x - ts * 0.08, y - ts * 0.7); ctx.fill();
+  for (let k = 0; k < r.charges; k++) { ctx.fillStyle = col; ctx.fillRect(x - ts * 0.2 + k * ts * 0.15, y + ts * 0.2, ts * 0.1, ts * 0.06); }
+}
+function drawPlayer(p, now) {
+  const ts = L.ts, x = AX(p.x), y = AY(p.y), r = P_R * ts * 1.1;
+  ctx.textAlign = 'center';
+  if (!p.alive) {
+    ctx.globalAlpha = 0.6; ctx.fillStyle = '#1a222d'; ctx.beginPath(); ctx.ellipse(x, y + r * 0.3, r * 1.1, r * 0.55, 0, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#5b6b7d'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - r * 0.45, y - r * 0.15); ctx.lineTo(x + r * 0.45, y + r * 0.75); ctx.moveTo(x + r * 0.45, y - r * 0.15); ctx.lineTo(x - r * 0.45, y + r * 0.75); ctx.stroke();
+    ctx.globalAlpha = 1; return;
+  }
+  ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(x, y + r * 0.85, r * 0.95, r * 0.35, 0, 0, 7); ctx.fill();
+  if (p.invuln > 0 && Math.floor(now * 14) % 2) ctx.globalAlpha = 0.45;
+  if (p.shoes) { ctx.strokeStyle = '#78e2ae'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(x, y + r * 0.8, r * 1.15, r * 0.45, 0, 0, 7); ctx.stroke(); }
+  // 몸
+  const gr = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
+  gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.25, p.color); gr.addColorStop(1, shade(p.color));
+  ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+  ctx.strokeStyle = p.human ? '#ffffff' : 'rgba(10,16,28,.8)'; ctx.lineWidth = p.human ? 2.2 : 1.5; ctx.stroke();
+  // 눈
+  const fm = Math.hypot(p.fx, p.fy) || 1, ex = p.fx / fm * r * 0.32, ey = p.fy / fm * r * 0.25;
+  ctx.fillStyle = '#0a1320';
+  for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(x + ex + s * r * 0.3, y + ey - r * 0.1, r * 0.13, 0, 7); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  // 마비
+  if (p.stun > 0) {
+    ctx.strokeStyle = '#f2c66d'; ctx.lineWidth = 2;
+    for (let k = 0; k < 3; k++) { const a = now * 8 + k * 2.1; ctx.beginPath(); const sx = x + Math.cos(a) * r * 1.2, sy = y + Math.sin(a) * r * 1.2; ctx.moveTo(sx, sy); ctx.lineTo(sx + 4, sy - 5); ctx.lineTo(sx - 2, sy - 6); ctx.lineTo(sx + 2, sy - 11); ctx.stroke(); }
+  }
+  // 이름표
+  const fs = Math.max(10, ts * 0.3);
+  ctx.font = `700 ${fs}px system-ui,'Malgun Gothic',sans-serif`;
+  const tw = ctx.measureText(p.name).width + 8, ty = p.y < 0.95 ? y + r + fs * 1.1 + 2 : y - r - fs * 0.6 - 2;
+  ctx.fillStyle = 'rgba(8,14,24,.75)'; ctx.fillRect(x - tw / 2, ty - fs * 0.85, tw, fs * 1.15);
+  ctx.fillStyle = p.color; ctx.fillText(p.name, x, ty);
+  // 들고 있는 피뢰침
+  for (let k = 0; k < p.rods; k++) { ctx.fillStyle = '#f2c66d'; ctx.fillRect(x + r * 0.95 + k * 4, y - r * 0.6, 2.5, r * 1.1); }
+  if (p.wire) { ctx.strokeStyle = '#e08a4a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x - r * 1.2, y, r * 0.25, 0, 7); ctx.stroke(); }
+}
+function shade(hex) { const n = parseInt(hex.slice(1), 16); const f = 0.45; return `rgb(${((n >> 16) & 255) * f | 0},${((n >> 8) & 255) * f | 0},${(n & 255) * f | 0})`; }
+function strokePath(pts, w, color) {
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.beginPath();
+  pts.forEach((q, i) => { const X = AX(q[0]), Y = AY(q[1]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }); ctx.stroke();
+}
+function drawStrike(s) {
+  const a = s.life / s.max, ts = L.ts;
+  ctx.fillStyle = `rgba(200,230,255,${a * 0.55})`;
+  for (let i = 0; i < N * N; i++) if (s.mask[i]) ctx.fillRect(AX(i % N), AY((i / N) | 0), ts, ts);
+  if (a < 0.25) return;
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.save(); ctx.beginPath(); ctx.rect(L.ax - ts, 0, L.as + ts * 2, L.ay + L.as + ts); ctx.clip();
+  for (const b of s.bolts) {
+    const c = b.rod ? '242,198,109' : '140,200,255';
+    strokePath(b.pts, ts * 0.4 * a, `rgba(${c},${0.25 * a})`);
+    strokePath(b.pts, ts * 0.14, `rgba(${c},${0.8 * a})`);
+    strokePath(b.pts, Math.max(1.5, ts * 0.05), `rgba(255,255,255,${a})`);
+    for (const q of b.br) strokePath(q, Math.max(1, ts * 0.04), `rgba(${c},${0.7 * a})`);
+  }
+  ctx.restore();
+}
+function drawDischarge(d) {
+  const a = d.life / d.max, ts = L.ts, x = AX(d.x), y = AY(d.y), pr = 1 - a;
+  ctx.strokeStyle = `rgba(242,198,109,${a})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, d.r * ts * (0.3 + pr * 0.8), 0, 7); ctx.stroke();
+  ctx.fillStyle = `rgba(242,198,109,${a * 0.18})`; ctx.beginPath(); ctx.arc(x, y, d.k * ts, 0, 7); ctx.fill();
+  for (const arc of d.arcs) { strokePath(arc, 4, `rgba(242,198,109,${a * 0.4})`); strokePath(arc, 1.5, `rgba(255,255,230,${a})`); }
+}
+
+function drawChips(now) {
+  const ps = G.players, n = ps.length, pad = 8, W = L.W;
+  const totalW = Math.min(L.chipW || W - 16, 720), x0 = (W - totalW) / 2, cw = (totalW - pad * (n - 1)) / n, h = L.chipH - 6, y = L.chipY;
+  ps.forEach((p, i) => {
+    const x = x0 + i * (cw + pad);
+    ctx.globalAlpha = p.alive ? 1 : 0.45;
+    ctx.fillStyle = 'rgba(21,34,56,.92)'; roundRect(x, y, cw, h, 9); ctx.fill();
+    ctx.strokeStyle = p.alive ? p.color : '#2c415b'; ctx.lineWidth = 1.5; roundRect(x, y, cw, h, 9); ctx.stroke();
+    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(x + 12, y + h / 2, 6, 0, 7); ctx.fill();
+    ctx.font = `700 ${cw < 90 ? 11 : 13}px system-ui,'Malgun Gothic',sans-serif`; ctx.textAlign = 'left'; ctx.fillStyle = '#eaf1fb';
+    ctx.fillText(p.name, x + 22, y + h / 2 - (G.mode === 'solo' ? -4 : 1));
+    if (G.mode === 'solo') {
+      for (let k = 0; k < SOLO_HP; k++) drawHeart(x + 60 + k * 18, y + h / 2, 7, k < p.hp);
+    } else {
+      for (let k = 0; k < WIN_TARGET; k++) { ctx.fillStyle = k < p.wins ? '#f2c66d' : '#2c415b'; ctx.beginPath(); ctx.arc(x + 25 + k * 9, y + h - 8, 3, 0, 7); ctx.fill(); }
+    }
+    // 아이템 아이콘
+    let ix = x + cw - 10; ctx.textAlign = 'right'; ctx.font = `700 11px system-ui,sans-serif`;
+    if (!p.alive) { ctx.fillStyle = '#e77d78'; ctx.fillText('탈락', ix, y + h / 2 + 4); }
+    else {
+      if (p.rods) { ctx.fillStyle = '#f2c66d'; ctx.fillRect(ix - 3, y + 6, 3, h - 12); ctx.fillText('×' + p.rods, ix - 5, y + h / 2 + 4); ix -= 26; }
+      if (p.shoes) { ctx.fillStyle = '#78e2ae'; ctx.fillRect(ix - 9, y + h / 2 - 2, 9, 7); ctx.fillRect(ix - 9, y + h / 2 - 7, 4, 6); ix -= 14; }
+      if (p.wire && ix > x + 50) { ctx.strokeStyle = '#e08a4a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ix - 5, y + h / 2, 4, 0, 7); ctx.stroke(); }
+    }
+    ctx.globalAlpha = 1;
+  });
+}
+function drawHeart(x, y, s, full) {
+  ctx.fillStyle = full ? '#e77d78' : '#2c415b'; ctx.beginPath();
+  ctx.moveTo(x, y + s * 0.8); ctx.bezierCurveTo(x - s * 1.4, y - s * 0.2, x - s * 0.6, y - s * 1.2, x, y - s * 0.4);
+  ctx.bezierCurveTo(x + s * 0.6, y - s * 1.2, x + s * 1.4, y - s * 0.2, x, y + s * 0.8); ctx.fill();
+}
+function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+function wrapText(text, maxW) {
+  const words = text.split(' '), lines = []; let cur = '';
+  for (const w of words) { const t = cur ? cur + ' ' + w : w; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; }
+  if (cur) lines.push(cur); return lines;
+}
+function drawOverlayText(now) {
+  const cx = L.ax + L.as / 2, cy = L.ay + L.as / 2;
+  ctx.textAlign = 'center';
+  if (G.phase === 'countdown') {
+    const c = Math.ceil(G.phaseT);
+    ctx.font = `900 ${L.as * 0.22}px system-ui,sans-serif`; ctx.fillStyle = '#f2c66d'; ctx.shadowColor = 'rgba(242,198,109,.8)'; ctx.shadowBlur = 24;
+    ctx.fillText(String(c), cx, cy + L.as * 0.12); ctx.shadowBlur = 0;
+  }
+  if (G.banner) {
+    const b = G.banner, a = Math.min(1, b.t * 3);
+    ctx.globalAlpha = a;
+    const by = G.phase === 'countdown' ? cy - L.as * 0.2 : cy;
+    ctx.fillStyle = 'rgba(8,14,24,.72)'; ctx.fillRect(L.ax, by - L.as * 0.1, L.as, L.as * (b.small ? 0.17 : 0.13));
+    ctx.font = `900 ${Math.min(42, L.as * 0.09)}px system-ui,'Malgun Gothic',sans-serif`; ctx.fillStyle = b.color || '#eaf1fb';
+    ctx.fillText(b.big, cx, by);
+    if (b.small) { ctx.font = `600 ${Math.min(17, L.as * 0.042)}px system-ui,'Malgun Gothic',sans-serif`; ctx.fillStyle = '#a5b7ca'; ctx.fillText(b.small, cx, by + L.as * 0.055); }
+    ctx.globalAlpha = 1;
+  }
+  if (G.tip) {
+    const a = Math.min(1, G.tip.t * 2, (4.2 - G.tip.t) * 4);
+    ctx.globalAlpha = a; ctx.font = `600 ${Math.max(12, Math.min(15, L.as * 0.036))}px system-ui,'Malgun Gothic',sans-serif`;
+    const lines = wrapText(G.tip.text, L.as - 40), lh = Math.max(16, Math.min(20, L.as * 0.048)), h = lines.length * lh + 14;
+    const topBusy = G.players.some(p => p.human && p.alive && p.y < 3.2);   // 사람 플레이어를 가리지 않게 위/아래 선택
+    const y = topBusy ? L.ay + L.as - h - 8 : L.ay + 8;
+    ctx.fillStyle = 'rgba(10,18,32,.9)'; roundRect(L.ax + 10, y, L.as - 20, h, 10); ctx.fill();
+    ctx.strokeStyle = '#f2c66d'; ctx.lineWidth = 1.2; roundRect(L.ax + 10, y, L.as - 20, h, 10); ctx.stroke();
+    ctx.fillStyle = '#eaf1fb'; lines.forEach((l, i) => ctx.fillText(l, cx, y + 7 + lh * (i + 0.78)));
+    ctx.globalAlpha = 1;
+  }
+}
+
+function renderTitleBg(dt) {
+  const { W, H } = L; titleT += dt;
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0e1a2c'); g.addColorStop(1, '#0a1320'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // 바닥 격자(원근)
+  ctx.strokeStyle = 'rgba(100,206,235,.1)'; ctx.lineWidth = 1; const hz = H * 0.62;
+  for (let i = -12; i <= 12; i++) { ctx.beginPath(); ctx.moveTo(W / 2 + i * 14, hz); ctx.lineTo(W / 2 + i * W * 0.18, H); ctx.stroke(); }
+  for (let k = 0; k < 9; k++) { const t = ((k + titleT * 0.4) % 9) / 9, yy = hz + (H - hz) * t * t; ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(W, yy); ctx.stroke(); }
+  // 비
+  ctx.strokeStyle = 'rgba(165,183,202,.12)';
+  for (let i = 0; i < 50; i++) { const x = (i * 97.3 + titleT * 260) % (W + 100) - 50, y = (i * 61.7 + titleT * 520) % H; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 4, y + 14); ctx.stroke(); }
+  titleNext -= dt;
+  if (titleNext <= 0) {
+    titleNext = 1 + Math.random() * 2.2;
+    const x = W * (0.1 + Math.random() * 0.8), pts = [[x, -10]]; let cx = x, cy = -10;
+    while (cy < hz) { cx += (Math.random() - 0.5) * 60; cy += 20 + Math.random() * 30; pts.push([cx, Math.min(cy, hz)]); }
+    titleBolts.push({ pts, life: 0.4 });
+    if (!RM) G.flash = 0.18;
+  }
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineJoin = 'round';
+  for (const b of titleBolts) {
+    b.life -= dt; const a = Math.max(0, b.life / 0.4);
+    for (const [w, c] of [[10, `rgba(140,200,255,${0.2 * a})`], [3, `rgba(200,230,255,${0.8 * a})`], [1.2, `rgba(255,255,255,${a})`]]) {
+      ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); b.pts.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke();
+    }
+  }
+  ctx.restore();
+  titleBolts = titleBolts.filter(b => b.life > 0);
+  G.flash = Math.max(0, G.flash - dt * 2);
+  if (G.flash > 0) { ctx.fillStyle = `rgba(200,225,255,${G.flash * 0.5})`; ctx.fillRect(0, 0, W, H); }
+}
+
+// ---------- 9) 화면 UI ----------
+const $ = id => document.getElementById(id);
+const SCREENS = { title: 'scrTitle', setup: 'scrSetup', how: 'scrHow', pause: 'scrPause', result: 'scrResult' };
+let howReturn = 'title';
+function showScreen(s) {
+  G.screen = s;
+  for (const k in SCREENS) $(SCREENS[k]).classList.toggle('hidden', k !== s);
+  const game = s === 'play' || s === 'pause';
+  $('hud').classList.toggle('hidden', !game);
+  $('touch').classList.toggle('hidden', s !== 'play');
+  if (s === 'title') renderBest();
+  layout();
+}
+function renderBest() {
+  const w = best.wins;
+  $('bestBox').innerHTML = `<span class="lbl">최고 기록</span>혼자 생존: <b>${best.solo ? best.solo.toFixed(1) + '초' : '-'}</b>${best.soloMap ? ' (' + best.soloMap + ')' : ''}<br>` +
+    `CPU 대전 우승: 쉬움 <b>${w.easy}</b> · 보통 <b>${w.normal}</b> · 어려움 <b>${w.hard}</b><br>한 경기 피뢰침 감전 최다: <b>${best.rodKO || 0}</b>회`;
+}
+function syncSound() {
+  const on = Snd.on;
+  document.querySelectorAll('.sndBtn').forEach(b => {
+    b.innerHTML = on ? '<svg class="ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>'
+      : '<svg class="ic" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
+    b.setAttribute('aria-label', on ? '소리 끄기' : '소리 켜기');
+  });
+}
+document.querySelectorAll('.sndBtn').forEach(b => b.addEventListener('click', () => { Snd.ensure(); Snd.on = !Snd.on; Store.set('sound', Snd.on); syncSound(); Snd.play('click'); }));
+
+function segInit(id, key, cb) {
+  const el = $(id);
+  const sync = () => el.querySelectorAll('button').forEach(b => b.classList.toggle('on', String(setup[key]) === b.dataset.v));
+  el.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setup[key] = isNaN(+b.dataset.v) ? b.dataset.v : +b.dataset.v; Snd.play('click'); sync(); cb && cb(); Store.set('setup', setup); });
+  sync(); return sync;
+}
+function setupNotes() {
+  const m = setup.mode;
+  $('modeNote').textContent = m === 'cpu' ? '4명 중 마지막 생존자가 라운드 승리. 3승 먼저 하면 우승!' :
+    m === 'duo' ? '한 기기에서 둘이 대결(휴대폰은 가로 화면 추천). 3승 먼저 하면 우승!' : '체력 3. 시간이 갈수록 낙뢰가 빨라져요. 몇 초 버틸까?';
+  $('cpuPanel').classList.toggle('hidden', m !== 'duo');
+  $('diffTitle').textContent = m === 'solo' ? '시작 난이도' : 'CPU 난이도';
+  $('diffPanel').classList.toggle('hidden', m === 'duo' && !+setup.duoCpu);
+  const mi = +setup.map; $('mapNote').textContent = mi < 0 ? (m === 'solo' ? '경기장을 무작위로 골라요.' : '라운드마다 경기장이 바뀌어요.') : MAPS[mi].desc;
+}
+segInit('segMode', 'mode', setupNotes); segInit('segDiff', 'diff'); segInit('segDuoCpu', 'duoCpu', setupNotes); segInit('segMap', 'map', setupNotes); setupNotes();
+
+$('btnStart').onclick = () => { Snd.ensure(); Snd.play('click'); showScreen('setup'); };
+$('btnHow').onclick = () => { Snd.ensure(); Snd.play('click'); howReturn = 'title'; showScreen('how'); };
+$('btnHowBack').onclick = () => { Snd.play('click'); showScreen(howReturn); };
+$('btnSetupBack').onclick = () => { Snd.play('click'); showScreen('title'); };
+$('btnGo').onclick = () => { Snd.ensure(); Snd.play('go'); Store.set('setup', setup); startMatch(); };
+$('btnPause').onclick = () => { Snd.play('click'); pauseGame(); };
+$('btnResume').onclick = () => { Snd.play('click'); resumeGame(); };
+$('btnRestart').onclick = () => { Snd.play('click'); startMatch(); };
+$('btnPauseHow').onclick = () => { Snd.play('click'); howReturn = 'pause'; showScreen('how'); };
+$('btnQuit').onclick = () => { Snd.play('click'); G.players = []; showScreen('title'); };
+$('btnAgain').onclick = () => { Snd.play('click'); startMatch(); };
+$('btnResTitle').onclick = () => { Snd.play('click'); G.players = []; showScreen('title'); };
+$('ffBtn').onclick = () => { G.speedMul = G.speedMul > 1 ? 1 : 4; Snd.play('click'); };
+
+function pauseGame() { if (G.screen !== 'play') return; keys.clear(); pads.forEach(p => { p.act = false; p.x = p.y = 0; }); showScreen('pause'); }
+function resumeGame() { if (G.screen !== 'pause') return; showScreen('play'); acc = 0; }
+document.addEventListener('visibilitychange', () => { if (document.hidden && G.screen === 'play') pauseGame(); });
+
+function showResult(r) {
+  showScreen('result');
+  $('resRec').innerHTML = r.newRec ? `<span class="newrec">${r.mode === 'solo' ? '최고 기록 갱신!' : (r.recText || '새 기록!')}</span>` : '';
+  if (r.mode === 'solo') {
+    $('resTitle').textContent = '생존 기록'; $('resBig').textContent = r.time.toFixed(1) + '초';
+    $('resBody').innerHTML = `<p class="best" style="margin:0">경기장: <b>${G.map.name}</b> · 시작 난이도: <b>${DIFF_NAME[G.diff]}</b><br>떨어진 낙뢰: <b>${G.stats.strikes}</b>번<br>최고 기록: <b>${best.solo.toFixed(1)}초</b></p>`;
+  } else {
+    const w = r.winner;
+    $('resTitle').textContent = '경기 결과';
+    $('resBig').textContent = !w ? '무승부' : (w.name === '나' ? '우승!' : w.name + ' 우승');
+    $('resBig').style.color = w ? w.color : '#a5b7ca';
+    const rows = [...G.players].sort((a, b) => b.wins - a.wins || b.rodKOs - a.rodKOs).map(p =>
+      `<tr><td><span class="dot" style="background:${p.color}"></span>${p.name}${p === w ? ' ★' : ''}</td><td>${p.wins}</td><td>${p.rodKOs}</td></tr>`).join('');
+    const tail = G.mode === 'cpu' ? `<p class="note">CPU 난이도: ${DIFF_NAME[G.diff]} · ${G.round}라운드 · 피뢰침 탈락 ${G.stats.rodKOs}회</p>`
+      : `<p class="note">${G.round}라운드 · 누적 우승 P1 ${best.duo[0] || 0} : P2 ${best.duo[1] || 0}</p>`;
+    $('resBody').innerHTML = `<table class="res"><tr><th style="text-align:left">선수</th><th>라운드 승</th><th>피뢰침 감전</th></tr>${rows}</table>${tail}`;
+  }
+  if (r.mode === 'solo' || (r.winner && r.winner.human)) Snd.play('win');
+}
+
+// HUD 텍스트 · 터치 버튼 상태
+let hudCache = '';
+function updateHud() {
+  if (G.screen !== 'play' && G.screen !== 'pause') return;
+  let s;
+  if (G.mode === 'solo') s = `생존 ${G.rt.toFixed(1)}초<small>최고 ${best.solo.toFixed(1)}초</small>`;
+  else { const m = Math.floor(G.rt / 60), sec = Math.floor(G.rt % 60); s = `라운드 ${G.round} · ${m}:${String(sec).padStart(2, '0')}<small>${G.map.name}</small>`; }
+  if (s !== hudCache) { hudCache = s; $('hudMid').innerHTML = s; }
+  $('ffBtn').classList.toggle('hidden', !(G.spectating && G.screen === 'play' && G.phase === 'live'));
+  $('ffBtn').textContent = G.speedMul > 1 ? '관전 중 · 보통 속도로 ▶' : '관전 중 · 빨리 감기 ▶▶';
+  if (L.touch) G.players.forEach(p => {
+    if (!p.human) return; const pe = padEls[p.slot]; if (!pe) return;
+    const t = p.rods + '개';
+    if (pe.bp.lastChild.textContent !== t) pe.bp.lastChild.textContent = t;
+    pe.bp.classList.toggle('has', p.rods > 0 && p.alive);
+    pe.bd.classList.toggle('cd', p.dashCd > 0 || !p.alive);
+  });
+}
+
+// ---------- 메인 루프 ----------
+let last = performance.now(), acc = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  let dt = (now - last) / 1000; last = now;
+  if (!(dt > 0)) dt = 0; if (dt > 0.1) dt = 0.1;
+  if (G.screen === 'play') {
+    acc += dt * G.speedMul; let n = 0;
+    while (acc >= STEP && n < 16) { step(STEP); acc -= STEP; n++; }
+    if (n >= 16) acc = 0;
+  }
+  updateHud();
+  render(dt);
+}
+
+// ---------- 10) 테스트 훅(읽기 전용 + 시간 진행) ----------
+window.__game = {
+  state: () => ({
+    screen: G.screen, mode: G.mode, diff: G.diff, phase: G.phase, round: G.round, roundTime: +G.rt.toFixed(2), map: G.map.name,
+    spectating: G.spectating, speedMul: G.speedMul, shrinkLevel: G.shrink.level, sudden: G.sudden,
+    players: G.players.map(p => ({ id: p.id, name: p.name, human: p.human, alive: p.alive, x: +p.x.toFixed(2), y: +p.y.toFixed(2), hp: p.hp,
+      rods: p.rods, wire: p.wire, shoes: p.shoes, stun: +p.stun.toFixed(2), wins: p.wins, rodKOs: p.rodKOs, survived: +p.survived.toFixed(1) })),
+    pats: G.pats.map(p => ({ kind: p.kind, left: +(p.warn - p.t).toFixed(2), hit: [...p.res.hit.keys()].filter(i => p.res.hit[i]), diverted: [...p.res.div].filter(v => v >= 0).length })),
+    rods: G.rods.map(r => ({ owner: r.owner, x: r.x, y: r.y, charges: r.charges, threat: +r.threat.toFixed(2) })),
+    items: G.items.map(i => ({ type: i.type, x: i.x, y: i.y })),
+    stats: { ...G.stats }, events: G.events.slice(-40), matchWinner: G.matchWinner ? G.matchWinner.name : null, result: G.result ? { newRec: G.result.newRec, time: G.result.time } : null,
+    best: JSON.parse(JSON.stringify(best)), layout: { ax: L.ax, ay: L.ay, as: L.as, ts: L.ts },
+  }),
+  start: opts => startMatch(opts),
+  advance: sec => { let n = Math.round(sec / STEP); while (n-- > 0 && G.screen === 'play') step(STEP); return window.__game.state().phase; },
+};
+
+syncSound();
+layout();
+showScreen('title');
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -1,0 +1,1782 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1320">
+<title>도시 전력 관리자</title>
+<style>
+:root{
+  --bg:#0a1320; --bg2:#101923; --panel:#152238; --line:#2c415b; --text:#eaf1fb; --dim:#a5b7ca;
+  --cyan:#64ceeb; --gold:#f2c66d; --green:#78e2ae; --red:#e77d78;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+  --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+  font-family:system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;background:var(--bg)}
+#top{position:fixed;left:0;right:0;top:0;padding:calc(var(--sat) + 6px) calc(var(--sar) + 6px) 0 calc(var(--sal) + 6px);
+  pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:5px;z-index:5}
+#hud{pointer-events:auto;width:100%;max-width:760px;background:rgba(21,34,56,.92);border:1px solid var(--line);
+  border-radius:14px;padding:5px;box-shadow:0 6px 20px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:4px}
+.row{display:flex;align-items:center;gap:4px;min-width:0}
+.ib{flex:0 0 auto;width:40px;height:44px;border-radius:10px;border:1px solid var(--line);background:#1b2c47;
+  font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0}
+.ib:active{transform:scale(.95)}
+.ib.on{background:#2a3f22;border-color:var(--green);color:var(--green)}
+#bSpeed{font-size:15px;color:var(--gold)}
+#clock{flex:1 1 auto;min-width:0;overflow:hidden;display:flex;align-items:center;gap:4px;padding:0 2px}
+#wIcon{font-size:22px;line-height:1;flex:0 0 auto}
+#clock .ct{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+#clock b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:380px){.ib{width:36px}#wIcon{display:none}#clock b{font-size:13px}.stat b{font-size:14px}}
+#clock small{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;padding:0 2px;min-width:50px}
+.stat small{font-size:11px;color:var(--dim);white-space:nowrap}
+.stat b{font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
+#moneyT{color:var(--gold)}
+#moneyT.neg{color:var(--red)}
+#happyT.low{color:var(--red)}
+#pwr{position:relative;flex:1 1 auto;min-width:0;height:30px;border-radius:8px;background:#0d1828;border:1px solid var(--line);overflow:hidden}
+#pwrFill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#3d8c69,#78e2ae);transition:width .25s}
+#pwrFill.warn{background:linear-gradient(90deg,#a8823b,#f2c66d)}
+#pwrFill.bad{background:linear-gradient(90deg,#9b3f3b,#e77d78);animation:blink .6s infinite alternate}
+#pwrCap{position:absolute;top:0;bottom:0;width:3px;background:#eaf1fb;box-shadow:0 0 6px #64ceeb}
+#pwrT{position:absolute;inset:0;display:flex;align-items:center;padding:0 8px;font-size:12.5px;font-weight:700;
+  text-shadow:0 1px 2px #000,0 0 4px #000;white-space:nowrap;overflow:hidden}
+#graph{flex:0 0 auto;width:72px;height:30px;border-radius:8px;background:#0d1828;border:1px solid var(--line)}
+.mini{flex:0 0 auto;font-size:12px;color:var(--dim);display:flex;flex-direction:column;line-height:1.2;align-items:flex-end;min-width:46px}
+.mini b{color:var(--text);font-size:12.5px;font-variant-numeric:tabular-nums}
+@keyframes blink{from{opacity:1}to{opacity:.55}}
+#goal{pointer-events:auto;max-width:760px;width:100%;background:rgba(16,25,35,.88);border:1px solid var(--line);border-radius:12px;
+  padding:7px 10px;font-size:13.5px;line-height:1.4;display:none}
+#goal.on{display:block}
+#goal.tut{border-color:var(--gold);box-shadow:0 0 14px rgba(242,198,109,.35)}
+#goal b{color:var(--gold)}
+#goal .gp{color:var(--cyan)}
+#toasts{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;max-width:520px}
+.toast{background:rgba(21,34,56,.95);border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-size:13.5px;
+  box-shadow:0 4px 14px rgba(0,0,0,.4);animation:tin .25s ease-out;max-width:100%;text-align:center}
+.toast.warn{border-color:var(--red);color:#ffd9d6}
+.toast.good{border-color:var(--green)}
+.toast.gold{border-color:var(--gold)}
+@keyframes tin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+#bottom{position:fixed;left:0;right:0;bottom:0;padding:0 calc(var(--sar) + 6px) calc(var(--sab) + 6px) calc(var(--sal) + 6px);
+  pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:5}
+#info{pointer-events:auto;width:100%;max-width:520px;background:rgba(21,34,56,.96);border:1px solid var(--line);border-radius:12px;
+  padding:8px 10px;font-size:13.5px;display:none;gap:8px;align-items:center}
+#info.on{display:flex}
+#info .it{flex:1 1 auto;min-width:0;line-height:1.4}
+#info .it b{font-size:15px}
+#info .it small{color:var(--dim)}
+#info .ib2{flex:0 0 auto;min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:#1b2c47;font-weight:700;font-size:13.5px}
+#info .ib2.red{border-color:var(--red);color:var(--red)}
+#info .ib2.gold{border-color:var(--gold);color:var(--gold)}
+#tools{pointer-events:auto;width:100%;max-width:760px;display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;
+  background:rgba(21,34,56,.94);border:1px solid var(--line);border-radius:14px;padding:5px;scrollbar-width:none;touch-action:pan-x}
+#tools::-webkit-scrollbar{display:none}
+.tb{flex:1 0 54px;min-width:54px;height:62px;border-radius:10px;border:1px solid transparent;background:#1a2a43;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1px;padding:2px 0;position:relative}
+.tb canvas{width:30px;height:30px}
+.tb span{font-size:11px;line-height:1.1;white-space:nowrap}
+.tb em{font-style:normal;font-size:10.5px;color:var(--gold);line-height:1.1}
+.tb.sel{border-color:var(--cyan);background:#20395a;box-shadow:inset 0 0 10px rgba(100,206,235,.35)}
+.tb.dis{opacity:.4}
+.tb.poor em{color:var(--red)}
+.tb.hint{animation:hint 0.9s infinite alternate;border-color:var(--gold)}
+@keyframes hint{from{box-shadow:0 0 0 0 rgba(242,198,109,.0)}to{box-shadow:0 0 14px 3px rgba(242,198,109,.8)}}
+.screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(6,12,22,.72);z-index:20;
+  padding:calc(var(--sat) + 12px) calc(var(--sar) + 12px) calc(var(--sab) + 12px) calc(var(--sal) + 12px)}
+.screen.on{display:flex}
+#title{background:radial-gradient(ellipse at 50% 30%,rgba(10,19,32,.35),rgba(10,19,32,.85))}
+.panel{width:100%;max-width:440px;max-height:100%;overflow:auto;background:rgba(21,34,56,.96);border:1px solid var(--line);
+  border-radius:18px;padding:18px 16px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.panel h2{margin:0 0 10px;font-size:21px;text-align:center}
+.panel p{color:var(--dim);margin:6px 0;line-height:1.5;font-size:14px}
+.btn{display:block;width:100%;min-height:48px;margin:8px 0;border-radius:12px;border:1px solid var(--line);background:#1d3150;
+  font-size:16px;font-weight:700}
+.btn.pri{background:linear-gradient(180deg,#f6d37f,#d9a743);color:#1b1405;border-color:#f2c66d;box-shadow:0 0 18px rgba(242,198,109,.45)}
+.btn:active{transform:scale(.98)}
+.back{position:fixed;left:calc(var(--sal) + 10px);top:calc(var(--sat) + 10px);z-index:21;color:var(--dim);text-decoration:none;
+  font-size:14px;padding:12px 12px;border-radius:10px;background:rgba(21,34,56,.85);border:1px solid var(--line);min-height:44px;display:flex;align-items:center}
+.logo{font-size:34px;font-weight:900;text-align:center;margin:4px 0 2px;color:#fff3cf;letter-spacing:1px;
+  text-shadow:0 0 8px rgba(242,198,109,.9),0 0 22px rgba(242,198,109,.6)}
+.sub{text-align:center;color:var(--dim);font-size:14.5px;margin-bottom:14px}
+.best{text-align:center;font-size:14px;color:var(--cyan);margin:6px 0 2px}
+.small-row{display:flex;gap:8px}
+.small-row .btn{font-size:14px}
+.card{display:flex;gap:10px;align-items:center;width:100%;text-align:left;min-height:64px;margin:7px 0;padding:9px 10px;border-radius:12px;
+  border:1px solid var(--line);background:#1a2c48}
+.card .cn{font-size:22px;width:36px;height:36px;flex:0 0 36px;border-radius:10px;background:#0f1c2f;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--gold)}
+.card .cb{flex:1;min-width:0}
+.card b{font-size:15px}
+.card small{display:block;color:var(--dim);font-size:12.5px;line-height:1.4;margin-top:2px}
+.card .ck{color:var(--green);font-weight:900;font-size:13px;flex:0 0 auto}
+.card.surv{border-color:var(--gold);background:#2a2a1e}
+.how{list-style:none;padding:0;margin:0}
+.how li{display:flex;gap:10px;align-items:center;margin:9px 0;font-size:14px;line-height:1.45}
+.how li canvas{flex:0 0 40px;width:40px;height:40px;background:#0f1c2f;border-radius:10px}
+.how li .ie{flex:0 0 40px;width:40px;height:40px;background:#0f1c2f;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.how b{color:var(--gold)}
+.kbd{color:var(--dim);font-size:12.5px;line-height:1.6;margin-top:8px}
+.res-big{font-size:30px;font-weight:900;text-align:center;margin:6px 0;color:var(--gold);text-shadow:0 0 14px rgba(242,198,109,.5)}
+.res-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.res-stats div{background:#0f1c2f;border-radius:10px;padding:8px;text-align:center;font-size:12.5px;color:var(--dim)}
+.res-stats b{display:block;color:var(--text);font-size:17px}
+.newrec{display:none;text-align:center;color:#1b1405;background:var(--gold);border-radius:999px;padding:4px 12px;font-weight:900;width:max-content;margin:0 auto;animation:hint .7s infinite alternate}
+.newrec.on{display:block}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4}
+</style>
+<meta name="description" content="발전소 5종을 짓고 날씨·고장·정전을 버티며 도시에 전기를 대는 전력 관리 게임. 생존 모드와 시나리오 6개."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/power-grid/"><meta property="og:title" content="도시 전력 관리자"><meta property="og:description" content="발전소 5종을 짓고 날씨·고장·정전을 버티며 도시에 전기를 대는 전력 관리 게임. 생존 모드와 시나리오 6개."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 84px);z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="도시 전력 관리자",D="발전소 5종을 짓고 날씨·고장·정전을 버티며 도시에 전기를 대는 전력 관리 게임. 생존 모드와 시나리오 6개.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/power-grid/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<canvas id="cv" aria-label="도시 지도"></canvas>
+<div id="flash"></div>
+
+<div id="top">
+  <div id="hud" hidden>
+    <div class="row">
+      <button class="ib" id="bMenu" aria-label="메뉴 (일시정지)">☰</button>
+      <button class="ib" id="bPause" aria-label="시간 멈춤/흐름">⏸</button>
+      <button class="ib" id="bSpeed" aria-label="배속">×1</button>
+      <div id="clock"><span id="wIcon">☀️</span><div class="ct"><b id="dayT">1일차 06:00</b><small id="wT">맑음</small></div></div>
+      <div class="stat"><small>💰 자금</small><b id="moneyT">0</b></div>
+      <div class="stat"><small>😊 만족도</small><b id="happyT">70</b></div>
+    </div>
+    <div class="row">
+      <div id="pwr"><div id="pwrFill"></div><div id="pwrCap"></div><span id="pwrT">수요 0 / 공급 0 MW</span></div>
+      <canvas id="graph" aria-label="24시간 수요·공급 그래프"></canvas>
+      <div class="mini"><span>👥 <b id="popT">0</b></span><span id="batBox">🔋 <b id="batT">-</b></span></div>
+      <div class="mini"><span>오염</span><b id="polT">0</b></div>
+    </div>
+  </div>
+  <div id="goal"></div>
+  <div id="toasts"></div>
+</div>
+
+<div id="bottom">
+  <div id="info"></div>
+  <div id="tools" hidden></div>
+</div>
+
+<!-- 타이틀 -->
+<div class="screen on" id="title">
+  <a class="back" href="../">← 게임 목록</a>
+  <div class="panel" style="background:rgba(21,34,56,.88)">
+    <div class="logo">⚡ 도시 전력 관리자</div>
+    <div class="sub">발전소를 짓고 전선을 이어, 밤에도 꺼지지 않는 도시를 만드세요!</div>
+    <button class="btn pri" id="bStart">게임 시작</button>
+    <button class="btn" id="bHow">방법 보기</button>
+    <div class="best" id="bestT">최고 기록: 없음</div>
+    <div class="small-row"><button class="btn" id="bSound1">🔊 소리 켜짐</button></div>
+  </div>
+</div>
+
+<!-- 모드 선택 -->
+<div class="screen" id="modes">
+  <div class="panel">
+    <h2>모드 선택</h2>
+    <div id="modeList"></div>
+    <button class="btn" id="bModesBack">← 뒤로</button>
+  </div>
+</div>
+
+<!-- 방법 보기 -->
+<div class="screen" id="howto">
+  <div class="panel">
+    <h2>방법 보기</h2>
+    <ul class="how" id="howList"></ul>
+    <div class="kbd">키보드: 방향키/WASD 지도 이동 · +/− 확대 · 1~9 도구 선택 · Space 시간 멈춤 · F 배속 · Esc 메뉴<br>휴대폰: 한 손가락 드래그로 이동, 두 손가락으로 확대·축소</div>
+    <button class="btn pri" id="bHowBack">알겠어요</button>
+  </div>
+</div>
+
+<!-- 일시정지 -->
+<div class="screen" id="pause">
+  <div class="panel">
+    <h2>일시정지</h2>
+    <p id="pauseInfo" style="text-align:center"></p>
+    <button class="btn pri" id="bResume">계속하기</button>
+    <button class="btn" id="bRestart">다시 시작</button>
+    <button class="btn" id="bSound2">🔊 소리 켜짐</button>
+    <button class="btn" id="bHow2">방법 보기</button>
+    <button class="btn" id="bQuit">타이틀로</button>
+  </div>
+</div>
+
+<!-- 결과 -->
+<div class="screen" id="result">
+  <div class="panel">
+    <h2 id="resTitle">게임 오버</h2>
+    <p id="resReason" style="text-align:center"></p>
+    <div class="res-big" id="resBig"></div>
+    <div class="newrec" id="resNew">🏆 최고 기록 갱신!</div>
+    <div class="res-stats" id="resStats"></div>
+    <button class="btn pri" id="bAgain">다시 하기</button>
+    <button class="btn" id="bResModes">다른 모드</button>
+    <button class="btn" id="bResTitle">타이틀</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ===================================================================
+ * 도시 전력 관리자 (games/03)
+ * 구조
+ *  - 상수: BUILD(발전·송전 시설), CONS(수요처), WEATHER, SCENARIOS
+ *  - 저장(Store) · 소리(Sfx: Web Audio 합성)
+ *  - 상태 G: 지도(tiles) · 건물(blds) · 전력망(net) · 시간/경제/만족도
+ *  - 시뮬레이션: rebuildNet()  → 전신주 연결 요소(전력망) 계산
+ *               simStep(dt)   → 수요·발전·배터리 배분, 정전(부하 차단), 돈/오염/만족도
+ *               hourly()/daily() → 건물 생성·성장, 고장·낙뢰·날씨
+ *  - 렌더링: drawWorld()(캔버스) · updateHud()(DOM)
+ *  - 입력: 포인터(탭/드래그/핀치/휠) · 키보드 · 툴바
+ * 시간: ×1 배속에서 게임 1시간 = 2.5초, 하루 = 60초
+ * =================================================================== */
+
+// ---------- 상수 ----------
+const TILE = 40;                 // 월드 좌표에서 타일 한 칸 크기
+const MIN_PER_SEC = 24;          // ×1에서 실제 1초당 게임 분
+const STEP = 5;                  // 시뮬레이션 고정 스텝(게임 분)
+const PRICE = 2.4;               // 판매 전력 1MWh당 수입(만원)
+const GRACE_H = 6;               // 새 건물 입주 준비 시간(시간)
+const START_MIN = 6 * 60;        // 1일차 06:00 시작
+const BANKRUPT = -800;           // 이보다 돈이 적으면 파산
+const POLL_LIMIT = 50;           // 오염 벌금 시작선
+const T = { GRASS: 0, WATER: 1, HILL: 2, FOREST: 3 };
+
+const BUILD = {
+  pole:    { name: '전신주', cost: 15, upkeep: 0.05, link: 3.2, serve: 2.3, kind: 'net', desc: '선을 이어요. 주변 2칸 건물에 전기를 나눠 줘요.' },
+  sub:     { name: '변전소', cost: 200, upkeep: 0.8, link: 5.5, serve: 3.6, kind: 'net', desc: '멀리까지 선이 닿고, 3칸 넘게 넓게 공급해요.' },
+  coal:    { name: '석탄 발전소', cost: 300, upkeep: 3, cap: 30, fuel: 0.8, link: 2.3, kind: 'plant', desc: '싸고 든든! 하지만 오염이 쌓여요.' },
+  solar:   { name: '태양광', cost: 180, upkeep: 0.4, cap: 12, link: 2.3, kind: 'plant', desc: '낮에만 발전. 흐리면 약해요.' },
+  wind:    { name: '풍력', cost: 240, upkeep: 0.8, cap: 16, link: 2.3, kind: 'plant', desc: '바람 따라 출력이 변해요. 언덕에서 더 강해요.' },
+  battery: { name: '배터리', cost: 350, upkeep: 0.4, store: 60, rate: 15, link: 2.3, kind: 'store', desc: '남는 전기를 저장했다가 부족할 때 내보내요.' },
+  nuclear: { name: '원자력', cost: 2500, upkeep: 22, cap: 120, link: 2.3, kind: 'plant', desc: '비싸지만 아주 강력하고 깨끗해요. 출력은 항상 일정.' },
+};
+const TOOLS = ['select', 'pole', 'sub', 'coal', 'solar', 'wind', 'battery', 'nuclear', 'bulldoze'];
+const TOOL_LABEL = { select: '보기', bulldoze: '철거' };
+
+// 시간대별 수요 비율(0~23시)
+const PROF = {
+  house:    [.35,.3,.28,.28,.3,.4,.65,.85,.7,.5,.45,.45,.5,.45,.45,.5,.65,.85,1,1,.95,.85,.65,.45],
+  shop:     [.1,.1,.1,.1,.1,.1,.15,.3,.55,.8,.9,.95,1,1,.95,.95,.95,.95,.9,.85,.7,.4,.2,.12],
+  factory:  [.45,.45,.45,.45,.45,.5,.75,.95,1,1,1,1,.9,1,1,1,1,.95,.8,.65,.55,.5,.45,.45],
+  hospital: [.8,.8,.8,.8,.8,.82,.88,.95,1,1,1,1,1,1,1,1,1,1,1,.98,.95,.9,.85,.82],
+};
+const CONS = {
+  house:    { name: '주택', lv: [{ mw: 1.5, pop: 10 }, { mw: 3.2, pop: 25 }, { mw: 5.5, pop: 50 }], w: [1, 2, 3], pri: 1 },
+  shop:     { name: '상가', lv: [{ mw: 3 }, { mw: 5.5 }], w: [1, 1.5], pri: 2 },
+  factory:  { name: '공장', lv: [{ mw: 8 }, { mw: 13 }], w: [1.5, 2], pri: 3 },
+  hospital: { name: '병원', lv: [{ mw: 5 }], w: [4], pri: 0 },
+};
+const LV_NAME = { house: ['주택', '2층 주택', '아파트'], shop: ['상가', '큰 상가'], factory: ['공장', '큰 공장'], hospital: ['병원'] };
+
+const WEATHER = {
+  sunny:  { name: '맑음', icon: '☀️', solar: 1,    wind: 1,    heat: 1 },
+  cloudy: { name: '흐림', icon: '☁️', solar: .35,  wind: .9,   heat: 1 },
+  windy:  { name: '강풍', icon: '🌬️', solar: .85,  wind: 1.5,  heat: 1 },
+  calm:   { name: '무풍', icon: '🍂', solar: .95,  wind: .1,   heat: 1 },
+  storm:  { name: '뇌우', icon: '⛈️', solar: .2,   wind: 1.25, heat: 1, lightning: true },
+  heat:   { name: '폭염', icon: '🔥', solar: 1.05, wind: .55,  heat: 1.5 },
+};
+
+const SCENARIOS = [
+  { id: 1, name: '첫 불빛', desc: '작은 마을에 처음 전기를 보내요. 3일 안에 인구 150명.', size: 20, seed: 101, money: 1000, days: 3, goal: { pop: 150 } },
+  { id: 2, name: '맑은 하늘 마을', desc: '석탄·원자력 금지! 태양광·풍력·배터리로 5일 안에 인구 350명.', size: 22, seed: 202, money: 1400, days: 5, goal: { pop: 350 }, banned: ['coal', 'nuclear'], weights: { sunny: 3, windy: 2, cloudy: 1.2, calm: .8, storm: .4, heat: .4 } },
+  { id: 3, name: '폭염 경보', desc: '4일 내내 폭염! 에어컨 수요를 버티고 4일째 밤까지 만족도 60 이상.', size: 22, seed: 303, money: 1500, days: 4, goal: { survive: true, happy: 60 }, weatherFixed: 'heat', startHouses: 7 },
+  { id: 4, name: '공장 단지', desc: '공장이 몰려와요. 6일 안에 공장 5곳 가동 + 인구 350명.', size: 24, seed: 404, money: 1600, days: 6, goal: { pop: 350, factories: 5 }, factoryBoost: true, river: true },
+  { id: 5, name: '폭풍의 섬', desc: '낙뢰가 잦은 섬. 5일을 버티며 인구 400명을 지켜내세요.', size: 22, seed: 505, money: 1500, days: 5, goal: { survive: true, pop: 400 }, island: true, weights: { sunny: 1, cloudy: 1.2, windy: 1.6, calm: .2, storm: 2.4, heat: .3 } },
+  { id: 6, name: '탄소 제로 도시', desc: '오염도를 20 아래로 지키며 8일 안에 인구 600명.', size: 26, seed: 606, money: 1800, days: 8, goal: { pop: 600 }, pollutionMax: 20 },
+];
+const SURVIVAL = { id: 0, name: '생존 모드', desc: '끝없이 커지는 도시. 며칠이나 버틸 수 있을까?', size: 30, money: 1200, survival: true };
+
+const RM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- 유틸 ----------
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const fmt = n => Math.round(n).toLocaleString('ko-KR');
+const fmt1 = n => (Math.round(n * 10) / 10).toFixed(1);
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function noiseField(rng, W, H, cell) {
+  const gw = Math.ceil(W / cell) + 3, gh = Math.ceil(H / cell) + 3, g = new Float32Array(gw * gh);
+  for (let i = 0; i < g.length; i++) g[i] = rng();
+  const sm = t => t * t * (3 - 2 * t);
+  return (x, y) => {
+    const fx = x / cell, fy = y / cell, xi = Math.floor(fx), yi = Math.floor(fy), tx = sm(fx - xi), ty = sm(fy - yi);
+    const i = yi * gw + xi;
+    return lerp(lerp(g[i], g[i + 1], tx), lerp(g[i + gw], g[i + gw + 1], tx), ty);
+  };
+}
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function wpick(obj) { let s = 0; for (const k in obj) s += obj[k]; let r = Math.random() * s; for (const k in obj) { r -= obj[k]; if (r <= 0) return k; } return Object.keys(obj)[0]; }
+
+// ---------- 저장 ----------
+const Store = {
+  get(k, d) { try { const v = localStorage.getItem('edgames.03.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('edgames.03.' + k, JSON.stringify(v)); } catch (e) { } },
+};
+
+// ---------- 소리 ----------
+const Sfx = {
+  ctx: null, on: Store.get('sound', true), master: null, last: {},
+  init() {
+    if (!this.ctx) {
+      try { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; this.ctx = new AC(); this.master = this.ctx.createGain(); this.master.gain.value = .5; this.master.connect(this.ctx.destination); } catch (e) { this.ctx = null; return; }
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => { });
+  },
+  tone(f, d, type = 'sine', v = .2, f2 = null, delay = 0) {
+    if (!this.on || !this.ctx) return;
+    const c = this.ctx, t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + d + .02);
+  },
+  noise(d, v = .2, freq = 1200, delay = 0) {
+    if (!this.on || !this.ctx) return;
+    const c = this.ctx, t = c.currentTime + delay, n = Math.floor(c.sampleRate * d), buf = c.createBuffer(1, n, c.sampleRate), data = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = buf; f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = .7; g.gain.value = v;
+    s.connect(f); f.connect(g); g.connect(this.master); s.start(t);
+  },
+  play(name) {
+    if (!this.on || !this.ctx) return;
+    const now = performance.now(); if (this.last[name] && now - this.last[name] < 70) return; this.last[name] = now;
+    switch (name) {
+      case 'click': this.tone(660, .06, 'triangle', .12); break;
+      case 'build': this.noise(.12, .25, 300); this.tone(520, .1, 'square', .07, null, .05); this.tone(780, .14, 'triangle', .1, null, .1); break;
+      case 'pole': this.noise(.08, .2, 500); this.tone(880, .08, 'triangle', .08, null, .03); break;
+      case 'error': this.tone(180, .18, 'square', .1, 120); break;
+      case 'on': this.tone(440, .12, 'triangle', .12, 880); this.tone(1320, .2, 'sine', .08, null, .1); break;
+      case 'off': this.tone(500, .35, 'sawtooth', .08, 90); this.noise(.2, .12, 200); break;
+      case 'zap': this.noise(.5, .5, 2200); this.noise(.8, .35, 120, .05); this.tone(90, .6, 'sawtooth', .12, 40); break;
+      case 'alarm': this.tone(880, .12, 'square', .08); this.tone(660, .12, 'square', .08, null, .15); this.tone(880, .12, 'square', .08, null, .3); break;
+      case 'repair': for (let i = 0; i < 3; i++) this.tone(1200 + i * 200, .05, 'square', .06, null, i * .07); break;
+      case 'coin': this.tone(988, .08, 'square', .06); this.tone(1319, .14, 'square', .06, null, .07); break;
+      case 'day': this.tone(523, .15, 'sine', .1); this.tone(659, .15, 'sine', .1, null, .12); this.tone(784, .25, 'sine', .1, null, .24); break;
+      case 'win': [523, 659, 784, 1047].forEach((f, i) => this.tone(f, .3, 'triangle', .14, null, i * .13)); break;
+      case 'lose': [440, 392, 330, 262].forEach((f, i) => this.tone(f, .35, 'sawtooth', .08, null, i * .18)); break;
+      case 'remove': this.noise(.2, .2, 400); this.tone(300, .15, 'triangle', .08, 150); break;
+    }
+  },
+};
+
+// ---------- 캔버스 ----------
+const cv = $('cv'), ctx = cv.getContext('2d');
+let DPR = 1, VW = 360, VH = 640;
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+  VW = window.innerWidth; VH = window.innerHeight;
+  cv.width = Math.round(VW * DPR); cv.height = Math.round(VH * DPR);
+  const gc = $('graph'), r = gc.getBoundingClientRect();
+  gc.width = Math.max(1, Math.round(r.width * DPR)); gc.height = Math.max(1, Math.round(r.height * DPR));
+  if (G) clampCam();
+}
+window.addEventListener('resize', resize);
+
+// ---------- 상태 ----------
+let G = null;             // 현재 게임 상태
+let screen = 'title';     // title | modes | howto | game | pause | result
+let uid = 1;
+const cam = { x: 0, y: 0, z: 1 };
+let tool = 'select', selected = null, hoverTile = null, pressTile = null;
+let fx = [];              // 파티클
+let bolts = [];           // 번개 연출
+let shake = 0, flashA = 0, animT = 0;
+
+function newGame(sc, demo = false) {
+  const size = sc.size;
+  G = {
+    sc, demo, W: size, H: size, tiles: [], occ: [], blds: [], cons: [], nodes: [],
+    net: { comps: [], links: [], covered: new Set() },
+    time: START_MIN, acc: 0, started: false, paused: false, speed: 1, over: false,
+    money: sc.money, happy: 70, pollution: 0, pop: 0, peakPop: 0,
+    wind: .6, windTarget: .6, weather: 'sunny', forecast: 'sunny',
+    stat: { dem: 0, cap: 0, out: 0, served: 0, bat: 0, batMax: 0, shed: 0, unconn: 0, renew: 0 },
+    hist: [], histAcc: 0, totalMWh: 0, blackoutH: 0, earned: 0,
+    lastHour: Math.floor(START_MIN / 60), dirty: true, startTime: START_MIN, hoursSinceStart: 0,
+    tut: (!demo && !Store.get('tutDone', false)) ? 0 : -1, tutTimer: 0,
+    shortageWas: false, lastShortToast: -999, seed: sc.seed || Math.floor(Math.random() * 1e9),
+  };
+  genMap();
+  placeStartCity();
+  G.weather = sc.weatherFixed || 'sunny';
+  G.forecast = rollWeather(2);
+  rebuildNet();
+  computePop();
+  terrainCanvas = null;
+  // 카메라: 도시 중심
+  const cx = Math.floor(G.W / 2), cy = Math.floor(G.H / 2);
+  cam.x = (cx + .5) * TILE; cam.y = (cy + 1) * TILE;
+  cam.z = clamp(Math.min(VW, 700) / (11 * TILE), .6, 1.6);
+  clampCam();
+  fx = []; bolts = []; selected = null; tool = 'select';
+  if (G.tut === 0) tool = 'select';
+}
+
+// ---------- 지도 생성 ----------
+function genMap() {
+  const sc = G.sc, W = G.W, H = G.H, rng = mulberry32(G.seed);
+  const n1 = noiseField(rng, W, H, 6), n2 = noiseField(rng, W, H, 3), n3 = noiseField(rng, W, H, 4), n4 = noiseField(rng, W, H, 5);
+  const cx = W / 2, cy = H / 2;
+  const riverX = Math.floor(W * .78);
+  for (let y = 0; y < H; y++) {
+    G.tiles[y] = []; G.occ[y] = [];
+    for (let x = 0; x < W; x++) {
+      let t = T.GRASS;
+      const n = n1(x, y) * .7 + n2(x, y) * .3;
+      const dc = Math.hypot(x + .5 - cx, y + .5 - cy);
+      if (sc.island) {
+        const r = W * .44 + (n - .5) * 4;
+        if (dc > r) t = T.WATER;
+      } else if (n < .26 && dc > 5) t = T.WATER;
+      if (sc.river && Math.abs(x - riverX - Math.sin(y * .4) * 1.4) < 1.1) t = T.WATER;
+      if (t === T.GRASS) {
+        if (n3(x, y) > .66 && dc > 4) t = T.HILL;
+        else if (n4(x, y) > .64 && dc > 3.5) t = T.FOREST;
+      }
+      if (dc < 4.2) t = T.GRASS;
+      G.tiles[y][x] = t; G.occ[y][x] = null;
+    }
+  }
+}
+function placeStartCity() {
+  const cx = Math.floor(G.W / 2), cy = Math.floor(G.H / 2);
+  const spots = [[0, 0, 'house'], [1, 0, 'house'], [0, 1, 'house'], [1, 1, 'house'], [2, 0, 'shop']];
+  const extra = [[2, 2, 'house'], [-1, 2, 'house'], [3, 1, 'house'], [0, 3, 'house'], [1, -1, 'house'], [3, -1, 'shop']];
+  const n = (G.sc.startHouses || 0);
+  for (let i = 0; i < n && i < extra.length; i++) spots.push(extra[i]);
+  if (G.demo) {
+    for (const [dx, dy, t] of [[2, 2, 'house'], [-1, 2, 'house'], [3, 1, 'house'], [0, 3, 'house'], [1, -1, 'house'], [3, -1, 'shop'], [4, 2, 'factory'], [-2, 3, 'house'], [2, 4, 'hospital'], [0, -2, 'house']]) spots.push([dx, dy, t]);
+  }
+  for (const [dx, dy, t] of spots) {
+    const c = addCons(t, cx + dx, cy + dy, true);
+    if (c && G.demo) c.level = 1 + (c.id % 3 === 0 ? 1 : 0);
+  }
+  if (G.demo) {
+    addBuild('coal', cx - 4, cy, true); addBuild('solar', cx - 4, cy + 2, true); addBuild('wind', cx - 4, cy - 2, true);
+    for (const [dx, dy] of [[-2, 0], [-1, 2], [2, 1], [1, 3], [3, 3], [-2, -2], [2, -2]]) addBuild('pole', cx + dx, cy + dy, true);
+  }
+}
+const inMap = (x, y) => x >= 0 && y >= 0 && x < G.W && y < G.H;
+
+function addCons(type, x, y, ready) {
+  if (!inMap(x, y) || G.tiles[y][x] === T.WATER || G.occ[y][x]) return null;
+  if (G.tiles[y][x] === T.FOREST) G.tiles[y][x] = T.GRASS;
+  const c = { id: uid++, cat: 'cons', type, x, y, level: 1, on: false, conn: false, prog: ready ? 1 : 0, offH: 0, onH: 0, dem: 0, feed: null, comp: -1, hue: Math.floor(Math.random() * 5), flick: 0 };
+  G.cons.push(c); G.occ[y][x] = c; G.dirty = true; terrainCanvas = null;
+  return c;
+}
+function addBuild(type, x, y, free) {
+  const b = { id: uid++, cat: 'build', type, x, y, broken: false, repairT: 0, out: 0, charge: 0, comp: -1, builtAt: G.time, ang: Math.random() * 6 };
+  G.blds.push(b); G.occ[y][x] = b; G.dirty = true;
+  if (G.tiles[y][x] === T.FOREST) { G.tiles[y][x] = T.GRASS; terrainCanvas = null; }
+  return b;
+}
+function removeObj(o) {
+  if (o.cat === 'build') G.blds.splice(G.blds.indexOf(o), 1); else G.cons.splice(G.cons.indexOf(o), 1);
+  G.occ[o.y][o.x] = null; G.dirty = true;
+  if (selected === o) selected = null;
+}
+
+// ---------- 날씨 ----------
+function rollWeather(day) {
+  const sc = G.sc;
+  if (sc.weatherFixed) return sc.weatherFixed;
+  if (day <= 1) return 'sunny';
+  const w = Object.assign({ sunny: 3.4, cloudy: 2, windy: 1.4, calm: 1.2, storm: .9, heat: .8 }, sc.weights || {});
+  if (sc.survival) { w.storm += day * .08; w.heat += day * .07; }
+  return wpick(w);
+}
+const WX = () => WEATHER[G.weather];
+
+// ---------- 전력망 계산 ----------
+function rebuildNet() {
+  const nodes = G.blds.filter(b => !(b.broken && BUILD[b.type].kind === 'net'));
+  const n = nodes.length, parent = nodes.map((_, i) => i);
+  const find = i => { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
+  const edges = [];
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+    const a = nodes[i], b = nodes[j], d = dist(a, b), r = Math.max(BUILD[a.type].link, BUILD[b.type].link);
+    if (d <= r + 1e-6) edges.push([d, i, j]);
+  }
+  edges.sort((a, b) => a[0] - b[0]);
+  const links = [];
+  for (const [d, i, j] of edges) { const a = find(i), b = find(j); if (a !== b) { parent[a] = b; links.push([nodes[i], nodes[j]]); } }
+  const compMap = new Map(), comps = [];
+  for (const b of G.blds) b.comp = -1;
+  nodes.forEach((b, i) => {
+    const r = find(i);
+    if (!compMap.has(r)) { compMap.set(r, comps.length); comps.push({ nodes: [], cons: [], energized: false, short: false }); }
+    b.comp = compMap.get(r); comps[b.comp].nodes.push(b);
+  });
+  // 수요처 배정: 가장 가까운 공급 노드(전신주·변전소)
+  const servers = nodes.filter(b => BUILD[b.type].serve);
+  const covered = new Set();
+  for (const s of servers) {
+    const R = BUILD[s.type].serve, ri = Math.ceil(R);
+    for (let y = s.y - ri; y <= s.y + ri; y++) for (let x = s.x - ri; x <= s.x + ri; x++)
+      if (inMap(x, y) && Math.hypot(x - s.x, y - s.y) <= R + 1e-6) covered.add(y * G.W + x);
+  }
+  for (const c of G.cons) {
+    let best = null, bd = 1e9;
+    for (const s of servers) { const d = dist(s, c); if (d <= BUILD[s.type].serve + 1e-6 && d < bd) { bd = d; best = s; } }
+    c.feed = best; c.comp = best ? best.comp : -1; c.conn = !!best;
+    if (best) comps[best.comp].cons.push(c);
+  }
+  G.net = { comps, links, covered };
+  G.dirty = false;
+}
+
+// ---------- 수요/발전 ----------
+const hourOf = t => (t % 1440) / 60;
+const dayOf = t => Math.floor(t / 1440) + 1;
+function profile(type, h) { const p = PROF[type], i = Math.floor(h) % 24, f = h - Math.floor(h); return lerp(p[i], p[(i + 1) % 24], f); }
+function demandOf(c, h) {
+  if (c.prog < 1) return 0;
+  const d = CONS[c.type].lv[c.level - 1].mw * profile(c.type, h) * (1 + .03 * (dayOf(G.time) - 1));
+  let heat = 1;
+  if (WX().heat > 1 && (c.type === 'house' || c.type === 'shop')) heat = 1 + (WX().heat - 1) * clamp((h - 9) / 4, 0, 1) * clamp((24 - h) / 3, 0, 1);
+  return d * heat;
+}
+function sunOf(h) { return h > 6 && h < 18.5 ? Math.max(0, Math.sin(Math.PI * (h - 6) / 12.5)) : 0; }
+function plantOut(b, h) {
+  const d = BUILD[b.type];
+  if (b.broken) return 0;
+  if (b.type === 'solar') return d.cap * sunOf(h) * WX().solar;
+  if (b.type === 'wind') return d.cap * Math.min(1.25, G.wind * (G.tiles[b.y][b.x] === T.HILL ? 1.3 : 1));
+  if (b.type === 'nuclear') return d.cap;
+  return 0;
+}
+function darkness(h) {
+  if (h >= 7.5 && h <= 17) return 0;
+  if (h > 17 && h < 20) return (h - 17) / 3 * .7;
+  if (h > 5 && h < 7.5) return (7.5 - h) / 2.5 * .7;
+  return .7;
+}
+
+function simStep(dt) {
+  if (G.dirty) rebuildNet();
+  const h = hourOf(G.time), dh = dt / 60;
+  const S = { dem: 0, cap: 0, out: 0, served: 0, bat: 0, batMax: 0, shed: 0, unconn: 0, renew: 0, coal: 0 };
+  // 바람: 목표값을 향해 천천히
+  G.wind = lerp(G.wind, G.windTarget, .04);
+  let fuelCost = 0, newlyOff = 0, newlyOn = 0;
+  for (const comp of G.net.comps) {
+    let renew = 0, nuke = 0, coalCap = 0; const coals = [], bats = [];
+    for (const b of comp.nodes) {
+      const k = b.type;
+      if (k === 'coal') { if (!b.broken) { coalCap += BUILD.coal.cap; coals.push(b); } b.out = 0; }
+      else if (k === 'battery') { if (!b.broken) bats.push(b); S.bat += b.charge; S.batMax += BUILD.battery.store; b.out = 0; }
+      else if (BUILD[k].kind === 'plant') { b.out = plantOut(b, h); if (k === 'nuclear') nuke += b.out; else renew += b.out; }
+    }
+    let demand = 0;
+    for (const c of comp.cons) { c.dem = demandOf(c, h); demand += c.dem; }
+    const base = renew + nuke;
+    let coalOut = 0, batOut = 0, need = 0;
+    const batAvail = bats.reduce((s, b) => s + Math.min(BUILD.battery.rate, b.charge / dh), 0);
+    if (base >= demand) {
+      need = 0;
+    } else {
+      need = demand - base;
+      coalOut = Math.min(coalCap, need); need -= coalOut;
+      batOut = Math.min(batAvail, need); need -= batOut;
+      if (batOut > 0) { const tot = batAvail; for (const b of bats) { const share = Math.min(BUILD.battery.rate, b.charge / dh) / tot * batOut; b.charge = Math.max(0, b.charge - share * dh); b.out = share; } }
+    }
+    // 남는 전기로 배터리 충전(재생/원자력 잉여 → 남는 석탄 순)
+    if (bats.length) {
+      let spareFree = Math.max(0, base - demand), spareCoal = coalCap - coalOut;
+      for (const b of bats) {
+        const room = (BUILD.battery.store - b.charge) / dh / .9;
+        let want = Math.min(BUILD.battery.rate, room);
+        if (want <= 0 || b.out > 0) continue;
+        const a = Math.min(want, spareFree); spareFree -= a; want -= a;
+        const c2 = Math.min(want, spareCoal); spareCoal -= c2; coalOut += c2;
+        b.charge = Math.min(BUILD.battery.store, b.charge + (a + c2) * dh * .9); b.out = -(a + c2);
+      }
+    }
+    for (const b of coals) b.out = coalCap > 0 ? coalOut * BUILD.coal.cap / coalCap : 0;
+    S.coal += coalOut; fuelCost += coalOut * dh * BUILD.coal.fuel;
+    // 공급 가능량 & 부하 차단
+    const available = demand - need;
+    comp.energized = (base + coalCap + batAvail) > 0.01;
+    comp.short = need > 0.01;
+    let left = available + 1e-6;
+    const order = comp.short ? comp.cons.slice().sort((a, b) => CONS[a.type].pri - CONS[b.type].pri || a.id - b.id) : comp.cons;
+    for (const c of order) {
+      const was = c.on;
+      if (c.prog < 1) { c.on = false; continue; }
+      if (c.dem <= left) { c.on = true; left -= c.dem; S.served += c.dem; } else { c.on = false; S.shed += c.dem; }
+      if (was && !c.on) newlyOff++; if (!was && c.on) newlyOn++;
+    }
+    S.dem += demand; S.cap += base + coalCap + batAvail; S.out += base + coalOut + batOut; S.renew += renew;
+  }
+  for (const c of G.cons) if (c.comp < 0) { const was = c.on; c.on = false; c.dem = demandOf(c, h); if (c.prog >= 1) { S.dem += c.dem; S.unconn += c.dem; } if (was) newlyOff++; }
+  G.stat = S;
+  // 시작 전(준비): 첫 불이 켜지면 시간이 흐름
+  if (!G.started) return { newlyOn, newlyOff };
+
+  // 경제
+  let upkeep = 0;
+  for (const b of G.blds) upkeep += BUILD[b.type].upkeep;
+  const income = S.served * dh * PRICE;
+  G.money += income - upkeep * dh - fuelCost;
+  G.earned += income;
+  G.totalMWh += S.served * dh;
+  // 오염
+  G.pollution = clamp(G.pollution + S.coal * .02 * dh - G.pollution * .02 * dh, 0, 100);
+  if (G.pollution > POLL_LIMIT) G.money -= (G.pollution - POLL_LIMIT) * 1.5 * dh;
+  // 만족도
+  let tw = 0, ow = 0, hospOff = 0;
+  for (const c of G.cons) {
+    if (c.prog < 1) continue;
+    const w = CONS[c.type].w[c.level - 1]; tw += w;
+    if (!c.on) { ow += c.conn ? w : w * .5; if (c.type === 'hospital') hospOff++; }
+  }
+  const bf = tw ? ow / tw : 0;
+  let dH = bf < .001 ? (G.happy < 85 ? 1.2 : .3) : -(.8 + 18 * bf);
+  dH -= hospOff * 3;
+  if (G.pollution > POLL_LIMIT) dH -= (G.pollution - POLL_LIMIT) * .06;
+  G.happy = clamp(G.happy + dH * dh, 0, 100);
+  if (bf > .001) G.blackoutH += dh;
+  // 기록용 그래프
+  G.histAcc += dt;
+  if (G.histAcc >= 15) { G.histAcc -= 15; G.hist.push({ d: S.dem, c: S.cap }); if (G.hist.length > 96) G.hist.shift(); }
+  return { newlyOn, newlyOff };
+}
+
+// ---------- 매 시간 / 매일 ----------
+function hourly() {
+  const sc = G.sc, day = dayOf(G.time), h = Math.floor(hourOf(G.time));
+  G.hoursSinceStart++;
+  // 건물 상태 시간 누적
+  for (const c of G.cons.slice()) {
+    if (c.prog < 1) { c.prog = Math.min(1, c.prog + 1 / GRACE_H); if (c.prog >= 1) G.dirty = true; continue; }
+    if (c.on) { c.onH++; c.offH = 0; } else { c.offH++; c.onH = 0; }
+    if (c.offH >= 30 && c.type !== 'hospital') {
+      removeObj(c); G.happy = Math.max(0, G.happy - 3);
+      toast(`${CONS[c.type].name}의 주민이 오랜 정전에 떠났어요`, 'warn');
+      spawnFx(c.x, c.y, 'dust');
+    }
+  }
+  // 바람 변화
+  G.windTarget = clamp((.25 + Math.random() * .8) * WX().wind, .02, 1.3);
+  // 수리 진행
+  for (const b of G.blds) if (b.broken && b.repairT > 0) { b.repairT--; if (b.repairT <= 0) { b.broken = false; G.dirty = true; toast(`${BUILD[b.type].name} 수리 완료!`, 'good'); Sfx.play('repair'); } }
+  // 건물 생성·성장 (시작 후 3시간부터)
+  if (G.hoursSinceStart >= 3) { spawnTick(day); upgradeTick(day); }
+  // 고장
+  if (day >= 2 || G.hoursSinceStart > 20) {
+    const diff = sc.survival ? 1 + (day - 1) * .12 : 1;
+    const pr = { coal: .006, nuclear: .0035, wind: .004, solar: .0015, battery: .002, sub: .002 };
+    for (const b of G.blds) {
+      if (b.broken || !pr[b.type]) continue;
+      if (Math.random() < pr[b.type] * diff) breakDown(b, 'fail');
+    }
+  }
+  // 낙뢰
+  if (WX().lightning) {
+    if (Math.random() < .5) {
+      const tall = G.blds.filter(b => !b.broken && (b.type === 'pole' || b.type === 'sub' || b.type === 'wind'));
+      if (tall.length && Math.random() < .75) { const b = pick(tall); lightning(b.x, b.y, true); breakDown(b, 'bolt'); }
+      else lightning(Math.floor(Math.random() * G.W), Math.floor(Math.random() * G.H), false);
+    }
+  }
+  // 튜토리얼 타이머
+  if (G.tut >= 3) { G.tutTimer++; }
+  checkGoals();
+}
+function daily() {
+  const day = dayOf(G.time);
+  G.weather = G.forecast;
+  G.forecast = rollWeather(day + 1);
+  const w = WX();
+  toast(`${day}일차 시작! 오늘 날씨: ${w.icon} ${w.name}`, 'gold');
+  if (G.weather === 'heat') toast('🔥 폭염 특보! 낮~저녁 에어컨 수요가 급증해요', 'warn');
+  if (G.weather === 'storm') toast('⛈️ 뇌우! 낙뢰로 전신주가 고장 날 수 있어요', 'warn');
+  if (G.weather === 'calm') toast('🍂 바람이 없어요. 풍력 발전이 거의 멈춰요', 'warn');
+  if (G.weather === 'cloudy') toast('☁️ 흐린 날. 태양광이 약해요');
+  Sfx.play('day');
+}
+function spawnTick(day) {
+  const sc = G.sc;
+  const hf = clamp((G.happy - 15) / 55, .1, 1.2);
+  let p = (.2 + .035 * day) * hf;
+  if (sc.factoryBoost) p *= 1.15;
+  let n = 0; while (Math.random() < p && n < 3) { n++; p *= .5; spawnOne(day); }
+}
+function spawnOne(day) {
+  const sc = G.sc;
+  const counts = { house: 0, shop: 0, factory: 0, hospital: 0 };
+  for (const c of G.cons) counts[c.type]++;
+  let type;
+  if (G.pop >= 150 * (counts.hospital + 1) && counts.hospital < 4) type = 'hospital';
+  else {
+    const w = { house: 6.2, shop: counts.house >= 5 ? 2 : 0, factory: (day >= 2 || sc.factoryBoost) ? (sc.factoryBoost ? 2.4 : 1.1) : 0 };
+    type = wpick(w);
+  }
+  const cand = [];
+  const plants = G.blds.filter(b => b.type === 'coal' || b.type === 'nuclear');
+  const ccx = G.W / 2, ccy = G.H / 2;
+  for (let y = 0; y < G.H; y++) for (let x = 0; x < G.W; x++) {
+    if (G.occ[y][x] || G.tiles[y][x] !== T.GRASS) continue;
+    let near = false;
+    for (const c of G.cons) { const d = Math.hypot(c.x - x, c.y - y); if (d <= 2.3) { near = true; break; } }
+    if (!near) continue;
+    if (type !== 'factory' && plants.some(p => Math.hypot(p.x - x, p.y - y) < 2.2)) continue;
+    const dc = Math.hypot(x - ccx, y - ccy);
+    if (type === 'factory' && dc < 3.5) continue;
+    if (G.tut >= 0 && G.tut < 3 && Math.abs(x - Math.floor(ccx)) < 4 && Math.abs(y - Math.floor(ccy)) < 4) continue;
+    cand.push({ x, y, w: type === 'factory' ? dc : 1 });
+  }
+  if (!cand.length) return;
+  // 공장은 바깥쪽 선호
+  let c;
+  if (type === 'factory') { cand.sort((a, b) => b.w - a.w); c = cand[Math.floor(Math.random() * Math.min(6, cand.length))]; }
+  else c = pick(cand);
+  const o = addCons(type, c.x, c.y, false);
+  if (o) {
+    spawnFx(c.x, c.y, 'dust');
+    if (type === 'hospital') toast('🏥 병원이 생겨요! 병원 정전은 만족도에 치명적이에요', 'gold');
+    else if (type === 'factory' && counts.factory === 0) toast('🏭 첫 공장이 들어와요. 전력을 많이 써요!', 'gold');
+  }
+}
+function upgradeTick(day) {
+  const hf = clamp((G.happy - 20) / 50, 0, 1.2);
+  for (const c of G.cons) {
+    if (!c.on || c.prog < 1 || c.onH < 10) continue;
+    const max = CONS[c.type].lv.length;
+    if (c.level >= max) continue;
+    let p = c.type === 'house' ? (c.level === 1 ? .014 : (day >= 3 ? .008 : 0)) : .006;
+    if (Math.random() < p * hf) { c.level++; c.onH = 0; spawnFx(c.x, c.y, 'up'); }
+  }
+}
+function breakDown(b, why) {
+  b.broken = true; b.repairT = 0; G.dirty = true;
+  spawnFx(b.x, b.y, 'spark');
+  if (why === 'bolt') toast(`⚡ 낙뢰! ${BUILD[b.type].name} 고장 — 탭해서 수리`, 'warn');
+  else toast(`⚠ ${BUILD[b.type].name} 고장! 탭해서 수리하세요`, 'warn');
+  Sfx.play('alarm');
+}
+function repairCost(b) { return Math.max(10, Math.round(BUILD[b.type].cost * .15)); }
+function startRepair(b) {
+  if (!b.broken || b.repairT > 0) return;
+  const c = repairCost(b);
+  if (G.money < c) { toast('수리비가 부족해요', 'warn'); Sfx.play('error'); return; }
+  G.money -= c; b.repairT = BUILD[b.type].kind === 'net' ? 1 : 2;
+  floatText(b.x, b.y, `-${c}만`, '#e77d78');
+  toast(`${BUILD[b.type].name} 수리 시작 (${b.repairT}시간)`);
+  Sfx.play('repair'); spawnFx(b.x, b.y, 'spark');
+}
+function lightning(x, y, hit) {
+  bolts.push({ x: (x + .5) * TILE, y: (y + .3) * TILE, t: 0, seg: makeBolt(), hit });
+  flashA = RM ? .12 : .55; if (!RM) shake = Math.max(shake, 8);
+  Sfx.play('zap');
+}
+function makeBolt() { const s = []; let x = 0; for (let i = 0; i <= 10; i++) { s.push(x); x += (Math.random() - .5) * 26; } return s; }
+
+// ---------- 목표 ----------
+function goalInfo() {
+  const sc = G.sc, g = sc.goal || {};
+  const day = dayOf(G.time);
+  if (sc.survival) return `생존 <b>${fmtSurv(G.time - START_MIN)}</b> · 최고 ${bestText()}`;
+  const parts = [];
+  if (g.pop) parts.push(`인구 <span class="gp">${G.pop}/${g.pop}</span>`);
+  if (g.factories) parts.push(`가동 공장 <span class="gp">${poweredFactories()}/${g.factories}</span>`);
+  if (g.happy) parts.push(`만족도 ${g.happy} 이상 유지`);
+  if (sc.pollutionMax) parts.push(`오염 <span class="gp">${Math.round(G.pollution)}/${sc.pollutionMax}</span> 미만`);
+  const leftMin = sc.days * 1440 - G.time;
+  const lh = Math.max(0, Math.ceil(leftMin / 60));
+  return `<b>${sc.name}</b> · ${parts.join(' · ')} · 남은 시간 ${Math.floor(lh / 24)}일 ${lh % 24}시간`;
+}
+function poweredFactories() { return G.cons.filter(c => c.type === 'factory' && c.on).length; }
+function checkGoals() {
+  if (G.over || G.demo) return;
+  const sc = G.sc, g = sc.goal || {};
+  if (G.happy <= 0) return endGame(false, '시민들의 불만이 폭발했어요! 만족도가 0이 되었습니다.');
+  if (G.money < BANKRUPT) return endGame(false, `파산했어요! 자금이 ${BANKRUPT}만 아래로 떨어졌습니다.`);
+  if (sc.survival) return;
+  if (sc.pollutionMax && G.pollution >= sc.pollutionMax) return endGame(false, `오염도가 한도(${sc.pollutionMax})를 넘었어요.`);
+  const deadline = sc.days * 1440;
+  let met = true;
+  if (g.pop && G.pop < g.pop) met = false;
+  if (g.factories && poweredFactories() < g.factories) met = false;
+  if (g.survive) {
+    if (G.time >= deadline) {
+      if (g.happy && G.happy < g.happy) return endGame(false, `버텼지만 만족도가 ${g.happy} 미만이에요.`);
+      if (met) return endGame(true, `${sc.days}일을 버텨냈어요!`);
+      return endGame(false, '기간 안에 목표를 이루지 못했어요.');
+    }
+    return;
+  }
+  if (met) return endGame(true, '목표 달성!');
+  if (G.time >= deadline) return endGame(false, '기간 안에 목표를 이루지 못했어요.');
+}
+
+// ---------- 갱신 ----------
+function computePop() { let p = 0; for (const c of G.cons) if (c.type === 'house' && c.prog >= 1) p += CONS.house.lv[c.level - 1].pop; G.pop = p; G.peakPop = Math.max(G.peakPop, p); }
+
+function update(dt) {
+  animT += dt;
+  if (!G) return;
+  // 애니메이션
+  for (const b of G.blds) if (b.type === 'wind' && !b.broken) b.ang += dt * (1 + G.wind * 7) * (G.started || G.demo ? 1 : .4);
+  updateFx(dt);
+  if (shake > 0) shake = Math.max(0, shake - dt * 30);
+  if (flashA > 0) { flashA = Math.max(0, flashA - dt * 2.5); }
+  $('flash').style.opacity = flashA.toFixed(3);
+  if (G.demo) { G.time += dt * 70; G.wind = .7; if (G.dirty) rebuildNet(); for (const c of G.cons) c.on = true; for (const cp of G.net.comps) cp.energized = true; for (const b of G.blds) b.out = 1; return; }
+  if (screen !== 'game' || G.over) return;
+  if (G.started && !G.paused) {
+    G.acc += dt * MIN_PER_SEC * G.speed;
+    let guard = 0;
+    while (G.acc >= STEP && guard++ < 20) { G.acc -= STEP; advanceStep(); if (G.over) break; }
+  } else {
+    // 준비 중/멈춤: 시간은 멈추지만 전력망 상태는 계속 계산
+    const r = simStep(0.0001);
+    if (r.newlyOn) onPowerOn(r.newlyOn);
+  }
+  tutorialTick();
+}
+function advanceStep() {
+  const r = simStep(STEP);
+  G.time += STEP;
+  computePop();
+  if (r.newlyOn) onPowerOn(r.newlyOn);
+  if (r.newlyOff && G.stat.shed > 0) {
+    if (animT - G.lastShortToast > 6) { toast('⚡ 전력 부족! 일부 구역이 정전됐어요', 'warn'); G.lastShortToast = animT; Sfx.play('off'); }
+  }
+  const hr = Math.floor(G.time / 60);
+  if (hr !== G.lastHour) {
+    G.lastHour = hr;
+    if (G.time % 1440 === 0) daily();
+    hourly();
+  }
+  if (G.happy <= 0 || G.money < BANKRUPT) checkGoals();
+}
+function onPowerOn(n) {
+  if (!G.started) {
+    G.started = true;
+    toast('💡 불이 켜졌어요! 이제 시간이 흐릅니다', 'good');
+  }
+  if (n > 0) Sfx.play('on');
+}
+
+// ---------- 튜토리얼 ----------
+const TUT = [
+  { text: () => `<b>① 발전소 짓기</b> — 아래 툴바에서 <b>${tutPlant() === 'coal' ? '석탄 발전소' : '태양광'}</b>을 고르고, 반짝이는 빈 땅을 탭하세요.`, tool: () => tutPlant(), mark: [-3, 0] },
+  { text: () => `<b>② 선 잇기</b> — <b>전신주</b>를 골라 발전소와 집 사이(반짝이는 곳)에 세우세요. 범위 안이면 선이 자동으로 이어져요.`, tool: () => 'pole', mark: [-1, 0] },
+  { text: () => `<b>③ 집에 불 켜기</b> — 불이 켜졌어요! 🔌 표시 건물은 아직 선이 안 닿았어요. 전신주를 하나 더 세워 모두 연결하세요.`, tool: () => 'pole', mark: [2, 1] },
+  { text: () => `<b>④ 수요와 공급</b> — 위쪽 막대가 <b>수요/공급</b>이에요. 저녁(18~20시)에 수요가 가장 커요. 수요가 공급을 넘으면 <b>정전</b>!` },
+  { text: () => `<b>⑤ 도시 키우기</b> — 새 건물이 계속 생겨요. 발전소를 늘리고 선을 이어 주세요. 고장 난 시설(❗)은 <b>탭해서 수리</b>!` },
+];
+function tutPlant() { return (G.sc.banned || []).includes('coal') ? 'solar' : 'coal'; }
+function tutorialTick() {
+  if (G.tut < 0) return;
+  const s = G.tut;
+  if (s === 0 && G.blds.some(b => BUILD[b.type].kind === 'plant')) advTut();
+  else if (s === 1 && G.cons.some(c => c.on)) advTut();
+  else if (s === 2 && G.cons.every(c => c.conn || c.prog < 1)) advTut();
+  else if (s === 3 && G.tutTimer >= 4) advTut();
+  else if (s === 4 && G.tutTimer >= 10) { G.tut = -1; Store.set('tutDone', true); refreshTools(); toast('튜토리얼 완료! 행운을 빌어요 ⚡', 'good'); }
+}
+function advTut() { G.tut++; G.tutTimer = 0; Sfx.play('coin'); refreshTools(); }
+function tutMark() {
+  if (G.tut < 0 || G.tut > 2) return null;
+  const m = TUT[G.tut].mark; if (!m) return null;
+  return { x: Math.floor(G.W / 2) + m[0], y: Math.floor(G.H / 2) + m[1] };
+}
+
+// ---------- 건설 ----------
+function canPlace(type, x, y) {
+  if (!inMap(x, y)) return '지도 밖이에요';
+  if (G.tiles[y][x] === T.WATER) return '물 위에는 지을 수 없어요';
+  if (G.occ[y][x]) return '이미 건물이 있어요';
+  if ((G.sc.banned || []).includes(type)) return '이 시나리오에서는 지을 수 없어요';
+  const cost = buildCost(type, x, y);
+  if (G.money < cost) return `돈이 부족해요 (${fmt(cost)}만 필요)`;
+  return null;
+}
+function buildCost(type, x, y) { return BUILD[type].cost + (inMap(x, y) && G.tiles[y][x] === T.FOREST ? 20 : 0); }
+function tapTile(x, y) {
+  if (!G || G.over) return;
+  const o = inMap(x, y) ? G.occ[y][x] : null;
+  // 고장 시설은 어떤 도구든 탭하면 수리
+  if (o && o.cat === 'build' && o.broken && tool !== 'bulldoze') { selected = o; startRepair(o); showInfo(); return; }
+  if (tool === 'select' || (o && tool !== 'bulldoze' && BUILD[tool])) {
+    selected = o || null; showInfo(); if (o) Sfx.play('click'); return;
+  }
+  if (tool === 'bulldoze') {
+    if (!o) return;
+    if (o.cat === 'cons') { toast('주민 건물은 철거할 수 없어요', 'warn'); Sfx.play('error'); return; }
+    demolish(o); return;
+  }
+  const err = canPlace(tool, x, y);
+  if (err) { toast(err, 'warn'); Sfx.play('error'); return; }
+  const cost = buildCost(tool, x, y);
+  G.money -= cost;
+  const b = addBuild(tool, x, y);
+  rebuildNet();
+  floatText(x, y, `-${cost}만`, '#f2c66d');
+  spawnFx(x, y, 'build');
+  Sfx.play(tool === 'pole' ? 'pole' : 'build');
+  if (selected) { selected = null; showInfo(); }
+}
+function demolish(b) {
+  const refund = Math.round(BUILD[b.type].cost * (G.time - b.builtAt <= 60 ? 1 : .5));
+  G.money += refund; removeObj(b); rebuildNet();
+  floatText(b.x, b.y, `+${refund}만`, '#78e2ae'); spawnFx(b.x, b.y, 'dust'); Sfx.play('remove');
+  showInfo();
+}
+
+// ---------- 파티클 ----------
+function spawnFx(x, y, kind) {
+  const cx = (x + .5) * TILE, cy = (y + .5) * TILE;
+  const n = kind === 'spark' ? 18 : kind === 'build' ? 14 : kind === 'up' ? 12 : 10;
+  for (let i = 0; i < n && fx.length < 500; i++) {
+    const a = Math.random() * Math.PI * 2, sp = kind === 'spark' ? 60 + Math.random() * 90 : 20 + Math.random() * 40;
+    fx.push({
+      x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - (kind === 'up' ? 50 : 0), life: 0, max: .5 + Math.random() * .5,
+      kind, col: kind === 'spark' ? '#f2c66d' : kind === 'up' ? '#78e2ae' : kind === 'build' ? '#64ceeb' : '#b7a58d', size: kind === 'dust' ? 4 : 2.5
+    });
+  }
+}
+function floatText(x, y, text, col) { fx.push({ x: (x + .5) * TILE, y: y * TILE, vx: 0, vy: -26, life: 0, max: 1.3, kind: 'text', text, col }); }
+function updateFx(dt) {
+  for (const p of fx) { p.life += dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.kind !== 'text') { p.vx *= .92; p.vy *= .92; } if (p.kind === 'smoke') p.vx += G.wind * 10 * dt; }
+  fx = fx.filter(p => p.life < p.max);
+  for (const b of bolts) b.t += dt; bolts = bolts.filter(b => b.t < .5);
+  // 굴뚝 연기 / 고장 연기
+  if (G && Math.random() < dt * 10) {
+    for (const b of G.blds) {
+      if (fx.length > 450) break;
+      if ((b.type === 'coal' && b.out > .5) || b.broken) {
+        if (Math.random() < (b.broken ? .25 : .35 * (b.out / 30 + .2))) {
+          const ox = b.type === 'coal' && !b.broken ? .69 : .5, oy = b.type === 'coal' && !b.broken ? .05 : .4;
+          fx.push({ x: (b.x + ox) * TILE, y: (b.y + oy) * TILE, vx: (Math.random() - .5) * 6, vy: -14 - Math.random() * 8, life: 0, max: 2.2, kind: 'smoke', col: b.broken ? '#3b3b3b' : '#9aa0a8', size: 5 });
+        }
+      }
+      if (b.type === 'nuclear' && !b.broken && Math.random() < .3) fx.push({ x: (b.x + .4) * TILE, y: (b.y + .14) * TILE, vx: (Math.random() - .5) * 5, vy: -10 - Math.random() * 6, life: 0, max: 2, kind: 'smoke', col: '#e8eef5', size: 6 });
+    }
+  }
+}
+
+// ---------- 그리기: 스프라이트 ----------
+function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+const ROOF = ['#d9665b', '#5b8fd9', '#5fb37a', '#d99a4b', '#9b72d4'];
+function poly(c, pts, s) { c.beginPath(); c.moveTo(pts[0] * s, pts[1] * s); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i] * s, pts[i + 1] * s); c.closePath(); }
+function shadow(c, s, w = .7) { c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(s * .52, s * .9, s * w / 2, s * .09, 0, 0, Math.PI * 2); c.fill(); }
+// o: {level, hue, lit(0~1 밤 불빛), ang, charge, broken}
+function sprite(c, type, s, o = {}) {
+  const win = o.lit > .1 ? '#ffd76a' : (o.off ? '#1c2533' : '#9cc3e6');
+  c.lineWidth = Math.max(1, s * .035); c.lineJoin = 'round';
+  switch (type) {
+    case 'house': {
+      const L = o.level || 1, roof = ROOF[(o.hue || 0) % 5];
+      shadow(c, s, .8);
+      if (L === 1) {
+        rr(c, s * .2, s * .42, s * .6, s * .46, s * .04); c.fillStyle = '#efe2c2'; c.fill(); c.strokeStyle = '#6b5c45'; c.stroke();
+        poly(c, [.1, .46, .5, .13, .9, .46], s); c.fillStyle = roof; c.fill(); c.stroke();
+        c.fillStyle = '#7a5236'; c.fillRect(s * .44, s * .66, s * .12, s * .22);
+        c.fillStyle = win; c.fillRect(s * .26, s * .56, s * .12, s * .11); c.fillRect(s * .62, s * .56, s * .12, s * .11);
+      } else if (L === 2) {
+        rr(c, s * .13, s * .32, s * .74, s * .58, s * .04); c.fillStyle = '#f1e6cf'; c.fill(); c.strokeStyle = '#6b5c45'; c.stroke();
+        poly(c, [.07, .36, .22, .1, .78, .1, .93, .36], s); c.fillStyle = roof; c.fill(); c.stroke();
+        c.fillStyle = win;
+        for (const [x, y] of [[.2, .42], [.42, .42], [.64, .42], [.2, .64], [.64, .64]]) c.fillRect(s * x, s * y, s * .14, s * .12);
+        c.fillStyle = '#7a5236'; c.fillRect(s * .43, s * .68, s * .13, s * .22);
+      } else {
+        rr(c, s * .15, s * .05, s * .7, s * .86, s * .05); c.fillStyle = '#c6d1e1'; c.fill(); c.strokeStyle = '#55657d'; c.stroke();
+        c.fillStyle = roof; c.fillRect(s * .15, s * .05, s * .7, s * .08);
+        c.fillStyle = win;
+        for (let r = 0; r < 5; r++) for (let k = 0; k < 3; k++) c.fillRect(s * (.22 + k * .2), s * (.18 + r * .14), s * .13, s * .09);
+      }
+      break;
+    }
+    case 'shop': {
+      const L = o.level || 1, top = L === 2 ? .18 : .34;
+      shadow(c, s, .85);
+      rr(c, s * .1, s * top, s * .8, s * (.9 - top), s * .04); c.fillStyle = '#f2d6e4'; c.fill(); c.strokeStyle = '#7d5568'; c.stroke();
+      if (L === 2) { c.fillStyle = win; for (let k = 0; k < 3; k++) c.fillRect(s * (.18 + k * .23), s * .24, s * .16, s * .1); }
+      for (let i = 0; i < 6; i++) { c.fillStyle = i % 2 ? '#fff4f4' : '#e77d78'; c.fillRect(s * (.08 + i * .14), s * (top + .02), s * .14, s * .12); }
+      c.fillStyle = win; c.fillRect(s * .18, s * (top + .22), s * .64, s * .2);
+      c.fillStyle = '#7a5236'; c.fillRect(s * .44, s * .72, s * .12, s * .18);
+      c.fillStyle = '#f2c66d'; rr(c, s * .3, s * (top - .1), s * .4, s * .1, s * .03); c.fill();
+      break;
+    }
+    case 'factory': {
+      const L = o.level || 1;
+      shadow(c, s, .9);
+      c.fillStyle = '#6b7480'; c.fillRect(s * .66, s * .06, s * .13, s * .4); c.fillStyle = '#e77d78'; c.fillRect(s * .66, s * .12, s * .13, s * .05);
+      if (L === 2) { c.fillStyle = '#6b7480'; c.fillRect(s * .46, s * .12, s * .11, s * .34); }
+      poly(c, [.06, .9, .06, .42, .25, .3, .25, .42, .45, .3, .45, .42, .65, .3, .65, .42, .94, .42, .94, .9], s);
+      c.fillStyle = '#8f9aaa'; c.fill(); c.strokeStyle = '#4b5463'; c.stroke();
+      c.fillStyle = win; for (let k = 0; k < 4; k++) c.fillRect(s * (.12 + k * .2), s * .55, s * .13, s * .13);
+      c.fillStyle = '#4b5463'; c.fillRect(s * .4, s * .72, s * .2, s * .18);
+      break;
+    }
+    case 'hospital': {
+      shadow(c, s, .9);
+      rr(c, s * .1, s * .16, s * .8, s * .74, s * .05); c.fillStyle = '#f4f7fb'; c.fill(); c.strokeStyle = '#7d8ea6'; c.stroke();
+      c.fillStyle = '#e25b56'; c.fillRect(s * .44, s * .22, s * .12, s * .3); c.fillRect(s * .35, s * .31, s * .3, s * .12);
+      c.fillStyle = win; for (let k = 0; k < 3; k++) { c.fillRect(s * (.17 + k * .25), s * .6, s * .14, s * .1); }
+      c.fillStyle = '#64ceeb'; c.fillRect(s * .42, s * .76, s * .16, s * .14);
+      break;
+    }
+    case 'coal': {
+      shadow(c, s, .9);
+      c.fillStyle = '#7a6a62'; c.fillRect(s * .6, s * .04, s * .18, s * .48);
+      c.fillStyle = '#e8e2dc'; c.fillRect(s * .6, s * .1, s * .18, s * .05); c.fillRect(s * .6, s * .22, s * .18, s * .05);
+      rr(c, s * .08, s * .42, s * .84, s * .48, s * .04); c.fillStyle = '#5c4a42'; c.fill(); c.strokeStyle = '#2e2420'; c.stroke();
+      c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = 1;
+      for (let r = 0; r < 3; r++) { c.beginPath(); c.moveTo(s * .08, s * (.56 + r * .12)); c.lineTo(s * .92, s * (.56 + r * .12)); c.stroke(); }
+      c.fillStyle = '#1d1a1a'; c.beginPath(); c.ellipse(s * .26, s * .8, s * .15, s * .08, 0, Math.PI, 0); c.fill();
+      c.fillStyle = o.lit > .1 || (o.out > 0) ? '#ffb347' : '#3a2f2a'; c.fillRect(s * .5, s * .58, s * .12, s * .1); c.fillRect(s * .72, s * .58, s * .12, s * .1);
+      break;
+    }
+    case 'solar': {
+      shadow(c, s, .9);
+      c.strokeStyle = '#8fa3b8'; c.lineWidth = s * .04;
+      c.beginPath(); c.moveTo(s * .3, s * .7); c.lineTo(s * .3, s * .88); c.moveTo(s * .7, s * .7); c.lineTo(s * .7, s * .88); c.stroke();
+      poly(c, [.14, .22, .86, .22, .94, .74, .06, .74], s); c.fillStyle = '#2b5aa3'; c.fill(); c.strokeStyle = '#cfe3ff'; c.lineWidth = Math.max(1, s * .03); c.stroke();
+      c.strokeStyle = 'rgba(160,205,255,.75)'; c.lineWidth = Math.max(1, s * .02);
+      c.beginPath();
+      for (let k = 1; k < 4; k++) { const t = k / 4; c.moveTo(s * lerp(.14, .06, 0) + s * .72 * t, s * .22); c.lineTo(s * .06 + s * .88 * t, s * .74); }
+      for (let k = 1; k < 3; k++) { const t = k / 3, y = lerp(.22, .74, t); c.moveTo(s * lerp(.14, .06, t), s * y); c.lineTo(s * lerp(.86, .94, t), s * y); }
+      c.stroke();
+      if (o.sun > .3) { c.fillStyle = `rgba(255,255,255,${.5 * o.sun})`; poly(c, [.2, .26, .34, .26, .26, .4, .14, .4], s); c.fill(); }
+      break;
+    }
+    case 'wind': {
+      shadow(c, s, .5);
+      c.strokeStyle = '#e8eef5'; c.lineWidth = s * .07; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(s * .5, s * .9); c.lineTo(s * .5, s * .36); c.stroke();
+      c.lineCap = 'butt';
+      const a = o.ang || 0;
+      c.fillStyle = '#f7fbff'; c.strokeStyle = '#9fb2c6'; c.lineWidth = Math.max(1, s * .02);
+      for (let k = 0; k < 3; k++) {
+        const ang = a + k * Math.PI * 2 / 3;
+        c.save(); c.translate(s * .5, s * .34); c.rotate(ang);
+        c.beginPath(); c.moveTo(0, -s * .03); c.quadraticCurveTo(s * .2, -s * .07, s * .36, 0); c.quadraticCurveTo(s * .2, s * .04, 0, s * .03); c.closePath(); c.fill(); c.stroke();
+        c.restore();
+      }
+      c.fillStyle = '#c9d6e3'; c.beginPath(); c.arc(s * .5, s * .34, s * .06, 0, Math.PI * 2); c.fill();
+      break;
+    }
+    case 'nuclear': {
+      shadow(c, s, .95);
+      c.beginPath(); c.moveTo(s * .08, s * .9); c.quadraticCurveTo(s * .2, s * .5, s * .14, s * .12); c.lineTo(s * .56, s * .12); c.quadraticCurveTo(s * .5, s * .5, s * .62, s * .9); c.closePath();
+      c.fillStyle = '#cfd6de'; c.fill(); c.strokeStyle = '#7d8a99'; c.stroke();
+      c.fillStyle = '#9aa7b6'; c.fillRect(s * .14, s * .12, s * .42, s * .05);
+      c.beginPath(); c.arc(s * .74, s * .72, s * .18, Math.PI, 0); c.lineTo(s * .92, s * .9); c.lineTo(s * .56, s * .9); c.closePath(); c.fillStyle = '#eef2f6'; c.fill(); c.stroke();
+      c.fillStyle = '#f2c66d'; c.beginPath(); c.arc(s * .74, s * .72, s * .08, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#2b2b2b';
+      for (let k = 0; k < 3; k++) { c.beginPath(); c.moveTo(s * .74, s * .72); c.arc(s * .74, s * .72, s * .07, k * 2.09 - .5, k * 2.09 + .5); c.fill(); }
+      break;
+    }
+    case 'battery': {
+      shadow(c, s, .85);
+      rr(c, s * .14, s * .24, s * .72, s * .64, s * .06); c.fillStyle = '#2f6b52'; c.fill(); c.strokeStyle = '#173a2c'; c.stroke();
+      c.fillStyle = '#b8c4cf'; c.fillRect(s * .3, s * .16, s * .12, s * .09); c.fillRect(s * .58, s * .16, s * .12, s * .09);
+      rr(c, s * .24, s * .36, s * .52, s * .42, s * .03); c.fillStyle = '#0e1f18'; c.fill();
+      const ch = o.charge == null ? .7 : o.charge;
+      c.fillStyle = ch > .25 ? '#78e2ae' : '#e77d78'; c.fillRect(s * .27, s * (.75 - .36 * ch), s * .46, s * .36 * ch);
+      c.fillStyle = '#f2c66d'; poly(c, [.53, .38, .4, .58, .5, .58, .46, .76, .6, .52, .5, .52], s); c.fill();
+      break;
+    }
+    case 'pole': {
+      c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(s * .55, s * .88, s * .14, s * .05, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#8a6a45'; c.fillRect(s * .46, s * .24, s * .08, s * .65);
+      c.fillStyle = '#6d5236'; c.fillRect(s * .26, s * .25, s * .48, s * .06);
+      c.fillStyle = '#d9e4ef'; for (const x of [.28, .5, .72]) { c.beginPath(); c.arc(s * x, s * .24, s * .035, 0, Math.PI * 2); c.fill(); }
+      break;
+    }
+    case 'sub': {
+      shadow(c, s, .95);
+      rr(c, s * .06, s * .14, s * .88, s * .78, s * .05); c.fillStyle = '#34404f'; c.fill();
+      c.setLineDash([s * .05, s * .04]); c.strokeStyle = '#a5b7ca'; c.lineWidth = Math.max(1, s * .025); c.stroke(); c.setLineDash([]);
+      for (const x of [.16, .54]) {
+        rr(c, s * x, s * .38, s * .3, s * .4, s * .03); c.fillStyle = '#9aa8b8'; c.fill(); c.strokeStyle = '#56657a'; c.stroke();
+        c.fillStyle = '#56657a'; for (let k = 0; k < 3; k++) c.fillRect(s * (x + .04 + k * .09), s * .44, s * .04, s * .28);
+        c.fillStyle = '#d9e4ef'; c.beginPath(); c.arc(s * (x + .15), s * .32, s * .04, 0, Math.PI * 2); c.fill();
+      }
+      c.fillStyle = '#f2c66d'; poly(c, [.53, .16, .44, .3, .5, .3, .46, .4, .58, .26, .51, .26], s); c.fill();
+      break;
+    }
+    case 'select': {
+      c.fillStyle = '#eaf1fb'; poly(c, [.32, .14, .32, .78, .46, .64, .56, .88, .66, .84, .56, .6, .76, .6], s); c.fill();
+      c.strokeStyle = '#0a1320'; c.lineWidth = Math.max(1, s * .04); c.stroke();
+      break;
+    }
+    case 'bulldoze': {
+      c.fillStyle = '#f2c66d'; rr(c, s * .2, s * .42, s * .5, s * .28, s * .04); c.fill();
+      c.fillStyle = '#c99a3b'; c.fillRect(s * .28, s * .28, s * .24, s * .16);
+      c.fillStyle = '#444'; rr(c, s * .16, s * .68, s * .58, s * .14, s * .07); c.fill();
+      c.fillStyle = '#9aa8b8'; poly(c, [.72, .4, .88, .4, .9, .8, .74, .74], s); c.fill();
+      break;
+    }
+  }
+}
+const ANCHOR = { pole: [.5, .24], sub: [.5, .3], coal: [.3, .45], solar: [.5, .3], wind: [.5, .5], nuclear: [.74, .58], battery: [.5, .2] };
+function anchorOf(b) { const a = ANCHOR[b.type] || [.5, .4]; return [(b.x + a[0]) * TILE, (b.y + a[1]) * TILE]; }
+
+// ---------- 그리기: 지형 ----------
+let terrainCanvas = null, terrainScale = 1;
+function buildTerrain() {
+  const W = G.W, H = G.H;
+  terrainScale = Math.min(2, 2400 / (W * TILE));
+  const tc = document.createElement('canvas'); tc.width = Math.ceil(W * TILE * terrainScale); tc.height = Math.ceil(H * TILE * terrainScale);
+  const c = tc.getContext('2d'); c.scale(terrainScale, terrainScale);
+  const rng = mulberry32(G.seed + 99);
+  const grassAt = (x, y) => inMap(x, y) && G.tiles[y][x] !== T.WATER;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = G.tiles[y][x], px = x * TILE, py = y * TILE;
+    if (t === T.WATER) {
+      c.fillStyle = (x + y) % 2 ? '#1d4a72' : '#1f4f79'; c.fillRect(px, py, TILE, TILE);
+      // 물가
+      c.fillStyle = '#c9b98a';
+      if (grassAt(x, y - 1)) c.fillRect(px, py, TILE, 3);
+      if (grassAt(x, y + 1)) c.fillRect(px, py + TILE - 3, TILE, 3);
+      if (grassAt(x - 1, y)) c.fillRect(px, py, 3, TILE);
+      if (grassAt(x + 1, y)) c.fillRect(px + TILE - 3, py, 3, TILE);
+      c.fillStyle = 'rgba(160,210,255,.25)';
+      for (let k = 0; k < 2; k++) c.fillRect(px + 6 + rng() * 22, py + 6 + rng() * 26, 8, 2);
+      continue;
+    }
+    const base = t === T.HILL ? ((x + y) % 2 ? '#5d7a4c' : '#62804f') : ((x + y) % 2 ? '#3f6e48' : '#43744c');
+    c.fillStyle = base; c.fillRect(px, py, TILE, TILE);
+    for (let k = 0; k < 5; k++) { c.fillStyle = rng() < .5 ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.07)'; c.fillRect(px + rng() * 36, py + rng() * 36, 3, 3); }
+    if (t === T.HILL) {
+      c.strokeStyle = 'rgba(30,45,25,.45)'; c.lineWidth = 2;
+      c.beginPath(); c.arc(px + 20, py + 30, 14, Math.PI * 1.1, Math.PI * 1.9); c.stroke();
+      c.beginPath(); c.arc(px + 20, py + 30, 7, Math.PI * 1.1, Math.PI * 1.9); c.stroke();
+    }
+    if (t === T.FOREST) {
+      for (const [ox, oy] of [[11, 14], [28, 12], [19, 27], [31, 30]]) {
+        c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(px + ox + 2, py + oy + 8, 7, 3, 0, 0, 7); c.fill();
+        c.fillStyle = '#2b5a35'; c.beginPath(); c.arc(px + ox, py + oy, 8, 0, 7); c.fill();
+        c.fillStyle = '#3e7a48'; c.beginPath(); c.arc(px + ox - 2, py + oy - 2, 5, 0, 7); c.fill();
+      }
+    } else if (rng() < .12) {
+      c.fillStyle = ['#f2c66d', '#e77d78', '#eaf1fb'][Math.floor(rng() * 3)];
+      c.fillRect(px + rng() * 34 + 2, py + rng() * 34 + 2, 3, 3);
+    }
+  }
+  terrainCanvas = tc;
+}
+
+// ---------- 그리기: 월드 ----------
+let glowSprite = null;
+function makeGlow() {
+  const g = document.createElement('canvas'); g.width = g.height = 64; const c = g.getContext('2d');
+  const gr = c.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,214,110,.85)'); gr.addColorStop(.4, 'rgba(255,190,80,.35)'); gr.addColorStop(1, 'rgba(255,190,80,0)');
+  c.fillStyle = gr; c.fillRect(0, 0, 64, 64); glowSprite = g;
+}
+function clampCam() {
+  if (!G) return;
+  cam.z = clamp(cam.z, .35, 2.6);
+  cam.x = clamp(cam.x, 0, G.W * TILE); cam.y = clamp(cam.y, 0, G.H * TILE);
+}
+function screenToWorld(sx, sy) { return { x: (sx - VW / 2) / cam.z + cam.x, y: (sy - VH / 2) / cam.z + cam.y }; }
+function worldToScreen(wx, wy) { return { x: (wx - cam.x) * cam.z + VW / 2, y: (wy - cam.y) * cam.z + VH / 2 }; }
+function screenToTile(sx, sy) { const w = screenToWorld(sx, sy); return { x: Math.floor(w.x / TILE), y: Math.floor(w.y / TILE) }; }
+
+function render() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = '#0a1320'; ctx.fillRect(0, 0, cv.width, cv.height);
+  if (!G) return;
+  if (!terrainCanvas) buildTerrain();
+  if (!glowSprite) makeGlow();
+  const sx = shake ? (Math.random() - .5) * shake : 0, sy = shake ? (Math.random() - .5) * shake : 0;
+  const z = cam.z * DPR;
+  ctx.setTransform(z, 0, 0, z, DPR * (VW / 2 - cam.x * cam.z + sx), DPR * (VH / 2 - cam.y * cam.z + sy));
+  const h = hourOf(G.time), dark = darkness(h);
+  // 보이는 범위
+  const tl = screenToWorld(0, 0), br = screenToWorld(VW, VH);
+  const x0 = Math.max(0, Math.floor(tl.x / TILE) - 1), y0 = Math.max(0, Math.floor(tl.y / TILE) - 1), x1 = Math.min(G.W - 1, Math.ceil(br.x / TILE) + 1), y1 = Math.min(G.H - 1, Math.ceil(br.y / TILE) + 1);
+  // 지도 밖 바다
+  ctx.fillStyle = '#163b5e'; ctx.fillRect(-TILE * 30, -TILE * 30, (G.W + 60) * TILE, (G.H + 60) * TILE);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(terrainCanvas, 0, 0, G.W * TILE, G.H * TILE);
+  ctx.imageSmoothingEnabled = true;
+  // 물결
+  ctx.strokeStyle = 'rgba(180,220,255,.18)'; ctx.lineWidth = 1.5;
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (G.tiles[y][x] === T.WATER) {
+    const ph = animT * 1.5 + x * .7 + y * 1.3; ctx.beginPath(); ctx.moveTo(x * TILE + 8, y * TILE + 22 + Math.sin(ph) * 2); ctx.quadraticCurveTo(x * TILE + 20, y * TILE + 18 + Math.sin(ph + 1) * 3, x * TILE + 32, y * TILE + 22 + Math.sin(ph) * 2); ctx.stroke();
+  }
+  // 공급 범위 표시(건설 도구 선택 시)
+  const showCov = !G.demo && (tool === 'pole' || tool === 'sub' || G.tut === 2 || G.tut === 1);
+  if (showCov) {
+    ctx.fillStyle = 'rgba(100,206,235,.13)';
+    for (const k of G.net.covered) { const x = k % G.W, y = Math.floor(k / G.W); if (x >= x0 && x <= x1 && y >= y0 && y <= y1) ctx.fillRect(x * TILE + 1, y * TILE + 1, TILE - 2, TILE - 2); }
+  }
+  // 드롭선(전신주 → 건물)
+  ctx.lineWidth = 1.2;
+  for (const c of G.cons) {
+    if (!c.feed || c.prog < 1) continue;
+    const [ax, ay] = anchorOf(c.feed), bx = (c.x + .5) * TILE, by = (c.y + .4) * TILE;
+    ctx.strokeStyle = c.on ? 'rgba(30,30,35,.75)' : 'rgba(30,30,35,.5)';
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo((ax + bx) / 2, (ay + by) / 2 + 6, bx, by); ctx.stroke();
+  }
+  // 건물(위→아래 순)
+  const objs = [];
+  for (const b of G.blds) if (b.x >= x0 && b.x <= x1 && b.y >= y0 && b.y <= y1) objs.push(b);
+  for (const c of G.cons) if (c.x >= x0 && c.x <= x1 && c.y >= y0 && c.y <= y1) objs.push(c);
+  objs.sort((a, b) => a.y - b.y || a.x - b.x);
+  const sun = sunOf(h) * WX().solar;
+  for (const o of objs) {
+    ctx.save(); ctx.translate(o.x * TILE, o.y * TILE);
+    if (o.cat === 'cons') {
+      if (o.prog < 1) drawScaffold(o);
+      else sprite(ctx, o.type, TILE, { level: o.level, hue: o.hue, lit: o.on ? dark : 0, off: !o.on });
+    } else {
+      sprite(ctx, o.type, TILE, { ang: o.ang, charge: o.charge / BUILD.battery.store, sun, out: o.out, lit: dark });
+      if (o.broken) { ctx.fillStyle = 'rgba(231,125,120,.28)'; ctx.fillRect(2, 2, TILE - 4, TILE - 4); }
+    }
+    if (o === selected) { ctx.strokeStyle = '#64ceeb'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]); ctx.lineDashOffset = -animT * 20; ctx.strokeRect(1, 1, TILE - 2, TILE - 2); ctx.setLineDash([]); }
+    ctx.restore();
+  }
+  // 전선
+  drawWires(false);
+  // 파티클(연기 등)
+  for (const p of fx) if (p.kind === 'smoke' || p.kind === 'dust') {
+    const k = p.life / p.max; ctx.globalAlpha = (1 - k) * .55; ctx.fillStyle = p.col;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 + k * 1.6), 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  // 날씨 그늘·밤
+  const W = WX(); let tint = 0;
+  if (G.weather === 'cloudy') tint = .14; if (G.weather === 'storm') tint = .26;
+  const worldRect = [-TILE * 30, -TILE * 30, (G.W + 60) * TILE, (G.H + 60) * TILE];
+  if (tint) { ctx.fillStyle = `rgba(20,28,40,${tint})`; ctx.fillRect(...worldRect); }
+  if (G.weather === 'heat') { ctx.fillStyle = `rgba(255,140,60,${.07 + .03 * Math.sin(animT * 2)})`; ctx.fillRect(...worldRect); }
+  if (G.pollution > 25) { ctx.fillStyle = `rgba(110,90,60,${clamp((G.pollution - 25) / 75, 0, 1) * .3})`; ctx.fillRect(...worldRect); }
+  if (dark > 0) { ctx.fillStyle = `rgba(4,9,22,${dark})`; ctx.fillRect(...worldRect); }
+  // 구름 그림자
+  if (G.weather === 'cloudy' || G.weather === 'storm') {
+    ctx.fillStyle = 'rgba(10,15,25,.16)';
+    for (let i = 0; i < 6; i++) {
+      const cx = ((animT * 12 + i * 211) % ((G.W + 8) * TILE)) - 4 * TILE, cy = ((i * 137) % G.H + .5) * TILE;
+      ctx.beginPath(); ctx.ellipse(cx, cy, TILE * 3, TILE * 1.4, 0, 0, 7); ctx.fill();
+    }
+  }
+  // 불빛(밤)
+  if (dark > .05) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (const o of objs) {
+      if (o.cat === 'cons' ? (o.on && o.prog >= 1) : (o.type === 'pole' ? o.comp >= 0 && G.net.comps[o.comp] && G.net.comps[o.comp].energized && !o.broken : (!o.broken && o.out > .1))) {
+        const big = o.cat === 'cons' ? 1.5 + o.level * .25 : (o.type === 'pole' ? .9 : 1.4);
+        const flick = o.cat === 'cons' ? .85 + .15 * Math.sin(animT * 3 + o.id) : 1;
+        ctx.globalAlpha = dark * 1.1 * flick * (o.type === 'pole' ? .5 : 1);
+        const sz = TILE * big; ctx.drawImage(glowSprite, (o.x + .5) * TILE - sz / 2, (o.y + .5) * TILE - sz / 2, sz, sz);
+      }
+    }
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  }
+  // 전류 흐름(빛나는 점)
+  drawWires(true);
+  // 아이콘(정전/연결/고장)
+  for (const o of objs) drawIcon(o, dark);
+  // 비
+  if (G.weather === 'storm') {
+    ctx.strokeStyle = 'rgba(170,200,240,.35)'; ctx.lineWidth = 1.2; ctx.beginPath();
+    for (let i = 0; i < 90; i++) {
+      const rx = tl.x + ((i * 97.3 + animT * 40) % (br.x - tl.x + 40)), ry = tl.y + ((i * 53.7 + animT * 600) % (br.y - tl.y + 40));
+      ctx.moveTo(rx, ry); ctx.lineTo(rx - 4, ry + 12);
+    }
+    ctx.stroke();
+  }
+  if (G.weather === 'windy') {
+    ctx.strokeStyle = 'rgba(235,245,255,.25)'; ctx.lineWidth = 1.5; ctx.beginPath();
+    for (let i = 0; i < 18; i++) {
+      const rx = tl.x + ((i * 131 + animT * 160) % (br.x - tl.x + 80)) - 40, ry = tl.y + ((i * 71.3) % (br.y - tl.y));
+      ctx.moveTo(rx, ry); ctx.lineTo(rx + 26, ry - 2);
+    }
+    ctx.stroke();
+  }
+  // 번개
+  for (const b of bolts) {
+    const a = 1 - b.t / .5; ctx.strokeStyle = `rgba(255,250,210,${a})`; ctx.lineWidth = 3; ctx.shadowColor = '#f2c66d'; ctx.shadowBlur = 18;
+    ctx.beginPath(); const top = tl.y - 20, n = b.seg.length - 1;
+    for (let i = 0; i <= n; i++) { const y = lerp(top, b.y, i / n), x = b.x + b.seg[i] * (1 - i / n); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke(); ctx.shadowBlur = 0;
+  }
+  // 반짝/텍스트 파티클
+  for (const p of fx) {
+    if (p.kind === 'smoke' || p.kind === 'dust') continue;
+    const k = p.life / p.max; ctx.globalAlpha = 1 - k;
+    if (p.kind === 'text') { ctx.font = 'bold 13px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#0a1320'; ctx.strokeText(p.text, p.x, p.y); ctx.fillStyle = p.col; ctx.fillText(p.text, p.x, p.y); }
+    else { ctx.fillStyle = p.col; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); }
+  }
+  ctx.globalAlpha = 1;
+  // 튜토리얼 표시
+  const m = tutMark();
+  if (m && inMap(m.x, m.y)) {
+    const pulse = .5 + .5 * Math.sin(animT * 5);
+    ctx.strokeStyle = `rgba(242,198,109,${.6 + .4 * pulse})`; ctx.lineWidth = 3;
+    ctx.strokeRect(m.x * TILE + 2 - pulse * 3, m.y * TILE + 2 - pulse * 3, TILE - 4 + pulse * 6, TILE - 4 + pulse * 6);
+    ctx.fillStyle = '#f2c66d'; ctx.beginPath(); const ay = m.y * TILE - 8 - pulse * 6;
+    ctx.moveTo((m.x + .5) * TILE, ay + 8); ctx.lineTo((m.x + .5) * TILE - 8, ay - 4); ctx.lineTo((m.x + .5) * TILE + 8, ay - 4); ctx.fill();
+  }
+  // 미리보기
+  drawGhost();
+}
+function drawScaffold(o) {
+  const s = TILE;
+  ctx.strokeStyle = '#c9a76b'; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
+  ctx.strokeRect(s * .15, s * .3, s * .7, s * .6); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(s * .15, s * .9); ctx.lineTo(s * .85, s * .3); ctx.moveTo(s * .15, s * .3); ctx.lineTo(s * .85, s * .9); ctx.stroke();
+  ctx.fillStyle = '#0a1320'; ctx.fillRect(s * .15, s * .12, s * .7, s * .1);
+  ctx.fillStyle = '#64ceeb'; ctx.fillRect(s * .15, s * .12, s * .7 * o.prog, s * .1);
+}
+function drawWires(pulses) {
+  const links = G.net.links;
+  if (!pulses) {
+    for (const [a, b] of links) {
+      const [ax, ay] = anchorOf(a), [bx, by] = anchorOf(b);
+      const sag = Math.hypot(bx - ax, by - ay) * .1;
+      const comp = G.net.comps[a.comp];
+      ctx.strokeStyle = comp && comp.energized ? (comp.short ? '#5a2a2a' : '#151b24') : '#2b3442';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo((ax + bx) / 2, (ay + by) / 2 + sag, bx, by); ctx.stroke();
+    }
+    return;
+  }
+  ctx.globalCompositeOperation = 'lighter';
+  for (const [a, b] of links) {
+    const comp = G.net.comps[a.comp]; if (!comp || !comp.energized) continue;
+    const [ax, ay] = anchorOf(a), [bx, by] = anchorOf(b);
+    const len = Math.hypot(bx - ax, by - ay), sag = len * .1, cx = (ax + bx) / 2, cy = (ay + by) / 2 + sag;
+    const n = Math.max(1, Math.round(len / 45));
+    for (let k = 0; k < n; k++) {
+      const t = ((animT * (comp.short ? .35 : .8) + k / n + (a.id * .37) % 1) % 1);
+      const x = (1 - t) * (1 - t) * ax + 2 * (1 - t) * t * cx + t * t * bx, y = (1 - t) * (1 - t) * ay + 2 * (1 - t) * t * cy + t * t * by;
+      ctx.fillStyle = comp.short ? 'rgba(231,125,120,.85)' : 'rgba(242,198,109,.9)';
+      ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = comp.short ? 'rgba(231,125,120,.18)' : 'rgba(242,198,109,.2)';
+      ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
+function bubble(x, y, bg, draw) {
+  const bob = Math.sin(animT * 4 + x) * 2;
+  ctx.save(); ctx.translate((x + .5) * TILE, y * TILE + 2 + bob);
+  ctx.fillStyle = bg; ctx.strokeStyle = '#0a1320'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  draw(); ctx.restore();
+}
+function drawIcon(o, dark) {
+  if (o.cat === 'build') {
+    if (o.broken) {
+      if (o.repairT > 0) {
+        bubble(o.x, o.y, '#64ceeb', () => { ctx.strokeStyle = '#0a1320'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(-4, 4); ctx.lineTo(3, -3); ctx.stroke(); ctx.beginPath(); ctx.arc(4, -4, 2.5, 0, 6.3); ctx.stroke(); });
+      } else {
+        const blink = .6 + .4 * Math.sin(animT * 8);
+        bubble(o.x, o.y, `rgba(231,90,85,${blink})`, () => { ctx.fillStyle = '#fff'; ctx.font = 'bold 14px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('!', 0, 1); });
+      }
+    } else if (o.comp >= 0 && BUILD[o.type].kind !== 'net') {
+      const comp = G.net.comps[o.comp];
+      if (comp && !comp.cons.length && comp.nodes.length === 1 && !G.demo) bubble(o.x, o.y, 'rgba(100,206,235,.9)', () => plug());
+    }
+    return;
+  }
+  if (o.prog < 1 || o.on || G.demo) return;
+  if (!o.conn) bubble(o.x, o.y, 'rgba(100,206,235,.92)', () => plug());
+  else {
+    const blink = .55 + .45 * Math.sin(animT * 6 + o.id);
+    bubble(o.x, o.y, `rgba(231,125,120,${blink})`, () => { ctx.fillStyle = '#1b1405'; ctx.beginPath(); ctx.moveTo(1, -6); ctx.lineTo(-4, 1); ctx.lineTo(0, 1); ctx.lineTo(-1, 6); ctx.lineTo(4, -1); ctx.lineTo(0, -1); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#1b1405'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-6, -6); ctx.lineTo(6, 6); ctx.stroke(); });
+  }
+}
+function plug() { ctx.fillStyle = '#0a1320'; ctx.fillRect(-4, -3, 8, 6); ctx.fillRect(-3, -6, 2, 3); ctx.fillRect(1, -6, 2, 3); ctx.fillRect(-1, 3, 2, 4); }
+function drawGhost() {
+  const t = pressTile || hoverTile;
+  if (!t || !BUILD[tool] || !inMap(t.x, t.y) || G.demo) return;
+  if (G.occ[t.y][t.x]) return;
+  const err = canPlace(tool, t.x, t.y), d = BUILD[tool];
+  const fake = { x: t.x, y: t.y, type: tool };
+  // 연결 미리보기
+  const [fx0, fy0] = anchorOf(fake);
+  ctx.setLineDash([5, 5]); ctx.lineWidth = 1.6;
+  for (const b of G.blds) {
+    if (b.broken && BUILD[b.type].kind === 'net') continue;
+    if (dist(b, t) <= Math.max(d.link, BUILD[b.type].link) + 1e-6) { const [bx, by] = anchorOf(b); ctx.strokeStyle = 'rgba(242,198,109,.85)'; ctx.beginPath(); ctx.moveTo(fx0, fy0); ctx.lineTo(bx, by); ctx.stroke(); }
+  }
+  ctx.setLineDash([]);
+  const cx = (t.x + .5) * TILE, cy = (t.y + .5) * TILE;
+  if (d.serve) { ctx.fillStyle = 'rgba(100,206,235,.12)'; ctx.strokeStyle = 'rgba(100,206,235,.8)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, (d.serve + .5) * TILE, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(242,198,109,.5)'; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.arc(cx, cy, d.link * TILE, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+  ctx.save(); ctx.translate(t.x * TILE, t.y * TILE); ctx.globalAlpha = .7;
+  sprite(ctx, tool, TILE, { ang: animT });
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = err ? 'rgba(231,125,120,.35)' : 'rgba(120,226,174,.25)'; ctx.fillRect(0, 0, TILE, TILE);
+  ctx.restore();
+}
+
+// ---------- HUD ----------
+const gctx = $('graph').getContext('2d');
+let hudT = 0;
+function updateHud(force) {
+  if (!G || G.demo) return;
+  hudT += 1; if (!force && hudT % 4) return;
+  const h = hourOf(G.time), hh = Math.floor(h), mm = Math.floor((h - hh) * 60 / 10) * 10;
+  $('dayT').textContent = `${dayOf(G.time)}일 ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  const w = WX(), f = WEATHER[G.forecast];
+  $('wIcon').textContent = (G.weather === 'sunny' && darkness(h) > .3) ? '🌙' : w.icon;
+  $('wT').textContent = G.started ? `${w.name} ▸${f.icon}` : '준비 중';
+  $('wT').title = `오늘 ${w.name}, 내일 ${f.name}`;
+  const mt = $('moneyT'); mt.textContent = fmt(G.money) + '만'; mt.classList.toggle('neg', G.money < 0);
+  const ht = $('happyT'); ht.textContent = Math.round(G.happy); ht.classList.toggle('low', G.happy < 30);
+  const S = G.stat, maxv = Math.max(S.cap, S.dem, 10) * 1.15;
+  const fill = $('pwrFill');
+  fill.style.width = clamp(S.dem / maxv * 100, 0, 100) + '%';
+  const ratio = S.cap > 0 ? S.dem / S.cap : (S.dem > 0 ? 9 : 0);
+  fill.className = (S.shed > .01 || ratio > 1) ? 'bad' : ratio > .85 ? 'warn' : '';
+  $('pwrCap').style.left = `calc(${clamp(S.cap / maxv * 100, 0, 100)}% - 1px)`;
+  $('pwrT').textContent = `수요 ${fmt1(S.dem)} / 공급 ${fmt1(S.cap)} MW`;
+  $('popT').textContent = fmt(G.pop);
+  $('batT').textContent = S.batMax > 0 ? Math.round(S.bat / S.batMax * 100) + '%' : '-';
+  const pt = $('polT'); pt.textContent = Math.round(G.pollution); pt.style.color = G.pollution > POLL_LIMIT ? '#e77d78' : G.pollution > 30 ? '#f2c66d' : '';
+  $('bPause').textContent = (!G.started || G.paused) ? '▶' : '⏸';
+  $('bPause').classList.toggle('on', !G.started || G.paused);
+  $('bSpeed').textContent = '×' + G.speed;
+  // 목표/튜토리얼
+  const goal = $('goal');
+  if (G.tut >= 0) { goal.innerHTML = TUT[G.tut].text(); goal.className = 'on tut'; }
+  else { goal.innerHTML = goalInfo(); goal.className = 'on'; }
+  drawGraph();
+  // 툴바 가격 색
+  document.querySelectorAll('.tb').forEach(el => { const k = el.dataset.t; if (BUILD[k]) el.classList.toggle('poor', G.money < BUILD[k].cost); });
+  if (selected && hudT % 12 === 0) showInfo();
+}
+function drawGraph() {
+  const c = gctx, gc = $('graph'), w = gc.width, h = gc.height;
+  c.clearRect(0, 0, w, h);
+  const H = G.hist; if (H.length < 2) return;
+  let mx = 10; for (const p of H) mx = Math.max(mx, p.d, p.c); mx *= 1.1;
+  const X = i => i / 95 * w, Y = v => h - v / mx * h;
+  c.lineWidth = 1.5 * DPR;
+  c.strokeStyle = '#78e2ae'; c.beginPath(); H.forEach((p, i) => i ? c.lineTo(X(i), Y(p.c)) : c.moveTo(X(i), Y(p.c))); c.stroke();
+  c.strokeStyle = '#f2c66d'; c.beginPath(); H.forEach((p, i) => i ? c.lineTo(X(i), Y(p.d)) : c.moveTo(X(i), Y(p.d))); c.stroke();
+  c.fillStyle = 'rgba(231,125,120,.35)';
+  H.forEach((p, i) => { if (p.d > p.c) c.fillRect(X(i), Y(p.d), Math.max(1, w / 96), Y(p.c) - Y(p.d)); });
+}
+let toastQ = [];
+function toast(msg, kind = '', ms = 3600) {
+  if (!G || G.demo) return;
+  const box = $('toasts');
+  if (toastQ.some(t => t.msg === msg)) return;
+  const el = document.createElement('div'); el.className = 'toast ' + kind; el.textContent = msg;
+  box.appendChild(el); const item = { msg, el }; toastQ.push(item);
+  while (toastQ.length > 3) { const o = toastQ.shift(); o.el.remove(); }
+  setTimeout(() => { el.remove(); toastQ = toastQ.filter(t => t !== item); }, ms);
+}
+function showInfo() {
+  const box = $('info');
+  if (!selected || !G || (selected.cat === 'cons' ? !G.cons.includes(selected) : !G.blds.includes(selected))) { box.className = ''; box.innerHTML = ''; selected = null; return; }
+  const o = selected; let html = '', btn = '';
+  if (o.cat === 'cons') {
+    const d = CONS[o.type], L = o.level;
+    const status = o.prog < 1 ? `입주 준비 중 ${Math.round(o.prog * 100)}%` : o.on ? '<span style="color:#78e2ae">전기 공급 중</span>' : o.conn ? '<span style="color:#e77d78">정전! 발전량이 부족해요</span>' : '<span style="color:#64ceeb">연결 안 됨 — 가까이 전신주가 필요해요</span>';
+    html = `<b>${LV_NAME[o.type][L - 1]}</b> ${o.type === 'house' ? `<small>· 인구 ${d.lv[L - 1].pop}명</small>` : ''}<br>${status}<br><small>지금 수요 ${fmt1(o.dem)} MW${o.type === 'hospital' ? ' · 최우선 공급' : ''}</small>`;
+  } else {
+    const d = BUILD[o.type]; let line = '';
+    if (o.type === 'battery') line = `저장 ${fmt1(o.charge)}/${d.store} MWh · ${o.out > 0 ? '방전 ' + fmt1(o.out) : o.out < 0 ? '충전 ' + fmt1(-o.out) : '대기'} MW`;
+    else if (d.kind === 'plant') line = `출력 ${fmt1(o.out)} / ${d.cap} MW${o.type === 'wind' && G.tiles[o.y][o.x] === T.HILL ? ' · 언덕 보너스' : ''}`;
+    else line = `연결 ${d.link}칸 · 공급 범위 ${d.serve}칸`;
+    const conn = d.kind !== 'net' && o.comp >= 0 && G.net.comps[o.comp] && G.net.comps[o.comp].cons.length === 0 ? '<br><small style="color:#64ceeb">아직 건물과 이어지지 않았어요 — 전신주로 연결하세요</small>' : '';
+    const st = o.broken ? (o.repairT > 0 ? `<span style="color:#64ceeb">수리 중 (${o.repairT}시간)</span>` : '<span style="color:#e77d78">고장!</span>') : '';
+    html = `<b>${d.name}</b> ${st}<br>${line}${conn}<br><small>유지비 ${d.upkeep}만/시간 · ${d.desc}</small>`;
+    if (o.broken && o.repairT <= 0) btn += `<button class="ib2 gold" id="iRepair">수리 ${repairCost(o)}만</button>`;
+    const refund = Math.round(d.cost * (G.time - o.builtAt <= 60 ? 1 : .5));
+    btn += `<button class="ib2 red" id="iDemolish">철거 +${refund}</button>`;
+  }
+  box.innerHTML = `<div class="it">${html}</div>${btn}<button class="ib2" id="iClose" aria-label="닫기">✕</button>`;
+  box.className = 'on';
+  const r = $('iRepair'); if (r) r.onclick = () => { startRepair(o); showInfo(); };
+  const dm = $('iDemolish'); if (dm) dm.onclick = () => demolish(o);
+  $('iClose').onclick = () => { selected = null; showInfo(); };
+}
+
+// ---------- 툴바 ----------
+function buildToolbar() {
+  const box = $('tools'); box.innerHTML = '';
+  TOOLS.forEach((k, i) => {
+    const b = document.createElement('button'); b.className = 'tb'; b.dataset.t = k;
+    const name = TOOL_LABEL[k] || (k === 'battery' ? '배터리' : k === 'coal' ? '석탄' : BUILD[k].name);
+    b.setAttribute('aria-label', `${name} (${i + 1})`);
+    const c = document.createElement('canvas'); c.width = c.height = 30 * 2;
+    const x = c.getContext('2d'); x.scale(2, 2); sprite(x, k, 30, { level: 1, ang: .4, charge: .7, sun: 1 });
+    b.appendChild(c);
+    const s = document.createElement('span'); s.textContent = name; b.appendChild(s);
+    const e = document.createElement('em'); e.textContent = BUILD[k] ? BUILD[k].cost + '만' : ' '; b.appendChild(e);
+    b.onclick = () => { Sfx.init(); setTool(k); };
+    box.appendChild(b);
+  });
+  refreshTools();
+}
+function setTool(k) {
+  if (G && (G.sc.banned || []).includes(k)) { toast('이 시나리오에서는 지을 수 없어요', 'warn'); Sfx.play('error'); return; }
+  tool = (tool === k && k !== 'select') ? 'select' : k;
+  Sfx.play('click'); refreshTools();
+  if (BUILD[tool]) toast(`${BUILD[tool].name}: ${BUILD[tool].desc}`, '', 2200);
+}
+function refreshTools() {
+  const hint = G && G.tut >= 0 && TUT[G.tut].tool ? TUT[G.tut].tool() : null;
+  document.querySelectorAll('.tb').forEach(el => {
+    const k = el.dataset.t;
+    el.classList.toggle('sel', k === tool);
+    el.classList.toggle('dis', !!(G && (G.sc.banned || []).includes(k)));
+    el.classList.toggle('hint', k === hint && tool !== k);
+    const em = el.querySelector('em'); if (G && (G.sc.banned || []).includes(k)) em.textContent = '금지';
+  });
+}
+
+// ---------- 입력 ----------
+const ptrs = new Map(); let gesture = null;
+cv.addEventListener('pointerdown', e => {
+  Sfx.init();
+  if (screen !== 'game') return;
+  cv.setPointerCapture && cv.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 1) {
+    gesture = { type: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
+    pressTile = screenToTile(e.clientX, e.clientY);
+  } else if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()];
+    gesture = { type: 'pinch', d: Math.hypot(a.x - b.x, a.y - b.y), z: cam.z, mid: screenToWorld((a.x + b.x) / 2, (a.y + b.y) / 2) };
+    pressTile = null;
+  }
+});
+cv.addEventListener('pointermove', e => {
+  if (screen !== 'game') return;
+  if (e.pointerType === 'mouse' && !ptrs.size) { hoverTile = screenToTile(e.clientX, e.clientY); return; }
+  if (!ptrs.has(e.pointerId)) return;
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (gesture && gesture.type === 'pan') {
+    const dx = e.clientX - gesture.sx, dy = e.clientY - gesture.sy;
+    if (!gesture.moved && Math.hypot(dx, dy) > 9) { gesture.moved = true; pressTile = null; }
+    if (gesture.moved) { cam.x = gesture.cx - dx / cam.z; cam.y = gesture.cy - dy / cam.z; clampCam(); }
+    else pressTile = screenToTile(e.clientX, e.clientY);
+  } else if (gesture && gesture.type === 'pinch' && ptrs.size >= 2) {
+    const [a, b] = [...ptrs.values()];
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    cam.z = clamp(gesture.z * d / Math.max(10, gesture.d), .35, 2.6);
+    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    cam.x = gesture.mid.x - (mx - VW / 2) / cam.z; cam.y = gesture.mid.y - (my - VH / 2) / cam.z; clampCam();
+  }
+});
+function endPtr(e) {
+  if (!ptrs.has(e.pointerId)) return;
+  ptrs.delete(e.pointerId);
+  if (gesture && gesture.type === 'pan' && !gesture.moved && ptrs.size === 0 && e.type === 'pointerup') {
+    const t = screenToTile(e.clientX, e.clientY); tapTile(t.x, t.y);
+  }
+  if (ptrs.size === 0) { gesture = null; pressTile = null; }
+  else if (ptrs.size === 1) { const p = [...ptrs.values()][0]; gesture = { type: 'pan', sx: p.x, sy: p.y, cx: cam.x, cy: cam.y, moved: true }; }
+}
+cv.addEventListener('pointerup', endPtr);
+cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hoverTile = null; });
+cv.addEventListener('wheel', e => {
+  if (screen !== 'game') return; e.preventDefault();
+  const before = screenToWorld(e.clientX, e.clientY);
+  cam.z = clamp(cam.z * Math.exp(-e.deltaY * .0015), .35, 2.6);
+  const after = screenToWorld(e.clientX, e.clientY);
+  cam.x += before.x - after.x; cam.y += before.y - after.y; clampCam();
+}, { passive: false });
+cv.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('gesturestart', e => e.preventDefault());
+const keys = new Set();
+window.addEventListener('keydown', e => {
+  Sfx.init();
+  const k = e.key;
+  if (k === 'Escape') {
+    if (screen === 'game') openPause(); else if (screen === 'pause') resume(); else if (screen === 'howto') closeHow(); else if (screen === 'modes') show('title');
+    e.preventDefault(); return;
+  }
+  if (screen !== 'game') return;
+  if (k === ' ') { togglePause(); e.preventDefault(); return; }
+  if (k === 'f' || k === 'F') { cycleSpeed(); return; }
+  if (k === '+' || k === '=') { cam.z = clamp(cam.z * 1.2, .35, 2.6); return; }
+  if (k === '-' || k === '_') { cam.z = clamp(cam.z / 1.2, .35, 2.6); return; }
+  if (/^[1-9]$/.test(k)) { setTool(TOOLS[+k - 1]); return; }
+  if (k === 'Enter' && hoverTile) { tapTile(hoverTile.x, hoverTile.y); return; }
+  keys.add(k.toLowerCase());
+  if (k.startsWith('Arrow')) e.preventDefault();
+});
+window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+function keyPan(dt) {
+  if (screen !== 'game') return;
+  let dx = 0, dy = 0;
+  if (keys.has('arrowleft') || keys.has('a')) dx--; if (keys.has('arrowright') || keys.has('d')) dx++;
+  if (keys.has('arrowup') || keys.has('w')) dy--; if (keys.has('arrowdown') || keys.has('s')) dy++;
+  if (dx || dy) { cam.x += dx * 420 * dt / cam.z; cam.y += dy * 420 * dt / cam.z; clampCam(); }
+}
+
+// ---------- 화면 ----------
+const SCREENS = ['title', 'modes', 'howto', 'pause', 'result'];
+let howReturn = 'title';
+function show(name) {
+  screen = name;
+  for (const s of SCREENS) $(s).classList.toggle('on', s === name);
+  const inGame = name === 'game' || name === 'pause' || name === 'result';
+  $('hud').hidden = !inGame || (G && G.demo); $('tools').hidden = !inGame || (G && G.demo);
+  $('goal').style.display = inGame && G && !G.demo ? '' : 'none';
+  if (!inGame) { $('info').className = ''; }
+  if (name === 'title') { refreshBest(); if (!G || !G.demo) newGame(Object.assign({}, SURVIVAL, { seed: 77 }), true); }
+  if (name === 'modes') buildModes();
+  if (inGame) setTimeout(resize, 0);
+}
+function refreshBest() {
+  $('bestT').textContent = '최고 기록: ' + bestText() + ` · 시나리오 ${Store.get('cleared', []).length}/${SCENARIOS.length} 클리어`;
+  syncSound();
+}
+function bestText() { const b = Store.get('best', null); return b ? fmtSurv(b.min) : '없음'; }
+function fmtSurv(min) { min = Math.max(0, min); const d = Math.floor(min / 1440), h = Math.floor((min % 1440) / 60); return `${d}일 ${h}시간`; }
+function buildModes() {
+  const box = $('modeList'); box.innerHTML = '';
+  const cleared = Store.get('cleared', []);
+  const mk = (sc, num, cls) => {
+    const b = document.createElement('button'); b.className = 'card ' + (cls || '');
+    b.innerHTML = `<span class="cn">${num}</span><span class="cb"><b>${sc.name}</b><small>${sc.desc}</small></span>${cleared.includes(sc.id) ? '<span class="ck">✓ 클리어</span>' : ''}`;
+    b.onclick = () => { Sfx.init(); Sfx.play('click'); startGame(sc); };
+    box.appendChild(b);
+  };
+  mk(Object.assign({}, SURVIVAL, { desc: SURVIVAL.desc + ' 최고 기록: ' + bestText() }), '∞', 'surv');
+  SCENARIOS.forEach((sc, i) => mk(sc, i + 1));
+}
+let curSc = null;
+function startGame(sc) {
+  curSc = sc;
+  newGame(Object.assign({}, sc));
+  toastQ.forEach(t => t.el.remove()); toastQ = [];
+  buildToolbar();
+  show('game');
+  updateHud(true);
+  if (G.tut < 0) toast(sc.survival ? '발전소를 짓고 전신주로 집까지 이어 불을 켜세요!' : `목표: ${sc.desc}`, 'gold');
+}
+function openPause() {
+  if (screen !== 'game' || G.over) return;
+  $('pauseInfo').innerHTML = `${G.sc.name} · ${dayOf(G.time)}일차 · 인구 ${G.pop}명`;
+  syncSound(); show('pause');
+}
+function resume() { show('game'); last = performance.now(); }
+function togglePause() {
+  if (!G.started) { G.started = true; toast('시간이 흐르기 시작해요', 'good'); }
+  else G.paused = !G.paused;
+  Sfx.play('click'); updateHud(true);
+}
+function cycleSpeed() { G.speed = G.speed === 1 ? 2 : G.speed === 2 ? 4 : 1; if (G.paused) G.paused = false; Sfx.play('click'); updateHud(true); }
+function endGame(win, reason) {
+  if (G.over) return;
+  G.over = true; G.win = win;
+  const sc = G.sc;
+  let isNew = false;
+  const survived = G.time - START_MIN;
+  if (sc.survival) {
+    const b = Store.get('best', null);
+    if (!b || survived > b.min) { Store.set('best', { min: survived, pop: G.peakPop }); isNew = true; }
+  } else if (win) {
+    const cl = Store.get('cleared', []); if (!cl.includes(sc.id)) { cl.push(sc.id); Store.set('cleared', cl); isNew = true; }
+  }
+  Sfx.play(win ? 'win' : 'lose');
+  $('resTitle').textContent = sc.survival ? '도시가 무너졌어요' : win ? '🎉 시나리오 클리어!' : '시나리오 실패';
+  $('resReason').textContent = reason;
+  $('resBig').textContent = sc.survival ? `${fmtSurv(survived)} 버팀` : sc.name;
+  $('resNew').textContent = sc.survival ? '🏆 최고 기록 갱신!' : '✓ 첫 클리어!';
+  $('resNew').classList.toggle('on', isNew);
+  $('resStats').innerHTML = [
+    ['최고 인구', fmt(G.peakPop) + '명'], ['공급한 전력', fmt(G.totalMWh) + ' MWh'],
+    ['번 돈', fmt(G.earned) + '만'], ['정전 시간', fmt1(G.blackoutH) + '시간'],
+  ].map(([a, b]) => `<div>${a}<b>${b}</b></div>`).join('');
+  setTimeout(() => { if (G && G.over) show('result'); }, 600);
+}
+
+// 버튼
+$('bStart').onclick = () => { Sfx.init(); Sfx.play('click'); show('modes'); };
+$('bHow').onclick = () => { Sfx.init(); Sfx.play('click'); howReturn = 'title'; show('howto'); };
+$('bHow2').onclick = () => { howReturn = 'pause'; show('howto'); };
+function closeHow() { if (howReturn === 'pause') show('pause'); else show('title'); }
+$('bHowBack').onclick = closeHow;
+$('bModesBack').onclick = () => show('title');
+$('bResume').onclick = resume;
+$('bRestart').onclick = () => startGame(curSc);
+$('bQuit').onclick = () => { G = null; show('title'); };
+$('bAgain').onclick = () => startGame(curSc);
+$('bResModes').onclick = () => { G = null; show('modes'); newGame(Object.assign({}, SURVIVAL, { seed: 77 }), true); };
+$('bResTitle').onclick = () => { G = null; show('title'); };
+$('bMenu').onclick = () => { Sfx.init(); openPause(); };
+$('bPause').onclick = () => { Sfx.init(); togglePause(); };
+$('bSpeed').onclick = () => { Sfx.init(); cycleSpeed(); };
+function syncSound() { const t = Sfx.on ? '🔊 소리 켜짐' : '🔇 소리 꺼짐'; $('bSound1').textContent = t; $('bSound2').textContent = t; }
+function toggleSound() { Sfx.on = !Sfx.on; Store.set('sound', Sfx.on); Sfx.init(); syncSound(); Sfx.play('click'); }
+$('bSound1').onclick = toggleSound; $('bSound2').onclick = toggleSound;
+document.addEventListener('visibilitychange', () => { if (document.hidden && screen === 'game' && G && !G.over) openPause(); });
+
+// 방법 보기 내용
+(function buildHow() {
+  const items = [
+    ['coal', '<b>발전소</b>를 지어요. 석탄(싸지만 오염), 태양광(낮), 풍력(바람), 원자력(강력), 배터리(저장).'],
+    ['pole', '<b>전신주</b>는 3칸 안의 시설과 선으로 이어지고, 주변 2칸의 건물에 전기를 나눠 줘요. 변전소는 더 멀리·넓게!'],
+    ['house', '집·상가·공장·병원이 계속 생기고 커져요. <b>🔌</b>는 선이 안 닿은 건물이에요.'],
+    ['⚡', '<b>수요 &gt; 공급</b>이면 정전! 저녁 18~20시가 피크. 정전이 이어지면 만족도가 떨어지고 0이면 끝.'],
+    ['⛈️', '날씨: 흐림=태양광↓, 무풍=풍력↓, 폭염=에어컨 수요↑, 뇌우=낙뢰로 전신주 고장. 위쪽 날씨 옆 ▸ 아이콘이 내일 예보예요.'],
+    ['❗', '고장 난 시설은 <b>탭해서 수리</b>. 돈: 전기 요금 수입 − 건설비·유지비·연료비·오염 벌금.'],
+  ];
+  const ul = $('howList');
+  for (const [k, t] of items) {
+    const li = document.createElement('li');
+    if (k.length > 2) {
+      const c = document.createElement('canvas'); c.width = c.height = 80; const x = c.getContext('2d'); x.scale(2, 2);
+      sprite(x, k, 40, { level: 1, hue: 1, ang: .3 }); li.appendChild(c);
+    } else { const s = document.createElement('span'); s.className = 'ie'; s.textContent = k; li.appendChild(s); }
+    const d = document.createElement('div'); d.innerHTML = t; li.appendChild(d); ul.appendChild(li);
+  }
+})();
+
+// ---------- 루프 ----------
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, Math.max(0, (now - last) / 1000)); last = now;
+  keyPan(dt);
+  update(dt);
+  render();
+  if (screen === 'game') updateHud(false);
+  requestAnimationFrame(frame);
+}
+
+// ---------- 테스트용 읽기 훅 ----------
+window.__game = {
+  state: () => G ? ({
+    screen, mode: G.sc.survival ? 'survival' : 'scenario', scenario: G.sc.id, demo: G.demo, day: dayOf(G.time), hour: +hourOf(G.time).toFixed(2), time: G.time,
+    started: G.started, paused: G.paused, speed: G.speed, over: G.over, win: !!G.win, money: Math.round(G.money), happiness: +G.happy.toFixed(1),
+    pollution: +G.pollution.toFixed(1), pop: G.pop, demand: +G.stat.dem.toFixed(2), capacity: +G.stat.cap.toFixed(2), shed: +G.stat.shed.toFixed(2),
+    unconnected: +G.stat.unconn.toFixed(2), consumers: G.cons.length, poweredConsumers: G.cons.filter(c => c.on).length,
+    buildings: G.blds.length, broken: G.blds.filter(b => b.broken).length, weather: G.weather, tool, tutorial: G.tut, comps: G.net.comps.length,
+  }) : { screen },
+  map: () => G ? { w: G.W, h: G.H, tiles: G.tiles.map(r => r.slice()), buildings: G.blds.map(b => ({ type: b.type, x: b.x, y: b.y, broken: b.broken })), consumers: G.cons.map(c => ({ type: c.type, x: c.x, y: c.y, level: c.level, on: c.on, conn: c.conn, ready: c.prog >= 1 })) } : null,
+  tileToScreen: (x, y) => worldToScreen((x + .5) * TILE, (y + .5) * TILE),
+  center: () => G ? { x: Math.floor(G.W / 2), y: Math.floor(G.H / 2) } : null,
+  // 화면 탭·툴바 선택과 같은 동작(입력 자동화용)
+  tap: (x, y) => tapTile(x, y),
+  selectTool: (k) => { if (tool !== k) setTool(k); },
+  forecast: () => G ? G.forecast : null,
+  // 검증 자동화용 빨리 감기(일반 진행과 같은 규칙으로 시간만 앞당김)
+  advance: (min) => { if (!G || !G.started) return; for (let m = 0; m < min && !G.over; m += STEP) advanceStep(); updateHud(true); },
+};
+
+resize();
+show('title');
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

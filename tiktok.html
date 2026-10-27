@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>틱톡 연결</title>
+<!-- One-time TikTok login for the content factory (콘텐츠공장/열쇠_체크리스트.md). TikTok sends the login code back here;
+     the owner copies it into the Content factory workflow's tiktok_code box, which trades it for tokens (social.py). -->
+<style>
+:root{--bg:#0a1320;--panel:#152238;--edge:#2c415b;--ink:#eaf1fb;--muted:#a5b7ca;--gold:#f2c66d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;padding:20px 16px}
+main{max-width:520px;margin:0 auto}
+h1{font-size:22px;margin:0 0 12px}
+p,li{color:var(--muted)}
+input,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid var(--edge);background:var(--panel);color:var(--ink);font:inherit}
+textarea{height:110px;word-break:break-all}
+button,a.btn{display:block;width:100%;margin:10px 0;padding:14px;border:0;border-radius:10px;background:var(--gold);color:#1b1300;font:700 16px system-ui,sans-serif;text-align:center;text-decoration:none;cursor:pointer}
+a.btn.alt{background:var(--panel);color:var(--ink);border:1px solid var(--edge)}
+.err{color:#ff8a8a}
+</style>
+</head>
+<body>
+<main>
+<h1>🎵 틱톡 연결 (처음 한 번)</h1>
+<div id="start">
+  <p>틱톡 개발자 사이트의 <b>Client key</b>를 붙여 넣고 로그인하세요. 로그인이 끝나면 이 화면으로 돌아와 코드를 보여 줍니다.</p>
+  <input id="ck" placeholder="Client key" autocomplete="off">
+  <button id="go" type="button">틱톡으로 로그인</button>
+</div>
+<div id="done" hidden>
+  <p>아래 코드를 <b>5분 안에</b> GitHub에 넣으세요. 코드는 한 번만 쓸 수 있습니다.</p>
+  <textarea id="code" readonly></textarea>
+  <button id="copy" type="button">코드 복사</button>
+  <a class="btn alt" href="https://github.com/rnjsalstjd7096-design/electric-studio/actions/workflows/content.yml" target="_blank" rel="noopener">GitHub 열기 → Run workflow → tiktok_code 칸에 붙여 넣기</a>
+</div>
+<p id="err" class="err" hidden></p>
+</main>
+<script>
+var REDIRECT = location.origin + location.pathname;
+var q = new URLSearchParams(location.search);
+function $(id){return document.getElementById(id)}
+try{ $('ck').value = localStorage.getItem('tiktok.ck') || ''; }catch(e){}
+if (q.get('code')) {
+  $('start').hidden = true; $('done').hidden = false; $('code').value = q.get('code');
+} else if (q.get('error')) {
+  $('err').hidden = false; $('err').textContent = '틱톡 로그인 실패: ' + q.get('error') + ' ' + (q.get('error_description') || '');
+}
+$('go').onclick = function(){
+  var ck = $('ck').value.trim(); if (!ck) return;
+  try{ localStorage.setItem('tiktok.ck', ck); }catch(e){}
+  location.href = 'https://www.tiktok.com/v2/auth/authorize/?' + new URLSearchParams({client_key: ck, response_type: 'code',
+    scope: 'user.info.basic,video.publish', redirect_uri: REDIRECT, state: 'edd'});
+};
+$('copy').onclick = function(){
+  var t = $('code'); t.select();
+  (navigator.clipboard ? navigator.clipboard.writeText(t.value) : Promise.reject()).then(function(){ $('copy').textContent = '✅ 복사됨'; },
+    function(){ document.execCommand('copy'); $('copy').textContent = '✅ 복사됨'; });
+};
+</script>
+</body>
+</html>

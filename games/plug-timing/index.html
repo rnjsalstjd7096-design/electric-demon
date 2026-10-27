@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>콘센트 꽂기 타이밍</title>
+<style>
+html,body{margin:0;height:100%;background:#0e1424;color:#fff;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;overscroll-behavior:none;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+#wrap{position:relative;height:100%;max-width:430px;margin:0 auto}
+canvas{display:block;width:100%;height:100%}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(8,12,24,.78);text-align:center;padding:24px}
+#ov.hide{display:none}
+h1{margin:0;font-size:30px}
+#ov p{margin:0;font-size:16px;line-height:1.5;color:#cfd8f0}
+#fact{background:#1b2542;border-radius:12px;padding:12px 14px;font-size:15px;color:#ffe27a}
+button{font:inherit;font-weight:700;font-size:20px;padding:14px 38px;border:0;border-radius:14px;background:#ffd23f;color:#1a1a1a}
+#mute{position:absolute;top:8px;right:8px;font-size:18px;padding:6px 10px;background:#1b2542;color:#fff;border-radius:10px}
+a{color:#8fc1ff;font-size:14px}
+</style><meta name="description" content="좌우로 흔들리는 플러그를 알맞은 콘센트에 꽂는 타이밍 게임. 접지형·2구·젖은 콘센트를 구분하고, 실패하면 전기 상식 한 줄."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/plug-timing/"><meta property="og:title" content="콘센트 꽂기 타이밍"><meta property="og:description" content="좌우로 흔들리는 플러그를 알맞은 콘센트에 꽂는 타이밍 게임. 접지형·2구·젖은 콘센트를 구분하고, 실패하면 전기 상식 한 줄."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="콘센트 꽂기 타이밍",D="좌우로 흔들리는 플러그를 알맞은 콘센트에 꽂는 타이밍 게임. 접지형·2구·젖은 콘센트를 구분하고, 실패하면 전기 상식 한 줄.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/plug-timing/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head><body>
+<div id="wrap">
+<canvas id="c" width="360" height="640"></canvas>
+<button id="mute">🔊</button>
+<div id="ov"><h1>🔌 콘센트 꽂기</h1><p id="msg">움직이는 플러그를<br>알맞은 콘센트 위에서 <b>탭!</b></p><div id="fact" style="display:none"></div><button id="go">시작</button><a href="https://blog.naver.com/mms7096" target="_blank" rel="noopener">전기견문록 블로그</a></div>
+</div>
+<script>
+(()=>{
+const KEY='plug-timing.save.v1';
+const cv=document.getElementById('c'),g=cv.getContext('2d');
+const W=360,H=640,PY=190,OY=470;
+// kind: G=접지형, N=비접지형(2구), X=물 묻은·그을린 콘센트
+const NEEDG=[['세탁기','🧺'],['냉장고','🧊'],['전자레인지','📦'],['에어컨','❄️']];
+const FREE=[['스탠드','💡'],['휴대폰 충전기','🔋'],['라디오','📻']];
+const FACT={
+ G:'접지 제품은 접지형 콘센트에! 누전되면 전류가 땅으로 빠져 감전을 막아 줍니다.',
+ N:'접지 단자가 없는 콘센트에는 접지가 필요한 제품을 쓰면 안 됩니다. 누전 때 몸으로 흐를 수 있어요.',
+ X:'물에 젖었거나 그을린 콘센트는 쓰지 말고 전원을 끈 뒤 점검받으세요.',
+ M:'콘센트를 놓쳤어요! 꽂기 전에 어느 콘센트인지 먼저 확인하세요.'};
+let st,best=0;
+try{best=+localStorage.getItem(KEY)||0}catch(e){}
+function rnd(a){return a[Math.floor(Math.random()*a.length)]}
+function newRound(){
+  const first=st.score===0;
+  const needG=first||Math.random()<.55;
+  const ap=needG?rnd(NEEDG):rnd(FREE);
+  let kinds=first?['N','G','X']:shuffle(['G','N','X']);
+  st.ap={name:ap[0],ic:ap[1],needG};
+  st.kinds=kinds;
+  st.phase=Math.random()*6.28;
+  st.mode='swing';st.dropY=PY;st.t=0;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function reset(){st={score:0,lives:3,combo:0,mode:'swing',phase:0,spd:1.3,x:180,kinds:[],ap:null,dropY:PY,t:0,msg:'',ok:false,last:'',over:false};newRound()}
+const OX=[70,180,290];
+function plugX(){return 180+125*Math.sin(st.phase)}
+function tap(){
+  if(st.over||st.mode!=='swing')return;
+  st.mode='drop';st.x=plugX();st.t=0;beep(440,.06);
+}
+function judge(){
+  let idx=-1;
+  for(let i=0;i<3;i++)if(Math.abs(st.x-OX[i])<=34)idx=i;
+  let k=idx<0?'M':st.kinds[idx];
+  let good=false;
+  if(k==='G')good=true;
+  else if(k==='N')good=!st.ap.needG;
+  st.ok=good;
+  if(good){st.score++;st.combo++;st.spd=Math.min(3.4,1.3+st.score*.09);st.msg='+1'+(st.combo>=3?'  콤보 '+st.combo:'');beep(660,.1);beep(880,.12,.08)}
+  else{st.lives--;st.combo=0;st.last=k==='N'?FACT.N:FACT[k];st.msg=st.last;beep(150,.3,0,'sawtooth')}
+  st.mode='result';st.t=0;
+  if(st.score>best){best=st.score;try{localStorage.setItem(KEY,best)}catch(e){}}
+}
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  step(dt);draw();requestAnimationFrame(frame);
+}
+function step(dt){
+  if(!st||st.over||ov.className!=='hide')return;
+  st.t+=dt;
+  if(st.mode==='swing')st.phase+=st.spd*dt;
+  else if(st.mode==='drop'){st.dropY=PY+(OY-PY-30)*Math.min(1,st.t/.16);if(st.t>=.16)judge()}
+  else if(st.mode==='result'&&st.t>(st.ok?.6:1.7)){
+    if(st.lives<=0)gameOver();else newRound();
+  }
+}
+function gameOver(){
+  st.over=true;
+  document.getElementById('msg').innerHTML='점수 <b>'+st.score+'</b> · 최고 <b>'+best+'</b>';
+  const f=document.getElementById('fact');f.style.display='block';f.textContent='⚡ '+st.last;
+  document.querySelector('#ov h1').textContent='전기 사고 발생!';
+  document.getElementById('go').textContent='다시';
+  ov.className='';
+}
+function draw(){
+  g.fillStyle='#16203a';g.fillRect(0,0,W,H);
+  g.fillStyle='#1f2d52';g.fillRect(0,OY-60,W,H);
+  // 가전 카드
+  g.fillStyle='#223259';rr(20,56,320,80,14);g.fill();
+  g.fillStyle='#fff';g.textAlign='left';g.font='36px sans-serif';g.fillText(st.ap.ic,34,108);
+  g.font='bold 22px sans-serif';g.fillText(st.ap.name,86,92);
+  g.font='14px sans-serif';g.fillStyle=st.ap.needG?'#7dffa0':'#aab6d8';
+  g.fillText(st.ap.needG?'접지가 필요한 제품 ⏚':'접지 없이 써도 되는 제품',86,118);
+  // 콘센트
+  for(let i=0;i<3;i++){
+    const k=st.kinds[i],x=OX[i];
+    g.fillStyle=k==='X'?'#4a3a2a':'#e9edf5';rr(x-40,OY-45,80,100,12);g.fill();
+    g.fillStyle='#222';
+    g.fillRect(x-17,OY-12,6,18);g.fillRect(x+11,OY-12,6,18);
+    if(k==='G'){g.beginPath();g.arc(x,OY+22,6,0,7);g.fill();g.fillStyle='#2bb34a';g.fillRect(x-14,OY+36,28,5)}
+    if(k==='X'){g.fillStyle='#4aa3ff';g.beginPath();g.arc(x+22,OY+30,7,0,7);g.fill();g.fillStyle='#111';g.fillRect(x-36,OY-40,22,8)}
+    g.fillStyle='#cfd8f0';g.font='12px sans-serif';g.textAlign='center';
+    g.fillText(k==='G'?'접지형':k==='N'?'2구':'젖음/그을림',x,OY+78);
+  }
+  // 플러그
+  const px=st.mode==='swing'?plugX():st.x,py=st.mode==='swing'?PY:st.dropY;
+  g.strokeStyle='#999';g.lineWidth=4;g.beginPath();g.moveTo(px,0);g.lineTo(px,py-24);g.stroke();
+  g.fillStyle='#ffd23f';rr(px-22,py-26,44,34,8);g.fill();
+  g.fillStyle='#ccc';g.fillRect(px-12,py+8,5,16);g.fillRect(px+7,py+8,5,16);
+  if(st.ap.needG){g.beginPath();g.arc(px,py+22,3,0,7);g.fill()}
+  // 위
+  g.fillStyle='#fff';g.textAlign='left';g.font='bold 18px sans-serif';g.fillText('점수 '+st.score,16,28);
+  g.textAlign='center';g.font='16px sans-serif';g.fillText('❤'.repeat(Math.max(0,st.lives)),W/2,28);
+  g.textAlign='right';g.fillStyle='#aab6d8';g.fillText('최고 '+best,W-56,28);
+  if(st.mode==='result'){
+    g.textAlign='center';g.fillStyle=st.ok?'#7dffa0':'#ff8a8a';g.font='bold 22px sans-serif';
+    if(st.ok)g.fillText(st.msg,W/2,330);else wrap(st.msg,W/2,300);
+  }else if(st.mode==='swing'&&st.score===0){
+    g.textAlign='center';g.fillStyle='#ffd23f';g.font='bold 18px sans-serif';g.fillText('접지 제품은 ⏚ 접지형에! 알맞을 때 탭',W/2,330);
+  }
+}
+function wrap(t,x,y){g.font='bold 17px sans-serif';let line='',ly=y;for(const ch of t){line+=ch;if(g.measureText(line).width>300){g.fillText(line,x,ly);ly+=24;line=''}}g.fillText(line,x,ly)}
+function rr(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+// 소리
+let ac,muted=false;
+function beep(f,d,delay=0,type='square'){
+  if(muted)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+  const o=ac.createOscillator(),v=ac.createGain();o.type=type;o.frequency.value=f;v.gain.value=.05;
+  o.connect(v);v.connect(ac.destination);const t=ac.currentTime+delay;o.start(t);v.gain.exponentialRampToValueAtTime(.001,t+d);o.stop(t+d)}catch(e){}
+}
+const ov=document.getElementById('ov');
+document.getElementById('go').onclick=e=>{e.stopPropagation();reset();ov.className='hide';document.getElementById('fact').style.display='none'};
+document.getElementById('mute').onclick=e=>{e.stopPropagation();muted=!muted;e.target.textContent=muted?'🔇':'🔊'};
+cv.addEventListener('pointerdown',e=>{e.preventDefault();tap()});
+addEventListener('keydown',e=>{if(e.code==='Space')tap()});
+reset();requestAnimationFrame(frame);
+window.__game={get state(){return st},tap,plugX,OX,get best(){return best},reset};
+})();
+</script></body></html>

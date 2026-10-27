@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1320">
+<title>전력 배달 레이싱</title>
+<style>
+:root{--bg:#0a1320;--bg2:#101923;--panel:#152238;--line:#2c415b;--txt:#eaf1fb;--dim:#a5b7ca;--cyan:#64ceeb;--gold:#f2c66d;--green:#78e2ae;--red:#e77d78;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);overflow:hidden;overscroll-behavior:none;
+  font-family:system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#wrap{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:1000px;overflow:hidden;background:var(--bg2)}
+@media (min-width:1001px){#wrap{box-shadow:0 0 0 1px var(--line),0 0 60px rgba(100,206,235,.08)}}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#safe{position:absolute;visibility:hidden;pointer-events:none;padding:var(--st) var(--sr) var(--sb) var(--sl)}
+button{font-family:inherit;touch-action:manipulation;cursor:pointer}
+.ibtn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(21,34,56,.85);color:var(--txt);font-size:20px;display:flex;align-items:center;justify-content:center;padding:0}
+.ibtn:active{transform:scale(.94)}
+#topBtns{position:absolute;top:calc(8px + var(--st));right:calc(8px + var(--sr));display:flex;gap:8px;z-index:30}
+#btnPause{display:none}
+/* touch controls */
+#ctl{position:absolute;left:0;right:0;bottom:0;display:none;justify-content:space-between;align-items:flex-end;
+  padding:0 calc(12px + var(--sr)) calc(12px + var(--sb)) calc(12px + var(--sl));pointer-events:none;touch-action:none;z-index:10}
+#ctl.on{display:flex}
+.cg{display:flex;gap:10px;align-items:flex-end}
+.cb{pointer-events:auto;touch-action:none;width:74px;height:74px;border-radius:50%;border:2px solid rgba(100,206,235,.55);background:rgba(21,34,56,.62);
+  color:var(--txt);font-size:28px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:0;
+  box-shadow:0 0 14px rgba(100,206,235,.18) inset}
+.cb.down{background:rgba(100,206,235,.38);transform:scale(.95)}
+.cb small{font-size:12px;font-weight:700;margin-top:3px}
+.cb.brk{width:62px;height:62px;border-color:rgba(231,125,120,.6);font-size:15px}
+.cb.brk.down{background:rgba(231,125,120,.4)}
+.cb.bst{width:84px;height:84px;border-color:rgba(242,198,109,.8);font-size:30px;box-shadow:0 0 18px rgba(242,198,109,.35)}
+.cb.bst.down{background:rgba(242,198,109,.45)}
+#kbHint{position:absolute;left:0;right:0;bottom:calc(6px + var(--sb));text-align:center;font-size:11.5px;white-space:nowrap;overflow:hidden;color:var(--dim);display:none;pointer-events:none;z-index:5}
+/* screens */
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;overflow-x:hidden;
+  padding:calc(16px + var(--st)) calc(16px + var(--sr)) calc(20px + var(--sb)) calc(16px + var(--sl));z-index:20;touch-action:pan-y;
+  background:radial-gradient(ellipse at 50% 30%,rgba(16,25,35,.55),rgba(10,19,32,.9))}
+.screen.on{display:flex}
+.box{width:100%;max-width:460px;margin:auto 0;display:flex;flex-direction:column;align-items:stretch;gap:12px}
+.panel{background:rgba(21,34,56,.92);border:1px solid var(--line);border-radius:16px;padding:14px}
+h1{margin:0;text-align:center;font-size:clamp(34px,10vw,50px);line-height:1.1;letter-spacing:-1px;color:#fff;
+  text-shadow:0 0 12px rgba(242,198,109,.9),0 0 34px rgba(100,206,235,.6)}
+h1 .bolt{color:var(--gold)}
+h2{margin:0 0 4px;font-size:22px;text-align:center}
+h3{margin:4px 0;font-size:16px;color:var(--cyan)}
+.sub{text-align:center;color:var(--dim);margin:0;font-size:15px;line-height:1.5}
+.btn{min-height:50px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(#1e3554,#152238);color:var(--txt);font-size:17px;font-weight:800;padding:0 18px}
+.btn:active{transform:scale(.98)}
+.btn.pri{background:linear-gradient(#f6d688,#d9a441);color:#1d1503;border-color:#f2c66d;box-shadow:0 0 22px rgba(242,198,109,.4)}
+.btn.cy{background:linear-gradient(#2b6f86,#1d4a5c);border-color:var(--cyan)}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.stat{display:flex;justify-content:space-between;color:var(--dim);font-size:14px}
+.stat b{color:var(--gold)}
+#backLink{position:absolute;top:calc(10px + var(--st));left:calc(10px + var(--sl));color:var(--cyan);text-decoration:none;font-size:15px;font-weight:700;
+  background:rgba(21,34,56,.85);border:1px solid var(--line);border-radius:12px;padding:10px 12px;z-index:31;min-height:44px;display:flex;align-items:center}
+.how li{margin:6px 0;line-height:1.45;font-size:14.5px}
+.how ul{padding-left:4px;list-style:none;margin:4px 0}
+.how .ic{display:inline-block;width:26px;text-align:center}
+.k{display:inline-block;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;font-size:12px;background:#0f1a2b;color:var(--txt)}
+.tracks{display:flex;flex-direction:column;gap:8px}
+.tcard{text-align:left;border:1px solid var(--line);border-radius:12px;background:#11203a;color:var(--txt);padding:10px 12px;display:flex;gap:10px;align-items:center;min-height:56px}
+.tcard.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 18px rgba(242,198,109,.25)}
+.tcard:disabled{opacity:.5}
+.tcard .no{font-size:20px;font-weight:900;color:var(--cyan);width:24px;text-align:center}
+.tcard .nm{font-weight:800;font-size:16px}
+.tcard .ds{font-size:12.5px;color:var(--dim)}
+.tcard .bs{margin-left:auto;font-size:12px;color:var(--gold);text-align:right;white-space:nowrap}
+.upg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ucard{border:1px solid var(--line);border-radius:12px;background:#11203a;padding:10px;display:flex;flex-direction:column;gap:5px}
+.ucard .nm{font-weight:800;font-size:15px}
+.ucard .ds{font-size:12px;color:var(--dim);min-height:32px}
+.pips{display:flex;gap:4px}.pips i{flex:1;height:6px;border-radius:3px;background:#24364f}.pips i.on{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.ucard button{min-height:44px;border-radius:10px;font-size:14px;padding:0 6px}
+.money{color:var(--gold);font-weight:900}
+table.res{width:100%;border-collapse:collapse;font-size:14px}
+table.res th{color:var(--dim);font-weight:600;font-size:12px;text-align:right;padding:4px}
+table.res td{padding:7px 4px;text-align:right;border-top:1px solid #22344c}
+table.res td:nth-child(2),table.res th:nth-child(2){text-align:left}
+table.res tr.me td{color:var(--gold);font-weight:800}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.big{font-size:44px;font-weight:900;text-align:center;line-height:1.1}
+.badge{align-self:center;background:linear-gradient(#f6d688,#d9a441);color:#1d1503;font-weight:900;border-radius:999px;padding:5px 14px;font-size:14px}
+.note{text-align:center;color:var(--green);font-weight:700;font-size:14px}
+.flick{animation:flick 3.2s infinite}
+@keyframes flick{0%,100%{opacity:1}46%{opacity:1}48%{opacity:.55}50%{opacity:1}52%{opacity:.7}54%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.flick{animation:none}}
+</style>
+<meta name="description" content="배터리를 싣고 달리는 배달 레이싱. 배터리는 화물이자 부스터, CPU 3대와 트랙 5개, 업그레이드."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/power-racing/"><meta property="og:title" content="전력 배달 레이싱"><meta property="og:description" content="배터리를 싣고 달리는 배달 레이싱. 배터리는 화물이자 부스터, CPU 3대와 트랙 5개, 업그레이드."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;right:8px;top:calc(60px + env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="전력 배달 레이싱",D="배터리를 싣고 달리는 배달 레이싱. 배터리는 화물이자 부스터, CPU 3대와 트랙 5개, 업그레이드.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/power-racing/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="wrap">
+  <canvas id="cv"></canvas>
+  <div id="safe"></div>
+  <div id="topBtns">
+    <button id="btnPause" class="ibtn" aria-label="일시정지">⏸</button>
+    <button id="btnSound" class="ibtn" aria-label="소리 켜기/끄기">🔊</button>
+  </div>
+  <div id="ctl">
+    <div class="cg"><button class="cb" id="tbL" aria-label="왼쪽">◀</button><button class="cb" id="tbR" aria-label="오른쪽">▶</button></div>
+    <div class="cg"><button class="cb brk" id="tbBr" aria-label="브레이크">브레<br>이크</button><button class="cb bst" id="tbBo" aria-label="부스터">⚡<small>부스터</small></button></div>
+  </div>
+  <div id="kbHint">←→ 조향 · <b>Space</b> 부스터 · ↓/S/Shift 브레이크 · Esc 정지</div>
+
+  <section id="scrTitle" class="screen on">
+    <a id="backLink" href="../">← 게임 목록</a>
+    <div class="box">
+      <div style="height:40px"></div>
+      <h1 class="flick"><span class="bolt">⚡</span>전력 배달<br>레이싱</h1>
+      <p class="sub">정전된 도시에 전기를 배달하며 달려라!<br>배터리를 <b style="color:var(--gold)">부스터</b>에 쓸까, <b style="color:var(--green)">배달</b>에 쓸까?</p>
+      <div class="panel">
+        <div class="stat"><span>최고 기록</span><b id="tBest">0점</b></div>
+        <div class="stat"><span>보유 상금</span><b id="tMoney">0</b></div>
+        <div class="stat"><span>해금한 트랙</span><b id="tUnl">1 / 5</b></div>
+      </div>
+      <button class="btn pri" id="btnStart">게임 시작</button>
+      <button class="btn" id="btnHow">방법 보기</button>
+    </div>
+  </section>
+
+  <section id="scrHow" class="screen">
+    <div class="box how">
+      <h2>🚗 방법 보기</h2>
+      <div class="panel"><ul>
+        <li><span class="ic">🚗</span>차는 <b>자동으로 가속</b>해요. <b>◀ ▶</b> 버튼(<span class="k">←</span><span class="k">→</span> / <span class="k">A</span><span class="k">D</span>)으로 핸들을 돌려요.</li>
+        <li><span class="ic">🔋</span>배터리 하나 = <b style="color:var(--green)">배달할 전기</b> + <b style="color:var(--gold)">부스터 연료</b>. 이 게임에선 그냥 달리는 데 전기가 들지 않아요(실제 전기차는 달릴 때도 배터리를 써요).</li>
+        <li><span class="ic">🏠</span>빨갛게 깜빡이는 <b style="color:var(--red)">정전 건물</b> 앞의 <b style="color:var(--gold)">노란 배달 구역</b>을 지나가면 배터리 전기가 자동으로 배달돼요 → 점수!</li>
+        <li><span class="ic">🚑</span><b style="color:var(--red)">긴급</b> 요청(병원 등)은 시간이 짧지만 점수 2배. 시간이 다 되면 사라져요. 경쟁 차도 배달하니 먼저 가세요!</li>
+        <li><span class="ic">⚡</span><b>부스터</b>(<span class="k">Space</span>): 아주 빨라지지만 배터리를 빠르게 써서 <b>배달할 전기가 줄어요.</b></li>
+        <li><span class="ic">🟩</span>초록 <b>충전 패드</b>와 결승선 앞 <b>충전소 레인</b>(오른쪽 차선)에서 충전. 천천히 지나갈수록 많이 충전!</li>
+        <li><span class="ic">🛑</span><b>브레이크</b>(<span class="k">↓</span> / <span class="k">S</span> / <span class="k">Shift</span>): 감속하며 <b>회생 제동</b>으로 조금 충전. 브레이크+핸들 = 드리프트. 멈춘 상태에서 누르면 후진.</li>
+        <li><span class="ic">🧱</span>벽에 부딪히면 감속돼요.</li>
+        <li><span class="ic">🏁</span>3바퀴. <b>최종 순위 = 배달 점수 + 도착 보너스</b>(1등 300 · 2등 200 · 3등 100).</li>
+        <li><span class="ic">💰</span>상금으로 <b>차고</b>에서 업그레이드. <b>2위 이내</b>면 다음 트랙이 열려요(총 5개).</li>
+      </ul></div>
+      <button class="btn pri" id="btnHowBack">알겠어요!</button>
+    </div>
+  </section>
+
+  <section id="scrGarage" class="screen">
+    <div class="box">
+      <h2>🔧 차고 · 트랙 선택</h2>
+      <div class="stat" style="font-size:16px"><span>보유 상금</span><span class="money" id="gMoney">0</span></div>
+      <h3>트랙</h3>
+      <div class="tracks" id="trackList"></div>
+      <h3>업그레이드</h3>
+      <div class="upg" id="upgList"></div>
+      <button class="btn pri" id="btnGo">출발!</button>
+      <button class="btn" id="btnGarageBack">← 타이틀</button>
+    </div>
+  </section>
+
+  <section id="scrPause" class="screen">
+    <div class="box">
+      <h2>⏸ 일시정지</h2>
+      <button class="btn pri" id="btnResume">계속하기</button>
+      <button class="btn" id="btnRestart">처음부터 다시</button>
+      <button class="btn" id="btnPauseGarage">차고 · 트랙 선택</button>
+      <button class="btn" id="btnPauseTitle">타이틀로</button>
+    </div>
+  </section>
+
+  <section id="scrResult" class="screen">
+    <div class="box">
+      <h2>🏁 레이스 결과</h2>
+      <div class="big" id="rRank">1위</div>
+      <div id="rBadges" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div class="panel"><table class="res" id="rTable"></table></div>
+      <div class="panel" id="rStats" style="font-size:14px"></div>
+      <div class="row"><button class="btn pri" id="btnAgain">다시 하기</button><button class="btn cy" id="btnResGarage">차고</button></div>
+      <button class="btn" id="btnResTitle">타이틀</button>
+    </div>
+  </section>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+ * 전력 배달 레이싱 (게임 09)
+ * 구조:
+ *  1) 상수 · 트랙 정의        2) 저장(localStorage, edgames.09.*)
+ *  3) 사운드(Web Audio 합성)  4) 트랙 생성(둥근 모서리 경로, 건물, 배달 지점, 충전 패드)
+ *  5) 레이스: 차량 물리(드리프트), 벽 충돌, 배달/충전, CPU AI, 순위
+ *  6) 렌더링: 회전 카메라 월드 → HUD · 미니맵
+ *  7) 화면(UI) · 입력(키보드/터치)   8) 메인 루프 · 테스트 훅(window.__game)
+ * 배터리 하나가 "배달 화물"이자 "부스터 연료" — 이것이 게임의 핵심 선택.
+ * ===================================================================== */
+
+// ---------- 1) 상수 ----------
+const C = {
+  SP: 16,              // 트랙 샘플 간격(월드 단위)
+  CAR_R: 13,           // 차 충돌 반지름
+  BOOST_MULT: 1.5,     // 부스터 최고속 배율
+  BOOST_ACC: 2.4,      // 부스터 가속 배율
+  BOOST_DRAIN: 30,     // 부스터 배터리 소모 / 초
+  BRAKE: 640, REV_MAX: 130,
+  PAD_RATE: 95,        // 충전 패드 충전량 / 초
+  STATION_RATE: 150,   // 충전소 레인 / 초
+  DELIVER_PTS: 10,     // 전기 1당 점수
+  URGENT_MULT: 2,
+  COMPLETE_BONUS: 80, URGENT_BONUS: 150,
+  FINISH_BONUS: [300, 200, 100, 0],
+  PRIZE: [120, 80, 50, 30],
+  LAPS: 3, COUNT: 3,
+  ZONE_LEN: 150, PAD_LEN: 140,
+  MAX_DT: 0.05, STEP: 1 / 120,
+};
+const BASE_ST = { cap: 100, maxSpeed: 360, accel: 250, turn: 2.55, grip: 8, regen: 6, padMul: 1 };
+const UPGRADES = [
+  { key: 'bat', name: '🔋 배터리', desc: lv => `용량 ${100 + lv * 20} (배달·부스터 더 많이)` },
+  { key: 'mot', name: '⚙️ 모터', desc: lv => `최고속도 ${Math.round((360 + lv * 22) / 4)}km/h · 가속↑` },
+  { key: 'han', name: '🛞 핸들링', desc: lv => `조향 +${lv * 6}% · 접지력↑` },
+  { key: 'reg', name: '♻️ 회생 제동', desc: lv => `브레이크 충전 ${6 + lv * 5}/초 · 패드 +${lv * 8}%` },
+];
+const UPG_COST = [100, 180, 280, 400, 560];
+const UPG_MAX = 5;
+const CAR_DEFS = [
+  { name: '나', color: '#64ceeb' },
+  { name: '번개', color: '#e77d78' },
+  { name: '볼트', color: '#78e2ae' },
+  { name: '암페어', color: '#b896f5' },
+];
+const SPOT_TYPES = {
+  '집': { col: '#f2c66d' }, '가게': { col: '#f29f6d' }, '병원': { col: '#ff8a8a' }, '학교': { col: '#9fd8ff' }, '공장': { col: '#c7b3ff' },
+};
+const TRACKS = [
+  { name: '새싹 동네', desc: '넓은 사각 순환로. 배달 연습에 딱!', pts: [[0,0],[6,0],[6,4],[0,4]], hw: 90, r: 190,
+    spots: 5, pads: 1, cpu: 0.82, reqMax: 2, dem: [15, 30], tN: 44, tU: 26, seed: 11, types: ['집','가게','병원','집','학교'] },
+  { name: '시장 골목', desc: '좌우로 꺾이는 시장길. 가게 배달이 많아요.', pts: [[0,0],[6,0],[6,2.2],[4,2.2],[4,4.4],[0,4.4]], hw: 84, r: 180,
+    spots: 6, pads: 1, cpu: 0.89, reqMax: 3, dem: [18, 34], tN: 40, tU: 23, seed: 23, types: ['가게','집','가게','병원','가게','학교'] },
+  { name: '병원 언덕', desc: '비스듬한 언덕길. 급한 병원 요청에 주의!', pts: [[0,0],[3,0],[5,1.2],[7.5,1.2],[7.5,4.5],[4.5,4.5],[3.2,3],[0,3.5]], hw: 80, r: 175,
+    spots: 7, pads: 2, cpu: 0.95, reqMax: 3, dem: [20, 40], tN: 37, tU: 21, seed: 37, types: ['병원','집','가게','병원','학교','집','병원'] },
+  { name: '공단 순환로', desc: 'U자 급커브가 있는 공장 지대. 큰 전기가 필요해요.', pts: [[0,0],[8,0],[8,5],[6,5],[6,2],[4,2],[4,5],[0,5]], hw: 78, r: 170,
+    spots: 7, pads: 2, cpu: 1.0, reqMax: 4, dem: [22, 46], tN: 35, tU: 20, seed: 51, types: ['공장','공장','집','병원','공장','가게','공장'] },
+  { name: '한밤 도심', desc: '좁고 복잡한 한밤의 도심. 최종 시험!', pts: [[0,0],[3,0],[3,1.5],[5,1.5],[5,0],[8,0],[8,3],[6.5,4.5],[8,6],[4,6],[4,4],[2,4],[2,6],[0,6]], hw: 74, r: 165,
+    spots: 8, pads: 2, cpu: 1.05, reqMax: 4, dem: [25, 50], tN: 33, tU: 19, seed: 73, types: ['병원','가게','집','공장','병원','학교','가게','집'] },
+];
+const CELL = 400;
+const REDUCED = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+
+// ---------- 유틸 ----------
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+const wrapAng = a => { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; };
+function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const fmtTime = t => { const m = Math.floor(t / 60), s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1); };
+
+// ---------- 2) 저장 ----------
+const SKEY = 'edgames.09.';
+function lsGet(k, d) { try { const v = localStorage.getItem(SKEY + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(SKEY + k, JSON.stringify(v)); } catch (e) { /* 저장 불가해도 진행 */ } }
+const save = (() => {
+  const d = { money: 0, up: { bat: 0, mot: 0, han: 0, reg: 0 }, unlocked: 1, best: [0, 0, 0, 0, 0], last: 0, races: 0 };
+  const s = lsGet('save', null);
+  if (s && typeof s === 'object') {
+    d.money = Math.max(0, +s.money || 0);
+    if (s.up) for (const k in d.up) d.up[k] = clamp(Math.floor(+s.up[k] || 0), 0, UPG_MAX);
+    d.unlocked = clamp(Math.floor(+s.unlocked || 1), 1, TRACKS.length);
+    if (Array.isArray(s.best)) for (let i = 0; i < d.best.length; i++) d.best[i] = Math.max(0, +s.best[i] || 0);
+    d.last = clamp(Math.floor(+s.last || 0), 0, d.unlocked - 1);
+    d.races = +s.races || 0;
+  }
+  return d;
+})();
+let bestTotal = Math.max(0, +lsGet('best', 0) || 0);
+let soundOn = lsGet('sound', true) !== false;
+function persist() { lsSet('save', save); lsSet('best', bestTotal); }
+function playerStats() {
+  const u = save.up;
+  return { cap: 100 + u.bat * 20, maxSpeed: 360 + u.mot * 22, accel: 250 + u.mot * 28, turn: 2.55 + u.han * 0.155, grip: 8 + u.han * 1.1,
+           regen: 6 + u.reg * 5, padMul: 1 + u.reg * 0.08 };
+}
+
+// ---------- 3) 사운드 ----------
+const Snd = {
+  ctx: null, master: null, eng: null, noiseBuf: null, chargeT: 0,
+  init() {
+    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {}); return; }
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      const ctx = this.ctx = new AC();
+      this.master = ctx.createGain(); this.master.gain.value = soundOn ? 0.75 : 0; this.master.connect(ctx.destination);
+      const len = ctx.sampleRate | 0, b = ctx.createBuffer(1, len, ctx.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      this.noiseBuf = b;
+      const o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      o1.type = 'sawtooth'; o2.type = 'square'; o1.frequency.value = 60; o2.frequency.value = 90;
+      f.type = 'lowpass'; f.frequency.value = 500; f.Q.value = 2; g.gain.value = 0;
+      o1.connect(f); o2.connect(f); f.connect(g); g.connect(this.master); o1.start(); o2.start();
+      this.eng = { o1, o2, f, g };
+    } catch (e) { this.ctx = null; }
+  },
+  setOn(v) { soundOn = v; lsSet('sound', v); if (this.master) this.master.gain.setTargetAtTime(v ? 0.75 : 0, this.ctx.currentTime, 0.02); },
+  tone(freq, dur, type = 'sine', vol = 0.15, to = 0, delay = 0) {
+    if (!this.ctx || !soundOn) return;
+    const ctx = this.ctx, t = ctx.currentTime + delay, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t); if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + dur + 0.05);
+  },
+  noise(dur, vol = 0.2, type = 'lowpass', freq = 1200, to = 0, delay = 0) {
+    if (!this.ctx || !soundOn) return;
+    const ctx = this.ctx, t = ctx.currentTime + delay, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = this.noiseBuf; f.type = type; f.frequency.setValueAtTime(freq, t); if (to) f.frequency.exponentialRampToValueAtTime(to, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(this.master); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
+  },
+  engine(norm, boost, on) {
+    if (!this.eng) return;
+    const t = this.ctx.currentTime, e = this.eng;
+    e.g.gain.setTargetAtTime(on && soundOn ? 0.03 + 0.03 * norm + (boost ? 0.025 : 0) : 0, t, 0.08);
+    const f = 42 + norm * 105 + (boost ? 45 : 0);
+    e.o1.frequency.setTargetAtTime(f, t, 0.05); e.o2.frequency.setTargetAtTime(f * 1.505, t, 0.05);
+    e.f.frequency.setTargetAtTime(350 + norm * 1300 + (boost ? 1400 : 0), t, 0.08);
+  },
+};
+const sfx = {
+  click() { Snd.tone(700, 0.06, 'square', 0.06); },
+  deliver() { Snd.tone(320, 0.16, 'sawtooth', 0.12, 1500); Snd.noise(0.18, 0.12, 'highpass', 2500); Snd.tone(1200, 0.12, 'square', 0.06, 0, 0.08); },
+  complete() { [660, 880, 1320].forEach((f, i) => Snd.tone(f, 0.18, 'triangle', 0.14, 0, i * 0.07)); },
+  cpuDeliver() { Snd.tone(500, 0.08, 'sawtooth', 0.03, 900); },
+  crash(v) { Snd.noise(0.22, clamp(v / 400, 0.06, 0.3), 'lowpass', 900, 120); Snd.tone(90, 0.15, 'square', 0.08, 50); },
+  boost() { Snd.noise(0.35, 0.12, 'bandpass', 400, 3000); },
+  charge(lv) { const t = performance.now(); if (t - Snd.chargeT < 110) return; Snd.chargeT = t; Snd.tone(500 + lv * 700, 0.05, 'sine', 0.05); },
+  count() { Snd.tone(520, 0.16, 'square', 0.12); },
+  go() { Snd.tone(1040, 0.45, 'square', 0.14); },
+  lap() { Snd.tone(784, 0.12, 'triangle', 0.13); Snd.tone(1046, 0.2, 'triangle', 0.13, 0, 0.1); },
+  finish() { [523, 659, 784, 1046, 1318].forEach((f, i) => Snd.tone(f, 0.25, 'triangle', 0.14, 0, i * 0.1)); },
+  expire() { Snd.tone(300, 0.3, 'triangle', 0.06, 120); },
+  request(u) { Snd.tone(u ? 1200 : 900, 0.08, 'sine', 0.06); if (u) Snd.tone(1200, 0.08, 'sine', 0.06, 0, 0.12); },
+  empty() { Snd.tone(200, 0.15, 'square', 0.07, 140); },
+  buy() { Snd.tone(880, 0.08, 'square', 0.08); Snd.tone(1320, 0.12, 'square', 0.08, 0, 0.07); },
+};
+
+// ---------- 4) 트랙 생성 ----------
+function buildTrack(ti) {
+  const def = TRACKS[ti], hw = def.hw, R0 = def.r;
+  const P = def.pts.map(p => [p[0] * CELL, p[1] * CELL]), n = P.length;
+  // 둥근 모서리 폐곡선(시작 = 0번 변의 중간점)
+  const raw = [[(P[0][0] + P[1][0]) / 2, (P[0][1] + P[1][1]) / 2]];
+  for (let k = 1; k <= n; k++) {
+    const A = P[k - 1], V = P[k % n], B = P[(k + 1) % n];
+    let d1x = V[0] - A[0], d1y = V[1] - A[1]; const l1 = Math.hypot(d1x, d1y); d1x /= l1; d1y /= l1;
+    let d2x = B[0] - V[0], d2y = B[1] - V[1]; const l2 = Math.hypot(d2x, d2y); d2x /= l2; d2y /= l2;
+    const th = Math.atan2(d1x * d2y - d1y * d2x, d1x * d2x + d1y * d2y);
+    if (Math.abs(th) < 1e-3) { raw.push([V[0], V[1]]); continue; }
+    let r = R0, t = r * Math.tan(Math.abs(th) / 2); const tmax = Math.min(l1, l2) * 0.45;
+    if (t > tmax) { t = tmax; r = t / Math.tan(Math.abs(th) / 2); }
+    const sx = V[0] - d1x * t, sy = V[1] - d1y * t, sg = th > 0 ? 1 : -1;
+    const cx = sx + (-d1y) * r * sg, cy = sy + d1x * r * sg;
+    const a0 = Math.atan2(sy - cy, sx - cx), m = Math.max(4, Math.ceil(Math.abs(th) * r / 6));
+    raw.push([sx, sy]);
+    for (let j = 1; j <= m; j++) { const a = a0 + th * j / m; raw.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); }
+  }
+  // 균일 재표본화
+  const segL = []; let L0 = 0;
+  for (let i = 0; i < raw.length; i++) { const a = raw[i], b = raw[(i + 1) % raw.length]; const l = Math.hypot(b[0] - a[0], b[1] - a[1]); segL.push(l); L0 += l; }
+  const N = Math.round(L0 / C.SP), SP = L0 / N, L = L0;
+  const X = new Float32Array(N), Y = new Float32Array(N);
+  let seg = 0, acc = 0;
+  for (let i = 0; i < N; i++) {
+    const s = i * SP;
+    while (acc + segL[seg] < s && seg < raw.length - 1) { acc += segL[seg]; seg++; }
+    const a = raw[seg], b = raw[(seg + 1) % raw.length], u = segL[seg] > 0 ? (s - acc) / segL[seg] : 0;
+    X[i] = a[0] + (b[0] - a[0]) * u; Y[i] = a[1] + (b[1] - a[1]) * u;
+  }
+  const TX = new Float32Array(N), TY = new Float32Array(N), NX = new Float32Array(N), NY = new Float32Array(N), CV = new Float32Array(N), VL = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const a = (i - 1 + N) % N, b = (i + 1) % N; let tx = X[b] - X[a], ty = Y[b] - Y[a]; const l = Math.hypot(tx, ty) || 1;
+    TX[i] = tx / l; TY[i] = ty / l; NX[i] = -TY[i]; NY[i] = TX[i];
+  }
+  for (let i = 0; i < N; i++) {
+    const a = (i - 2 + N) % N, b = (i + 2) % N;
+    CV[i] = Math.abs(wrapAng(Math.atan2(TY[b], TX[b]) - Math.atan2(TY[a], TX[a]))) / (4 * SP);
+  }
+  for (let i = 0; i < N; i++) VL[i] = CV[i] > 1e-5 ? Math.sqrt(1050 / CV[i]) : 9999;
+  const T = { ti, def, hw, N, SP, L, X, Y, TX, TY, NX, NY, CV, VL };
+  T.at = s => { s = ((s % L) + L) % L; const f = s / SP; const i = Math.floor(f) % N, j = (i + 1) % N, u = f - Math.floor(f);
+    return { x: X[i] + (X[j] - X[i]) * u, y: Y[i] + (Y[j] - Y[i]) * u, nx: NX[i], ny: NY[i], tx: TX[i], ty: TY[i], i }; };
+  T.vlimAhead = (s, range) => { let i = Math.floor((((s % L) + L) % L) / SP) % N, m = 9999; const k = Math.ceil(range / SP); for (let j = 0; j < k; j++) { const v = VL[(i + j) % N]; if (v < m) m = v; } return m; };
+  // 경로(Path2D)
+  T.path = new Path2D(); T.path.moveTo(X[0], Y[0]); for (let i = 1; i < N; i++) T.path.lineTo(X[i], Y[i]); T.path.closePath();
+  let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+  for (let i = 0; i < N; i++) { minX = Math.min(minX, X[i]); maxX = Math.max(maxX, X[i]); minY = Math.min(minY, Y[i]); maxY = Math.max(maxY, Y[i]); }
+  T.bb = { minX, minY, maxX, maxY };
+  const R = rng(def.seed);
+  // 직선 구간 판정
+  const straight = new Uint8Array(N);
+  for (let i = 0; i < N; i++) { let ok = 1; for (let j = -12; j <= 12; j++) if (CV[(i + j + N) % N] > 0.0009) { ok = 0; break; } straight[i] = ok; }
+  const sOf = i => i * SP;
+  const exclStart = s => s > L - 620 || s < 420;
+  const used = [];
+  const farFromUsed = (s, d) => used.every(u => { const dd = Math.abs(s - u); return Math.min(dd, L - dd) > d; });
+  const pick = (target, minGap) => {
+    let best = -1, bd = 1e9;
+    for (let i = 0; i < N; i++) { if (!straight[i]) continue; const s = sOf(i); if (exclStart(s) || !farFromUsed(s, minGap)) continue;
+      const d = Math.min(Math.abs(s - target), L - Math.abs(s - target)); if (d < bd) { bd = d; best = i; } }
+    return best;
+  };
+  // 배달 지점
+  T.spots = [];
+  for (let k = 0; k < def.spots; k++) {
+    const i = pick(L * (k + 0.5) / def.spots, 430); if (i < 0) continue; const s = sOf(i); used.push(s);
+    const side = (k % 2 === 0 ? 1 : -1) * (R() < 0.25 ? -1 : 1);
+    const type = def.types[k % def.types.length];
+    const dep = 70 + R() * 20, wid = 120;
+    const bx = X[i] + NX[i] * side * (hw + 34 + dep / 2), by = Y[i] + NY[i] * side * (hw + 34 + dep / 2);
+    T.spots.push({ k: T.spots.length, i, s, side, type, z0: s - C.ZONE_LEN / 2, zl: C.ZONE_LEN, bx, by, bw: wid, bh: dep, rot: Math.atan2(TY[i], TX[i]),
+      req: null, cool: 0, flash: 0, served: 0 });
+  }
+  T.spots.sort((a, b) => a.s - b.s); T.spots.forEach((sp, k) => sp.k = k);
+  // 충전 패드
+  T.pads = [];
+  for (let k = 0; k < def.pads; k++) {
+    const i = pick(L * (k + 0.25) / def.pads + L * 0.1, 300); if (i < 0) continue; const s = sOf(i); used.push(s);
+    T.pads.push({ s0: s - C.PAD_LEN / 2, len: C.PAD_LEN, side: R() < 0.4 ? 0 : (R() < 0.5 ? 1 : -1), rate: C.PAD_RATE });
+  }
+  // 결승선 앞 충전소 레인(오른쪽 차선)
+  T.station = { s0: L - 380, len: 300, side: 1, rate: C.STATION_RATE, station: true };
+  T.chargers = T.pads.concat([T.station]);
+  // 구역 경로(Path2D)
+  const zonePath = (s0, len, la, lb) => { const p = new Path2D(); const steps = Math.ceil(len / SP);
+    for (let j = 0; j <= steps; j++) { const q = T.at(s0 + len * j / steps); const x = q.x + q.nx * la, y = q.y + q.ny * la; j ? p.lineTo(x, y) : p.moveTo(x, y); }
+    for (let j = steps; j >= 0; j--) { const q = T.at(s0 + len * j / steps); p.lineTo(q.x + q.nx * lb, q.y + q.ny * lb); }
+    p.closePath(); return p; };
+  const laneRange = side => side === 0 ? [-hw + 6, hw - 6] : side > 0 ? [6, hw - 6] : [-hw + 6, -6];
+  T.spots.forEach(sp => { const [a, b] = laneRange(sp.side); sp.path = zonePath(sp.z0, sp.zl, a, b); const q = T.at(sp.s); sp.zx = q.x + q.nx * sp.side * hw * 0.5; sp.zy = q.y + q.ny * sp.side * hw * 0.5; });
+  T.chargers.forEach(pd => { const [a, b] = laneRange(pd.side); pd.path = zonePath(pd.s0, pd.len, a, b); pd.mid = T.at(pd.s0 + pd.len / 2); });
+  // 건물(도시)
+  const nearestD2 = (x, y) => { let m = 1e18; for (let i = 0; i < N; i += 2) { const dx = x - X[i], dy = y - Y[i]; const d = dx * dx + dy * dy; if (d < m) m = d; } return m; };
+  T.bld = []; T.trees = [];
+  const winCols = ['#f2c66d', '#ffe3a1', '#a8dcff', '#f2c66d'];
+  const mkWins = (w, h, prob) => { const out = []; const nx = Math.max(1, Math.floor(w / 16)), ny = Math.max(1, Math.floor(h / 16));
+    for (let a = 0; a < nx; a++) for (let b = 0; b < ny; b++) if (R() < prob) out.push([-w / 2 + (a + 0.5) * w / nx - 2.5, -h / 2 + (b + 0.5) * h / ny - 2.5]); return out; };
+  const avoid = T.spots.map(sp => [sp.bx, sp.by, 95]);
+  const stQ = T.at(L - 230); const stx = stQ.x + stQ.nx * (hw + 80), sty = stQ.y + stQ.ny * (hw + 80);
+  T.stationB = { x: stx, y: sty, rot: Math.atan2(stQ.ty, stQ.tx) }; avoid.push([stx, sty, 110]);
+  for (let gx = minX - 700; gx <= maxX + 700; gx += 118) for (let gy = minY - 700; gy <= maxY + 700; gy += 118) {
+    const w = 52 + R() * 50, h = 52 + R() * 50, cx = gx + (R() - 0.5) * 24, cy = gy + (R() - 0.5) * 24;
+    const d = Math.sqrt(nearestD2(cx, cy)); const need = hw + 30 + Math.hypot(w, h) / 2;
+    if (d < need || d > 1100) { if (d >= hw + 40 && d < need && R() < 0.5) T.trees.push({ x: cx, y: cy, r: 12 + R() * 8 }); continue; }
+    if (avoid.some(a => Math.hypot(cx - a[0], cy - a[1]) < a[2] + Math.max(w, h) / 2)) continue;
+    if (R() < 0.08) { T.trees.push({ x: cx, y: cy, r: 16 + R() * 10 }); T.trees.push({ x: cx + 22, y: cy + 14, r: 12 + R() * 8 }); continue; }
+    const shade = 18 + Math.floor(R() * 12);
+    T.bld.push({ x: cx, y: cy, w, h, col: `rgb(${shade},${shade + 10},${shade + 26})`, roof: `rgb(${shade + 9},${shade + 20},${shade + 38})`,
+      wins: mkWins(w - 10, h - 10, 0.28 + R() * 0.25), wc: winCols[Math.floor(R() * winCols.length)] });
+  }
+  T.spots.forEach(sp => { sp.wins = mkWins(sp.bw - 14, sp.bh - 14, 0.6); });
+  // 가로등
+  T.lights = [];
+  for (let s = 100; s < L; s += 250) for (const sd of [-1, 1]) { const q = T.at(s + (sd > 0 ? 0 : 125)); T.lights.push([q.x + q.nx * sd * (hw + 14), q.y + q.ny * sd * (hw + 14)]); }
+  return T;
+}
+
+// ---------- 5) 레이스 ----------
+let race = null;
+function makeCar(k, T, isPlayer, st, s, lat) {
+  const q = T.at(s);
+  return {
+    k, name: CAR_DEFS[k].name, color: CAR_DEFS[k].color, isPlayer, st,
+    x: q.x + q.nx * lat, y: q.y + q.ny * lat, vx: 0, vy: 0, h: Math.atan2(q.ty, q.tx), steer: 0,
+    battery: st.cap, score: 0, idx: q.i, s, lat, dist: s, lap: 1, finished: false, finishTime: 0, finishPos: -1,
+    boosting: false, braking: false, drifting: false, zoneIn: {}, charging: false, wallT: 0, wrongT: 0, prevBoost: false,
+    lastRear: null, delivered: 0, completes: 0,
+    stats: { boostUsed: 0, delivered: 0, regen: 0, charged: 0, crashes: 0 },
+    ai: { lane: (Math.random() - 0.5) * 0.7, laneT: 2 + Math.random() * 3, lat, boostT: 0, decideT: Math.random(), aggr: 0.35 + Math.random() * 0.3, chargeAt: 0.45 + Math.random() * 0.2, skill: 1 },
+  };
+}
+function newRace(ti, demo) {
+  const T = buildTrack(ti), def = TRACKS[ti];
+  const cars = [];
+  // 출발 격자: 결승선 바로 뒤가 아니라 바로 앞(충전소 레인은 결승선 직전)
+  const grid = [[150, -0.45], [150, 0.45], [70, 0.45], [70, -0.45]];
+  for (let k = 0; k < 4; k++) {
+    let st;
+    if (k === 0 && !demo) st = playerStats();
+    else {
+      const m = def.cpu * (0.96 + Math.random() * 0.08) * (demo ? 1 : 1);
+      st = { cap: 100 + ti * 10, maxSpeed: 360 * m, accel: 250 * m, turn: 2.75, grip: 9, regen: 6, padMul: 1 };
+    }
+    const g = grid[k === 0 ? 3 : k - 1];
+    const c = makeCar(k, T, k === 0 && !demo, st, g[0], g[1] * T.hw);
+    c.ai.skill = k === 0 ? 1 : def.cpu;
+    c.ai.greed = demo ? 0.9 : clamp(0.45 + ti * 0.08 + Math.random() * 0.1, 0, 0.9); // CPU가 일부러 노리는 요청 비율
+    cars.push(c);
+  }
+  race = {
+    ti, T, def, demo: !!demo, cars, player: cars[0], t: 0, phase: demo ? 'race' : 'count', count: C.COUNT + 0.6,
+    laps: C.LAPS, timeLimit: Math.round(C.LAPS * T.L / 165 + 40), finishOrder: [], reqTimer: 1.5, reqId: 0,
+    popups: [], parts: [], skids: [], bolts: [], shake: 0, flash: 0,
+    cam: { x: cars[0].x, y: cars[0].y, ang: cars[0].h, z: 1 }, hint: null, hintsShown: {}, endT: 0, result: null, msg: null,
+  };
+  // 시작 요청: 첫 트랙은 플레이어 앞쪽 지점부터
+  const firstSpots = T.spots.slice().sort((a, b) => a.s - b.s);
+  const want = Math.min(def.reqMax, firstSpots.length);
+  const idxs = [0, Math.floor(firstSpots.length / 2), firstSpots.length - 1, 1].slice(0, want);
+  idxs.forEach(i => spawnRequest(firstSpots[i], true));
+  return race;
+}
+function spawnRequest(sp, quiet) {
+  const R = race, def = R.def;
+  const urgent = sp.type === '병원' || Math.random() < 0.18;
+  const lvl = R.demo ? 0 : 0;
+  const dem = Math.round(def.dem[0] + Math.random() * (def.dem[1] - def.dem[0]) + lvl);
+  const tMax = urgent ? def.tU : def.tN;
+  sp.req = { id: ++R.reqId, demand: dem, max: dem, t: tMax, tMax, urgent };
+  if (!quiet && !R.demo) sfx.request(urgent);
+}
+function aheadDist(from, to, L) { let d = ((to - from) % L + L) % L; if (d > L - 250) d -= L; return d; }
+function inZone(s, s0, len, L) { const d = ((s - s0) % L + L) % L; return d <= len; }
+
+// 차 위치를 트랙에 투영(인접 샘플 탐색)
+function locate(c, T) {
+  const { N, X, Y } = T; let best = 1e18, bi = c.idx;
+  for (let k = -16; k <= 16; k++) { const i = (c.idx + k + N) % N; const dx = c.x - X[i], dy = c.y - Y[i]; const d = dx * dx + dy * dy; if (d < best) { best = d; bi = i; } }
+  if (best > (T.hw * 2.5) ** 2) { for (let i = 0; i < N; i++) { const dx = c.x - X[i], dy = c.y - Y[i]; const d = dx * dx + dy * dy; if (d < best) { best = d; bi = i; } } }
+  c.idx = bi;
+  const dx = c.x - X[bi], dy = c.y - Y[bi];
+  c.lat = dx * T.NX[bi] + dy * T.NY[bi];
+  let s = bi * T.SP + dx * T.TX[bi] + dy * T.TY[bi]; s = ((s % T.L) + T.L) % T.L;
+  let ds = s - c.s; if (ds < -T.L / 2) ds += T.L; if (ds > T.L / 2) ds -= T.L;
+  c.s = s; return ds;
+}
+
+function stepCar(c, inp, dt, R) {
+  const st = c.st, T = R.T;
+  let fx = Math.cos(c.h), fy = Math.sin(c.h);
+  let vf = c.vx * fx + c.vy * fy, vl = c.vx * -fy + c.vy * fx;
+  const tgt = clamp(inp.steer, -1, 1);
+  const rate = (tgt !== 0 && Math.sign(tgt) !== Math.sign(c.steer)) ? 14 : 8;
+  c.steer += clamp(tgt - c.steer, -rate * dt, rate * dt);
+  const racing = R.phase === 'race' || R.phase === 'finish' || R.phase === 'post';
+  // 부스터: 배터리(=배달 화물) 소모
+  const boosting = racing && inp.boost && c.battery > 0.3 && !inp.brake;
+  if (boosting) { const use = Math.min(c.battery, C.BOOST_DRAIN * dt); c.battery -= use; c.stats.boostUsed += use; }
+  if (boosting && !c.prevBoost && c.isPlayer) sfx.boost();
+  c.prevBoost = boosting; c.boosting = boosting;
+  c.braking = !!inp.brake;
+  const vmax = st.maxSpeed * (boosting ? C.BOOST_MULT : 1);
+  if (!racing) { vf *= Math.exp(-6 * dt); }
+  else if (inp.brake) {
+    if (vf > 15) {
+      vf = Math.max(0, vf - C.BRAKE * dt);
+      if (vf > 60 && c.battery < st.cap) { const g = Math.min(st.cap - c.battery, st.regen * dt * Math.min(1, vf / 260)); c.battery += g; c.stats.regen += g; }
+    } else vf = Math.max(-C.REV_MAX, vf - 260 * dt);
+  } else {
+    const a = st.accel * (boosting ? C.BOOST_ACC : 1);
+    if (vf < vmax) vf = Math.min(vmax, vf + a * dt * (1 - 0.55 * Math.max(0, vf) / vmax));
+    else vf -= (vf - vmax) * 1.8 * dt;
+  }
+  // 드리프트: 고속 + 브레이크 + 큰 조향
+  const drift = inp.brake && Math.abs(c.steer) > 0.45 && vf > 170;
+  const grip = drift ? st.grip * 0.26 : st.grip;
+  const keep = Math.exp(-grip * dt), lost = vl * (1 - keep);
+  vl *= keep; if (!drift && vf > 0) vf += Math.abs(lost) * 0.5;
+  const sp = Math.abs(vf);
+  const sf = clamp(sp / 120, 0.3, 1) * (1 - 0.18 * clamp((sp - st.maxSpeed) / 200, 0, 1)) * (vf < -5 ? -1 : 1);
+  c.h = wrapAng(c.h + c.steer * st.turn * sf * (drift ? 1.3 : 1) * dt);
+  c.vx = fx * vf - fy * vl; c.vy = fy * vf + fx * vl;
+  c.drifting = drift || Math.abs(vl) > 95;
+  c.x += c.vx * dt; c.y += c.vy * dt;
+  // 벽 충돌
+  const ds = locate(c, T);
+  const lim = T.hw - C.CAR_R;
+  if (Math.abs(c.lat) > lim) {
+    const sg = Math.sign(c.lat), i = c.idx, nx = T.NX[i] * sg, ny = T.NY[i] * sg;
+    const over = Math.abs(c.lat) - lim; c.x -= nx * over; c.y -= ny * over; c.lat = sg * lim;
+    const vn = c.vx * nx + c.vy * ny;
+    if (vn > 0) {
+      c.vx -= nx * vn * 1.45; c.vy -= ny * vn * 1.45;
+      const loss = clamp(1 - vn / 900, 0.55, 0.95); c.vx *= loss; c.vy *= loss;
+      if (vn > 70 && c.wallT <= 0) {
+        c.wallT = 0.25; c.stats.crashes++;
+        for (let j = 0; j < 10; j++) addPart(c.x + nx * 12, c.y + ny * 12, -nx * 120 + (Math.random() - 0.5) * 260, -ny * 120 + (Math.random() - 0.5) * 260, 0.35, '#ffd27a', 2.5);
+        if (c.isPlayer) { sfx.crash(vn); R.shake = Math.max(R.shake, Math.min(10, vn / 40)); }
+      }
+    }
+    // 긁힘 감속
+    c.vx *= 1 - 1.2 * dt; c.vy *= 1 - 1.2 * dt;
+  }
+  c.wallT -= dt;
+  return ds;
+}
+
+function addPart(x, y, vx, vy, life, color, size, add = true) {
+  const P = race.parts; if (P.length > 450) P.shift();
+  P.push({ x, y, vx, vy, life, max: life, color, size, add });
+}
+function addPopup(x, y, text, color, big) { race.popups.push({ x, y, text, color, t: 0, big: !!big }); if (race.popups.length > 20) race.popups.shift(); }
+function addBolt(x1, y1, x2, y2, color) {
+  const pts = [], n = 9;
+  for (let j = 0; j <= n; j++) { const u = j / n, jx = (j && j < n) ? (Math.random() - 0.5) * 38 : 0, jy = (j && j < n) ? (Math.random() - 0.5) * 38 : 0; pts.push([lerp(x1, x2, u) + jx, lerp(y1, y2, u) + jy]); }
+  race.bolts.push({ pts, t: 0.4, max: 0.4, color });
+}
+function showHint(key, text) {
+  const R = race; if (!R || R.demo || R.ti !== 0 || R.hintsShown[key]) return;
+  if (R.hint && R.hint.t > 1.2) return; // 앞 안내가 아직 보이는 중
+  R.hintsShown[key] = 1; R.hint = { text, t: 5.5 };
+}
+
+function deliver(c, sp) {
+  const R = race, req = sp.req;
+  const amt = Math.min(c.battery, req.demand);
+  if (amt < 0.5) { if (c.isPlayer) { addPopup(sp.zx, sp.zy, '배터리 없음!', '#e77d78'); sfx.empty(); showHint('empty', '배터리가 비었어요! 충전 패드나 결승선 앞 충전소 레인으로'); } return; }
+  c.battery -= amt; req.demand -= amt; c.stats.delivered += amt;
+  let pts = Math.round(amt * C.DELIVER_PTS * (req.urgent ? C.URGENT_MULT : 1));
+  let done = false;
+  if (req.demand < 0.5) { pts += req.urgent ? C.URGENT_BONUS : C.COMPLETE_BONUS; done = true; c.completes++; }
+  c.score += pts; c.delivered += amt; sp.served++;
+  addBolt(c.x, c.y, sp.bx, sp.by, c.isPlayer ? '#f2c66d' : c.color);
+  for (let j = 0; j < 14; j++) addPart(sp.bx + (Math.random() - 0.5) * 60, sp.by + (Math.random() - 0.5) * 40, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200, 0.5, c.isPlayer ? '#f2c66d' : c.color, 3);
+  addPopup(sp.bx, sp.by, (c.isPlayer ? '' : c.name + ' ') + '+' + pts + (done ? (c.isPlayer ? ' 불이 켜졌다!' : '') : ''), c.isPlayer ? (done ? '#78e2ae' : '#f2c66d') : c.color, c.isPlayer);
+  if (done) { sp.req = null; sp.cool = 6 + Math.random() * 4; sp.flash = 1; }
+  if (c.isPlayer) {
+    if (done) sfx.complete(); else sfx.deliver();
+    if (!REDUCED) R.flash = 0.25;
+    showHint('boost', '⚡부스터는 빨라지지만 배터리를 써요 → 배달할 전기가 줄어요!');
+  } else if (!R.demo && Math.hypot(c.x - R.player.x, c.y - R.player.y) < 700) sfx.cpuDeliver();
+}
+
+function aiControl(c, R, dt) {
+  const T = R.T, ai = c.ai, v = Math.hypot(c.vx, c.vy);
+  ai.laneT -= dt; if (ai.laneT <= 0) { ai.laneT = 2 + Math.random() * 3; ai.lane = (Math.random() - 0.5) * 0.7; }
+  let tgt = ai.lane * T.hw, reqAhead = 1e9;
+  const look = 650 + v * 0.6;
+  if (c.battery > 5 && !c.finished) {
+    for (const sp of T.spots) { if (!sp.req || ((sp.req.id * 7 + c.k * 13) % 10) >= ai.greed * 10) continue; const d = aheadDist(c.s, sp.s, T.L); if (d > -40 && d < look && d < reqAhead) { reqAhead = d; tgt = sp.side * T.hw * 0.5; } }
+  }
+  if (reqAhead > 1e8 && c.battery < c.st.cap * ai.chargeAt) {
+    let bd = 1e9;
+    for (const pd of T.chargers) { const d = aheadDist(c.s, pd.s0 + pd.len / 2, T.L); if (d > -pd.len / 2 && d < 700 && d < bd) { bd = d; if (pd.side) tgt = pd.side * T.hw * 0.5; } }
+  }
+  ai.lat += clamp(tgt - ai.lat, -170 * dt, 170 * dt);
+  const la = 70 + v * 0.42, q = T.at(c.s + la);
+  const tx = q.x + q.nx * ai.lat, ty = q.y + q.ny * ai.lat;
+  const diff = wrapAng(Math.atan2(ty - c.y, tx - c.x) - c.h);
+  const out = { steer: clamp(diff * 2.8, -1, 1), brake: false, boost: false };
+  const lim = T.vlimAhead(c.s + 20, 80 + v * 1.0);
+  if (v > lim + 20) out.brake = true;
+  // 부스터 판단: 직선 + 여유 배터리
+  const reserve = reqAhead < 1e8 ? Math.min(c.st.cap * 0.7, 35) : 18;
+  ai.decideT -= dt;
+  if (ai.boostT > 0) { ai.boostT -= dt; out.boost = !out.brake && c.battery > reserve * 0.6 && lim > c.st.maxSpeed * 1.3; }
+  else if (ai.decideT <= 0) { ai.decideT = 0.5; if (c.battery > reserve && lim > c.st.maxSpeed * 1.45 && Math.random() < ai.aggr) ai.boostT = 0.5 + Math.random(); }
+  if (R.phase !== 'race' && R.phase !== 'finish' && R.phase !== 'post') { out.boost = false; }
+  return out;
+}
+
+function playerInput() {
+  const left = keys.ArrowLeft || keys.KeyA || tb.L, right = keys.ArrowRight || keys.KeyD || tb.R;
+  return { steer: (right ? 1 : 0) - (left ? 1 : 0), brake: !!(keys.ArrowDown || keys.KeyS || keys.ShiftLeft || keys.ShiftRight || tb.Br), boost: !!(keys.Space || tb.Bo) };
+}
+
+function updateRace(dt) {
+  const R = race, T = R.T;
+  if (R.phase === 'count') {
+    const before = Math.ceil(R.count - 0.6); R.count -= dt; const after = Math.ceil(R.count - 0.6);
+    if (after !== before && after > 0) sfx.count();
+    if (R.count <= 0.6) { R.phase = 'race'; sfx.go(); showHint('steer', isTouch ? '자동으로 달려요! ◀ ▶ 버튼으로 핸들을 돌리세요' : '자동으로 달려요! ← → 키로 핸들을 돌리세요'); }
+  } else R.t += dt;
+  // 요청 관리
+  if (R.phase === 'race' || R.demo) {
+    let active = 0; for (const sp of T.spots) { if (sp.req) active++; if (sp.cool > 0) sp.cool -= dt; if (sp.flash > 0) sp.flash -= dt * 0.8; }
+    for (const sp of T.spots) if (sp.req) {
+      sp.req.t -= dt;
+      if (sp.req.t <= 0) { sp.req = null; sp.cool = 5; if (!R.demo) { addPopup(sp.bx, sp.by, '시간 초과…', '#a5b7ca'); if (Math.hypot(sp.bx - R.player.x, sp.by - R.player.y) < 900) sfx.expire(); } }
+    }
+    R.reqTimer -= dt;
+    if (R.reqTimer <= 0) {
+      R.reqTimer = 1.2 + Math.random() * 2.2;
+      if (active < R.def.reqMax) {
+        const p = R.player;
+        const cand = T.spots.filter(sp => !sp.req && sp.cool <= 0 && !(aheadDist(p.s, sp.s, T.L) > -50 && aheadDist(p.s, sp.s, T.L) < 380));
+        if (cand.length) spawnRequest(cand[Math.floor(Math.random() * cand.length)]);
+      }
+    }
+  }
+  // 차량
+  for (const c of R.cars) {
+    const usePlayer = c.isPlayer && R.phase !== 'finish' && R.phase !== 'post';
+    const inp = usePlayer ? (R.phase === 'count' ? { steer: 0, brake: false, boost: false } : playerInput()) : aiControl(c, R, dt);
+    const ds = stepCar(c, inp, dt, R);
+    if (R.phase === 'count') continue;
+    if (!c.finished) {
+      c.dist += ds;
+      const lap = Math.floor(c.dist / T.L) + 1;
+      if (lap > c.lap) {
+        c.lap = lap;
+        if (!R.demo && c.lap > R.laps) {
+          c.finished = true; c.finishTime = R.t; c.finishPos = R.finishOrder.length; R.finishOrder.push(c);
+          if (c.isPlayer) { R.phase = 'finish'; R.endT = 2.6; sfx.finish(); R.msg = { text: '골인!', t: 2.6, col: '#f2c66d' }; }
+        } else if (c.isPlayer) { sfx.lap(); R.msg = { text: c.lap === R.laps ? '마지막 바퀴!' : '랩 ' + c.lap + ' / ' + R.laps, t: 1.6, col: '#64ceeb' }; }
+      }
+      // 역주행 감지
+      if (c.isPlayer) { if (ds < -0.3 && Math.hypot(c.vx, c.vy) > 40) c.wrongT += dt; else c.wrongT = Math.max(0, c.wrongT - dt * 2); }
+    }
+    // 배달 구역
+    for (const sp of T.spots) {
+      const inside = inZone(c.s, sp.z0, sp.zl, T.L) && c.lat * sp.side > 4;
+      if (inside && !c.zoneIn[sp.k]) { c.zoneIn[sp.k] = true; if (sp.req && !c.finished) deliver(c, sp); }
+      else if (!inside) c.zoneIn[sp.k] = false;
+    }
+    // 충전
+    c.charging = false;
+    for (const pd of T.chargers) {
+      if (inZone(c.s, pd.s0, pd.len, T.L) && (pd.side === 0 || c.lat * pd.side > 4) && c.battery < c.st.cap) {
+        const g = Math.min(c.st.cap - c.battery, pd.rate * c.st.padMul * dt); c.battery += g; c.stats.charged += g; c.charging = true;
+        if (Math.random() < 0.5) addPart(c.x + (Math.random() - 0.5) * 30, c.y + (Math.random() - 0.5) * 30, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60, 0.4, '#78e2ae', 2.2);
+        if (c.isPlayer) sfx.charge(c.battery / c.st.cap);
+      }
+    }
+    // 부스터 불꽃, 스키드
+    if (c.boosting) { const bx = c.x - Math.cos(c.h) * 20, by = c.y - Math.sin(c.h) * 20;
+      for (let j = 0; j < 2; j++) addPart(bx, by, -Math.cos(c.h) * 200 + (Math.random() - 0.5) * 80, -Math.sin(c.h) * 200 + (Math.random() - 0.5) * 80, 0.3, Math.random() < 0.5 ? '#64ceeb' : '#f2c66d', 3); }
+    const rx = c.x - Math.cos(c.h) * 13, ry = c.y - Math.sin(c.h) * 13;
+    if ((c.drifting || (c.braking && Math.hypot(c.vx, c.vy) > 160)) && c.lastRear) {
+      const ox = -Math.sin(c.h) * 8, oy = Math.cos(c.h) * 8, lr = c.lastRear;
+      R.skids.push([lr[0] + ox, lr[1] + oy, rx + ox, ry + oy, 1], [lr[0] - ox, lr[1] - oy, rx - ox, ry - oy, 1]);
+      if (R.skids.length > 600) R.skids.splice(0, 2);
+    }
+    c.lastRear = [rx, ry];
+  }
+  // 차끼리 충돌
+  const cs = R.cars;
+  for (let a = 0; a < cs.length; a++) for (let b = a + 1; b < cs.length; b++) {
+    const A = cs[a], B = cs[b]; const dx = B.x - A.x, dy = B.y - A.y, d = Math.hypot(dx, dy), md = C.CAR_R * 2.3;
+    if (d < md && d > 0.01) {
+      const nx = dx / d, ny = dy / d, o = (md - d) / 2; A.x -= nx * o; A.y -= ny * o; B.x += nx * o; B.y += ny * o;
+      const rv = (B.vx - A.vx) * nx + (B.vy - A.vy) * ny;
+      if (rv < 0) { const j = -rv * 0.9 / 2; A.vx -= nx * j; A.vy -= ny * j; B.vx += nx * j; B.vy += ny * j;
+        if ((A.isPlayer || B.isPlayer) && -rv > 80) { sfx.crash(-rv * 0.6); R.shake = Math.max(R.shake, 4); } }
+    }
+  }
+  // 플레이어 상황별 안내
+  const p = R.player;
+  if (R.phase === 'race' && !R.demo) {
+    if (R.t > 6) {
+      const near = T.spots.find(sp => sp.req && aheadDist(p.s, sp.s, T.L) > 0 && aheadDist(p.s, sp.s, T.L) < 900);
+      if (near) showHint('deliver', `빨간 정전 건물 앞 노란 구역을 지나가면 배달! (${near.side > 0 ? '오른쪽' : '왼쪽'} 차선)`);
+    }
+    if (p.battery < p.st.cap * 0.4 && R.t > 4) showHint('charge', '배터리가 줄었어요. 초록 충전 패드·결승선 앞 오른쪽 충전소 레인으로!');
+    if (R.t > 40) showHint('brake', isTouch ? '브레이크를 밟으면 회생 제동으로 조금 충전돼요. 브레이크+핸들 = 드리프트!' : '↓/S/Shift 브레이크 = 회생 충전. 브레이크+핸들 = 드리프트!');
+    if (R.t >= R.timeLimit) { R.phase = 'finish'; R.endT = 2.2; R.msg = { text: '시간 종료!', t: 2.2, col: '#e77d78' }; sfx.finish(); }
+  }
+  if (R.phase === 'finish') { R.endT -= dt; if (R.endT <= 0) { R.phase = 'post'; endRace(); } }
+  // 효과 갱신
+  for (const pp of R.parts) { pp.x += pp.vx * dt; pp.y += pp.vy * dt; pp.vx *= 1 - 2.5 * dt; pp.vy *= 1 - 2.5 * dt; pp.life -= dt; }
+  R.parts = R.parts.filter(pp => pp.life > 0);
+  for (const b of R.bolts) b.t -= dt; R.bolts = R.bolts.filter(b => b.t > 0);
+  for (const pu of R.popups) pu.t += dt; R.popups = R.popups.filter(pu => pu.t < 1.6);
+  for (const sk of R.skids) sk[4] -= dt * 0.12;
+  if (R.skids.length && R.skids[0][4] <= 0) R.skids = R.skids.filter(sk => sk[4] > 0);
+  R.shake = Math.max(0, R.shake - dt * 25); R.flash = Math.max(0, R.flash - dt);
+  if (R.hint) { R.hint.t -= dt; if (R.hint.t <= 0) R.hint = null; }
+  if (R.msg) { R.msg.t -= dt; if (R.msg.t <= 0) R.msg = null; }
+  // 카메라
+  const cam = R.cam, fc = R.player;
+  const sp = Math.hypot(fc.vx, fc.vy);
+  cam.x = lerp(cam.x, fc.x + fc.vx * 0.16, 1 - Math.exp(-9 * dt));
+  cam.y = lerp(cam.y, fc.y + fc.vy * 0.16, 1 - Math.exp(-9 * dt));
+  cam.ang += wrapAng(fc.h - cam.ang) * (1 - Math.exp(-3.6 * dt));
+  cam.spd = lerp(cam.spd || 0, clamp(sp / 480, 0, 1), 1 - Math.exp(-2 * dt));
+  // 엔진음
+  if (!R.demo && (R.phase === 'race' || R.phase === 'count' || R.phase === 'finish')) Snd.engine(clamp(sp / 500, 0, 1), p.boosting, true);
+  else Snd.engine(0, false, false);
+}
+
+function standingsByDist() {
+  const R = race;
+  const fin = R.finishOrder.slice();
+  const rest = R.cars.filter(c => !c.finished).sort((a, b) => b.dist - a.dist);
+  return fin.concat(rest);
+}
+function endRace() {
+  const R = race; if (R.result) return;
+  const order = standingsByDist();
+  order.forEach((c, i) => { c.finishPos = i; c.bonus = C.FINISH_BONUS[i]; c.total = c.score + c.bonus; });
+  const st = R.cars.slice().sort((a, b) => b.total - a.total || a.finishPos - b.finishPos);
+  const rank = st.indexOf(R.player);
+  const p = R.player;
+  const prize = Math.floor(p.total / 10) + C.PRIZE[rank];
+  const prevBest = save.best[R.ti] || 0;
+  const newBest = p.total > prevBest;
+  if (newBest) save.best[R.ti] = p.total;
+  const overall = p.total > bestTotal; if (overall) bestTotal = p.total;
+  save.money += prize; save.races++; save.last = R.ti;
+  let unlockedNew = null;
+  if (rank <= 1 && R.ti + 1 < TRACKS.length && save.unlocked < R.ti + 2) { save.unlocked = R.ti + 2; unlockedNew = TRACKS[R.ti + 1].name; }
+  persist();
+  R.result = { rank, prize, newBest, overall, unlockedNew, standings: st, time: p.finished ? p.finishTime : R.t };
+  showResult();
+}
+
+// ---------- 6) 렌더링 ----------
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+let W = 0, H = 0, DPR = 1, safe = { t: 0, b: 0, l: 0, r: 0 }, ctlTop = 0;
+const glow = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,214,140,0.9)'); gr.addColorStop(0.35, 'rgba(242,198,109,0.35)'); gr.addColorStop(1, 'rgba(242,198,109,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c; })();
+const beam = (() => { const c = document.createElement('canvas'); c.width = 128; c.height = 96; const g = c.getContext('2d');
+  const gr = g.createLinearGradient(0, 0, 128, 0); gr.addColorStop(0, 'rgba(255,245,200,0.55)'); gr.addColorStop(1, 'rgba(255,245,200,0)');
+  g.fillStyle = gr; g.beginPath(); g.moveTo(0, 40); g.lineTo(128, 0); g.lineTo(128, 96); g.lineTo(0, 56); g.closePath(); g.fill(); return c; })();
+let mm = null, mmFor = null;
+function resize() {
+  const r = document.getElementById('wrap').getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio || 1, 2.5); W = Math.max(1, r.width); H = Math.max(1, r.height);
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  const cs = getComputedStyle(document.getElementById('safe'));
+  safe = { t: parseFloat(cs.paddingTop) || 0, r: parseFloat(cs.paddingRight) || 0, b: parseFloat(cs.paddingBottom) || 0, l: parseFloat(cs.paddingLeft) || 0 };
+  mmFor = null; updateCtlTop();
+}
+function updateCtlTop() {
+  const el = document.getElementById('ctl');
+  if (el.classList.contains('on')) { const wr = document.getElementById('wrap').getBoundingClientRect(); let top = 1e9;
+    for (const b of el.querySelectorAll('.cb')) top = Math.min(top, b.getBoundingClientRect().top - wr.top); ctlTop = top; }
+  else ctlTop = H - 26 - safe.b;
+}
+function mmSize() { return Math.round(clamp(Math.min(W, H) * 0.3, 96, 170)); }
+function buildMinimap() {
+  const T = race.T, S = mmSize(); mm = document.createElement('canvas'); mm.width = Math.round(S * DPR); mm.height = Math.round(S * DPR);
+  const g = mm.getContext('2d'); g.scale(DPR, DPR);
+  const bw = T.bb.maxX - T.bb.minX, bh = T.bb.maxY - T.bb.minY, pad = 10, k = Math.min((S - pad * 2) / bw, (S - pad * 2) / bh);
+  const ox = (S - bw * k) / 2 - T.bb.minX * k, oy = (S - bh * k) / 2 - T.bb.minY * k;
+  mm.tf = { k, ox, oy, S };
+  g.fillStyle = 'rgba(10,19,32,0.78)'; g.strokeStyle = '#2c415b'; g.lineWidth = 1; rrect(g, 0.5, 0.5, S - 1, S - 1, 10); g.fill(); g.stroke();
+  g.save(); g.translate(ox, oy); g.scale(k, k); g.lineJoin = 'round';
+  g.strokeStyle = '#3c5677'; g.lineWidth = T.hw * 2; g.stroke(T.path);
+  g.fillStyle = '#78e2ae';
+  for (const pd of T.chargers) g.fill(pd.path);
+  g.restore();
+  // 결승선
+  const q = T.at(0); g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath();
+  g.moveTo(ox + (q.x + q.nx * T.hw * 1.4) * k, oy + (q.y + q.ny * T.hw * 1.4) * k); g.lineTo(ox + (q.x - q.nx * T.hw * 1.4) * k, oy + (q.y - q.ny * T.hw * 1.4) * k); g.stroke();
+  mmFor = race;
+}
+function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+
+function camSetup() {
+  const R = race, cam = R.cam;
+  const z = Math.min(W / 500, (H * 0.64) / 560) * (1 - 0.1 * (cam.spd || 0));
+  const ax = W / 2, ay = H * (W < H ? 0.64 : 0.66);
+  const rot = -Math.PI / 2 - cam.ang;
+  let sx = 0, sy = 0; if (R.shake > 0 && !REDUCED) { sx = (Math.random() - 0.5) * R.shake; sy = (Math.random() - 0.5) * R.shake; }
+  cam.z = z; cam.ax = ax + sx; cam.ay = ay + sy; cam.rot = rot; cam.cos = Math.cos(rot); cam.sin = Math.sin(rot);
+}
+function w2s(x, y) { const c = race.cam, dx = x - c.x, dy = y - c.y; return [c.ax + (dx * c.cos - dy * c.sin) * c.z, c.ay + (dx * c.sin + dy * c.cos) * c.z]; }
+
+function render(now) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = '#0b1420'; ctx.fillRect(0, 0, W, H);
+  if (!race) return;
+  const R = race, T = R.T, cam = R.cam, time = now / 1000;
+  camSetup();
+  const viewR = Math.hypot(W, H) / cam.z * 0.8 + 120;
+  const vis = (x, y, m = 0) => Math.abs(x - cam.x) < viewR + m && Math.abs(y - cam.y) < viewR + m;
+  ctx.save();
+  ctx.translate(cam.ax, cam.ay); ctx.scale(cam.z, cam.z); ctx.rotate(cam.rot); ctx.translate(-cam.x, -cam.y);
+  // 나무/공원
+  for (const t of T.trees) { if (!vis(t.x, t.y)) continue; ctx.fillStyle = '#10251f'; ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, 6.283); ctx.fill(); ctx.fillStyle = '#17352a'; ctx.beginPath(); ctx.arc(t.x - t.r * 0.25, t.y - t.r * 0.25, t.r * 0.55, 0, 6.283); ctx.fill(); }
+  // 일반 건물
+  for (const b of T.bld) {
+    if (!vis(b.x, b.y)) continue;
+    const x = b.x - b.w / 2, y = b.y - b.h / 2;
+    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(x + 7, y + 7, b.w, b.h);
+    ctx.fillStyle = b.col; ctx.fillRect(x, y, b.w, b.h);
+    ctx.fillStyle = b.roof; ctx.fillRect(x + 4, y + 4, b.w - 8, b.h - 8);
+    ctx.fillStyle = b.wc; ctx.globalAlpha = 0.55;
+    for (const w of b.wins) ctx.fillRect(b.x + w[0], b.y + w[1], 5, 5);
+    ctx.globalAlpha = 1;
+  }
+  // 도로
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.strokeStyle = '#1f2d40'; ctx.lineWidth = T.hw * 2 + 34; ctx.stroke(T.path);
+  ctx.strokeStyle = '#5a7496'; ctx.lineWidth = T.hw * 2 + 4; ctx.stroke(T.path);
+  ctx.strokeStyle = '#151e2b'; ctx.lineWidth = T.hw * 2 - 4; ctx.stroke(T.path);
+  ctx.strokeStyle = '#34465e'; ctx.lineWidth = 4; ctx.setLineDash([34, 30]); ctx.stroke(T.path); ctx.setLineDash([]);
+  // 스키드
+  ctx.lineWidth = 4; ctx.lineCap = 'butt';
+  for (const sk of R.skids) { if (!vis(sk[0], sk[1])) continue; ctx.strokeStyle = `rgba(4,7,12,${clamp(sk[4], 0, 1) * 0.55})`; ctx.beginPath(); ctx.moveTo(sk[0], sk[1]); ctx.lineTo(sk[2], sk[3]); ctx.stroke(); }
+  // 충전 패드 · 충전소 레인
+  const pulse = 0.5 + 0.5 * Math.sin(time * 5);
+  for (const pd of T.chargers) {
+    if (!vis(pd.mid.x, pd.mid.y, 300)) continue;
+    ctx.fillStyle = `rgba(120,226,174,${0.18 + 0.12 * pulse})`; ctx.fill(pd.path);
+    ctx.strokeStyle = '#78e2ae'; ctx.lineWidth = 3; ctx.stroke(pd.path);
+    // 화살표(번개 무늬)
+    const steps = Math.floor(pd.len / 60), lat0 = pd.side === 0 ? 0 : pd.side * T.hw * 0.5;
+    ctx.strokeStyle = `rgba(160,255,210,${0.5 + 0.4 * pulse})`; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    for (let j = 0; j < steps; j++) { const q = T.at(pd.s0 + 30 + j * 60), bx = q.x + q.nx * lat0, by = q.y + q.ny * lat0;
+      ctx.beginPath(); ctx.moveTo(bx - q.tx * 10 + q.nx * 16, by - q.ty * 10 + q.ny * 16); ctx.lineTo(bx + q.tx * 10, by + q.ty * 10); ctx.lineTo(bx - q.tx * 10 - q.nx * 16, by - q.ty * 10 - q.ny * 16); ctx.stroke(); }
+  }
+  // 결승선
+  { const q = T.at(0), n = 10, sq = T.hw * 2 / n;
+    for (let a = 0; a < n; a++) for (let b = 0; b < 2; b++) { ctx.fillStyle = (a + b) % 2 ? '#e8eef6' : '#1a2230';
+      const l = -T.hw + a * sq, f = b * sq * 0.6 - sq * 0.6; const x = q.x + q.nx * l + q.tx * f, y = q.y + q.ny * l + q.ty * f;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + q.nx * sq, y + q.ny * sq); ctx.lineTo(x + q.nx * sq + q.tx * sq * 0.6, y + q.ny * sq + q.ty * sq * 0.6); ctx.lineTo(x + q.tx * sq * 0.6, y + q.ty * sq * 0.6); ctx.fill(); } }
+  // 배달 구역
+  for (const sp of T.spots) {
+    if (!vis(sp.bx, sp.by, 200)) continue;
+    if (sp.req) {
+      const u = sp.req.urgent, col = u ? '231,125,120' : '242,198,109';
+      ctx.fillStyle = `rgba(${col},${0.2 + 0.18 * pulse})`; ctx.fill(sp.path);
+      ctx.strokeStyle = `rgba(${col},0.95)`; ctx.lineWidth = 3; ctx.setLineDash([14, 10]); ctx.lineDashOffset = -time * 40; ctx.stroke(sp.path); ctx.setLineDash([]);
+    } else { ctx.strokeStyle = 'rgba(165,183,202,0.12)'; ctx.lineWidth = 2; ctx.stroke(sp.path); }
+  }
+  // 배달 건물 · 충전소 건물
+  for (const sp of T.spots) {
+    if (!vis(sp.bx, sp.by, 100)) continue;
+    ctx.save(); ctx.translate(sp.bx, sp.by); ctx.rotate(sp.rot);
+    const w = sp.bw, h = sp.bh, dark = !!sp.req;
+    ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(-w / 2 + 8, -h / 2 + 8, w, h);
+    ctx.fillStyle = dark ? '#0e1520' : '#2a3a55'; ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.fillStyle = dark ? '#121b29' : '#34486a'; ctx.fillRect(-w / 2 + 5, -h / 2 + 5, w - 10, h - 10);
+    if (!dark) { ctx.fillStyle = '#ffe3a1'; ctx.globalAlpha = 0.85; for (const wv of sp.wins) ctx.fillRect(wv[0], wv[1], 6, 6); ctx.globalAlpha = 1; }
+    if (dark) { const a = sp.req.urgent ? 0.5 + 0.5 * Math.sin(time * 10) : 0.4 + 0.3 * Math.sin(time * 5); ctx.strokeStyle = `rgba(231,125,120,${a})`; ctx.lineWidth = 4; ctx.strokeRect(-w / 2 - 2, -h / 2 - 2, w + 4, h + 4); }
+    if (sp.flash > 0) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = clamp(sp.flash, 0, 1); ctx.drawImage(glow, -w, -w, w * 2, w * 2); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
+    ctx.restore();
+  }
+  { const b = T.stationB; if (vis(b.x, b.y, 100)) { ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.rot);
+    ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(-90 + 8, -40 + 8, 180, 80); ctx.fillStyle = '#16362c'; ctx.fillRect(-90, -40, 180, 80);
+    ctx.fillStyle = '#1f4d3c'; ctx.fillRect(-84, -34, 168, 68); ctx.fillStyle = `rgba(120,226,174,${0.6 + 0.4 * pulse})`;
+    ctx.beginPath(); ctx.moveTo(6, -26); ctx.lineTo(-14, 4); ctx.lineTo(0, 4); ctx.lineTo(-6, 26); ctx.lineTo(16, -6); ctx.lineTo(2, -6); ctx.closePath(); ctx.fill(); ctx.restore(); } }
+  // 가로등 빛
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = 0.28;
+  for (const l of T.lights) { if (!vis(l[0], l[1])) continue; ctx.drawImage(glow, l[0] - 60, l[1] - 60, 120, 120); }
+  ctx.globalAlpha = 1;
+  // 헤드라이트
+  for (const c of R.cars) { if (!vis(c.x, c.y)) continue; ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.h); ctx.globalAlpha = 0.5; ctx.drawImage(beam, 14, -48, 150, 96); ctx.restore(); }
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  // 차량
+  for (const c of R.cars) if (vis(c.x, c.y)) drawCar(c, time);
+  // 입자 · 번개
+  ctx.globalCompositeOperation = 'lighter';
+  for (const p of R.parts) { if (!vis(p.x, p.y)) continue; ctx.globalAlpha = clamp(p.life / p.max, 0, 1); ctx.fillStyle = p.color; ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2); }
+  for (const b of R.bolts) {
+    const a = clamp(b.t / b.max, 0, 1); ctx.globalAlpha = a; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    for (const [lw, col] of [[12, b.color], [4, '#ffffff']]) { ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.globalAlpha = lw > 5 ? a * 0.5 : a; ctx.beginPath(); b.pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); }
+  }
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  ctx.restore();
+
+  // ---- 화면 좌표 오버레이 ----
+  drawSpotMarkers(time);
+  for (const pu of R.popups) {
+    const [sx, sy] = w2s(pu.x, pu.y); const a = clamp(1.6 - pu.t, 0, 1);
+    ctx.globalAlpha = a; ctx.font = `900 ${pu.big ? 22 : 15}px system-ui,'Malgun Gothic',sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(5,10,18,.85)'; ctx.strokeText(pu.text, sx, sy - 40 - pu.t * 40); ctx.fillStyle = pu.color; ctx.fillText(pu.text, sx, sy - 40 - pu.t * 40);
+  }
+  ctx.globalAlpha = 1;
+  if (R.flash > 0) { ctx.fillStyle = `rgba(242,198,109,${R.flash * 0.35})`; ctx.fillRect(0, 0, W, H); }
+  if (!R.demo && screen !== 'result') drawHUD(time);
+}
+
+function drawCar(c, time) {
+  ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.h);
+  if (c.boosting) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.8; ctx.drawImage(glow, -60, -26, 52, 52); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
+  ctx.fillStyle = 'rgba(0,0,0,0.45)'; rrect(ctx, -16, -8, 36, 22, 6); ctx.fill();
+  ctx.fillStyle = c.color; rrect(ctx, -18, -11, 36, 22, 6); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.25)'; rrect(ctx, -14, -9, 28, 5, 2); ctx.fill();
+  ctx.fillStyle = '#0d1826'; rrect(ctx, -3, -8, 12, 16, 3); ctx.fill();
+  // 배터리 표시줄(지붕)
+  const bl = clamp(c.battery / c.st.cap, 0, 1);
+  ctx.fillStyle = '#0a1320'; ctx.fillRect(-15, -3, 10, 6); ctx.fillStyle = bl > 0.3 ? '#f2c66d' : '#e77d78'; ctx.fillRect(-15, -3, 10 * bl, 6);
+  ctx.fillStyle = '#fff7d6'; ctx.fillRect(15, -9, 3, 5); ctx.fillRect(15, 4, 3, 5);
+  ctx.fillStyle = c.braking ? '#ff4a4a' : '#9b2a2a'; ctx.fillRect(-18, -9, 2.5, 5); ctx.fillRect(-18, 4, 2.5, 5);
+  if (c.isPlayer) { ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2; rrect(ctx, -19, -12, 38, 24, 7); ctx.stroke(); }
+  ctx.restore();
+}
+
+function drawIcon(type, x, y, s, col) {
+  ctx.save(); ctx.translate(x, y); ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 2;
+  if (type === '병원') { ctx.fillRect(-s * 0.15, -s * 0.5, s * 0.3, s); ctx.fillRect(-s * 0.5, -s * 0.15, s, s * 0.3); }
+  else if (type === '집') { ctx.beginPath(); ctx.moveTo(-s * 0.55, -s * 0.05); ctx.lineTo(0, -s * 0.55); ctx.lineTo(s * 0.55, -s * 0.05); ctx.closePath(); ctx.fill(); ctx.fillRect(-s * 0.38, -s * 0.05, s * 0.76, s * 0.5); }
+  else if (type === '가게') { ctx.fillRect(-s * 0.5, -s * 0.45, s, s * 0.3); ctx.fillRect(-s * 0.4, -s * 0.1, s * 0.8, s * 0.55); }
+  else if (type === '학교') { ctx.fillRect(-s * 0.5, -s * 0.05, s, s * 0.5); ctx.fillRect(-s * 0.06, -s * 0.6, s * 0.12, s * 0.6); ctx.fillRect(-s * 0.06, -s * 0.6, s * 0.4, s * 0.22); }
+  else { ctx.beginPath(); ctx.moveTo(-s * 0.5, s * 0.45); ctx.lineTo(-s * 0.5, -s * 0.1); ctx.lineTo(-s * 0.17, -s * 0.35); ctx.lineTo(-s * 0.17, -s * 0.1); ctx.lineTo(s * 0.16, -s * 0.35); ctx.lineTo(s * 0.16, -s * 0.1); ctx.lineTo(s * 0.5, -s * 0.35); ctx.lineTo(s * 0.5, s * 0.45); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+}
+
+function drawSpotMarkers(time) {
+  const R = race, T = R.T, p = R.player;
+  const topLim = (R.demo ? 10 : safe.t + 60), botLim = R.demo ? H - 10 : ctlTop - 92;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const sp of T.spots) {
+    let [sx, sy] = w2s(sp.bx, sp.by);
+    const on = sx > -40 && sx < W + 40 && sy > -40 && sy < H + 40;
+    if (!sp.req) {
+      if (!on || R.demo) continue;
+      ctx.globalAlpha = 0.6; drawIcon(sp.type, sx, sy, 14, '#ffe3a1'); ctx.globalAlpha = 1; continue;
+    }
+    const req = sp.req, u = req.urgent, col = u ? '#e77d78' : '#f2c66d';
+    const d = Math.hypot(sp.bx - p.x, sp.by - p.y);
+    let edge = false;
+    if (sx < 24 || sx > W - 24 || sy < topLim || sy > botLim) {
+      if (R.demo || d > 2600) continue;
+      edge = true;
+      const cx = W / 2, cy = (topLim + botLim) / 2, dx = sx - cx, dy = sy - cy;
+      const k = Math.min((W / 2 - 30) / Math.abs(dx || 1e-3), ((botLim - topLim) / 2 - 22) / Math.abs(dy || 1e-3));
+      sx = cx + dx * k; sy = cy + dy * k;
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(Math.atan2(dy, dx)); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(18, -8); ctx.lineTo(18, 8); ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    const rr = edge ? 17 : 22;
+    ctx.fillStyle = 'rgba(10,19,32,0.88)'; ctx.beginPath(); ctx.arc(sx, sy, rr, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(sx, sy, rr, 0, 6.283); ctx.stroke();
+    const frac = clamp(req.t / req.tMax, 0, 1);
+    ctx.strokeStyle = frac < 0.3 && Math.sin(time * 14) > 0 ? '#ffffff' : col; ctx.beginPath(); ctx.arc(sx, sy, rr, -Math.PI / 2, -Math.PI / 2 + frac * 6.283); ctx.stroke();
+    drawIcon(sp.type, sx, sy - (edge ? 0 : 3), edge ? 13 : 15, col);
+    ctx.font = `800 ${edge ? 11 : 13}px system-ui,'Malgun Gothic',sans-serif`;
+    const label = Math.ceil(req.demand) + '⚡' + (u ? ' 긴급' : '');
+    const ly = sy + rr + 10;
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(5,10,18,0.9)'; ctx.strokeText(label, sx, ly); ctx.fillStyle = col; ctx.fillText(label, sx, ly);
+    if (!edge && !R.demo) { ctx.font = `700 11px system-ui,'Malgun Gothic',sans-serif`; ctx.fillStyle = '#a5b7ca'; ctx.strokeText(sp.type + ' 정전', sx, sy - rr - 9); ctx.fillText(sp.type + ' 정전', sx, sy - rr - 9); }
+  }
+}
+
+function drawHUD(time) {
+  const R = race, p = R.player, T = R.T;
+  const F = (w, s) => `${w} ${s}px system-ui,'Malgun Gothic',sans-serif`;
+  const x0 = 10 + safe.l, y0 = 10 + safe.t;
+  // 좌상단: 랩·시간·점수판
+  const pw = 150, rows = R.cars.slice().sort((a, b) => b.score - a.score);
+  const ph = 54 + rows.length * 19 + 6;
+  ctx.fillStyle = 'rgba(12,22,38,0.82)'; rrect(ctx, x0, y0, pw, ph, 12); ctx.fill(); ctx.strokeStyle = '#2c415b'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  const lap = Math.min(R.laps, p.lap);
+  ctx.fillStyle = '#eaf1fb'; ctx.font = F(900, 18); ctx.fillText(`랩 ${lap}/${R.laps}`, x0 + 10, y0 + 16);
+  const pos = standingsByDist().indexOf(p) + 1;
+  ctx.fillStyle = '#64ceeb'; ctx.font = F(900, 16); ctx.textAlign = 'right'; ctx.fillText(`${pos}위`, x0 + pw - 10, y0 + 16);
+  ctx.textAlign = 'left'; ctx.font = F(600, 12); ctx.fillStyle = R.t > R.timeLimit - 30 ? '#e77d78' : '#a5b7ca';
+  ctx.fillText(R.t > R.timeLimit - 30 ? `남은 시간 ${Math.max(0, R.timeLimit - R.t).toFixed(0)}초` : `⏱ ${fmtTime(R.t)}`, x0 + 10, y0 + 36);
+  ctx.textAlign = 'right'; ctx.fillStyle = '#a5b7ca'; ctx.fillText('배달 점수', x0 + pw - 10, y0 + 36);
+  rows.forEach((c, i) => {
+    const y = y0 + 58 + i * 19;
+    if (c.isPlayer) { ctx.fillStyle = 'rgba(100,206,235,0.16)'; ctx.fillRect(x0 + 4, y - 9, pw - 8, 18); }
+    ctx.fillStyle = c.color; ctx.fillRect(x0 + 10, y - 5, 10, 10);
+    ctx.textAlign = 'left'; ctx.fillStyle = c.isPlayer ? '#fff' : '#cfdbe8'; ctx.font = F(c.isPlayer ? 800 : 600, 13); ctx.fillText(c.name + (c.finished ? ' 🏁' : ''), x0 + 26, y);
+    ctx.textAlign = 'right'; ctx.fillStyle = c.isPlayer ? '#f2c66d' : '#cfdbe8'; ctx.fillText(String(c.score), x0 + pw - 10, y);
+  });
+  // 우상단: 미니맵
+  if (mmFor !== R || !mm) buildMinimap();
+  const S = mm.tf.S, mx = W - S - 10 - safe.r, my = 60 + safe.t;
+  ctx.drawImage(mm, mx, my, S, S);
+  const tf = mm.tf, mp = (x, y) => [mx + tf.ox + x * tf.k, my + tf.oy + y * tf.k];
+  for (const sp of T.spots) if (sp.req) { const [a, b] = mp(sp.bx, sp.by); ctx.fillStyle = sp.req.urgent ? '#e77d78' : '#f2c66d'; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(time * 8); ctx.beginPath(); ctx.arc(a, b, 4, 0, 6.283); ctx.fill(); ctx.globalAlpha = 1; }
+  for (const c of R.cars) { const [a, b] = mp(c.x, c.y); ctx.fillStyle = c.color; ctx.beginPath(); ctx.arc(a, b, c.isPlayer ? 4.5 : 3.2, 0, 6.283); ctx.fill(); if (c.isPlayer) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke(); } }
+  // 하단: 배터리 게이지
+  const gw = Math.min(360, W - 40), gx = (W - gw) / 2, gy = ctlTop - (isTouch ? 34 : 30), gh = 16;
+  const bl = clamp(p.battery / p.st.cap, 0, 1);
+  ctx.fillStyle = 'rgba(12,22,38,0.85)'; rrect(ctx, gx - 6, gy - 22, gw + 12, gh + 30, 10); ctx.fill(); ctx.strokeStyle = '#2c415b'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = '#0a111c'; rrect(ctx, gx, gy, gw, gh, 6); ctx.fill();
+  const gcol = p.boosting ? (Math.sin(time * 30) > 0 ? '#ffffff' : '#64ceeb') : p.charging ? '#78e2ae' : bl < 0.25 ? '#e77d78' : '#f2c66d';
+  ctx.fillStyle = gcol; ctx.shadowColor = gcol; ctx.shadowBlur = 10; rrect(ctx, gx, gy, Math.max(4, gw * bl), gh, 6); ctx.fill(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(10,17,28,0.6)'; ctx.lineWidth = 2; for (let j = 1; j < 10; j++) { ctx.beginPath(); ctx.moveTo(gx + gw * j / 10, gy + 2); ctx.lineTo(gx + gw * j / 10, gy + gh - 2); ctx.stroke(); }
+  // 가장 가까운 요청 필요량 표시선
+  const near = T.spots.filter(sp => sp.req).map(sp => ({ sp, d: aheadDist(p.s, sp.s, T.L) })).filter(o => o.d > 0).sort((a, b) => a.d - b.d)[0];
+  if (near) { const nx = gx + gw * clamp(near.sp.req.demand / p.st.cap, 0, 1); ctx.strokeStyle = near.sp.req.urgent ? '#e77d78' : '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(nx, gy - 3); ctx.lineTo(nx, gy + gh + 3); ctx.stroke(); }
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.font = F(800, 13); ctx.fillStyle = '#eaf1fb';
+  ctx.fillText(`🔋 ${Math.floor(p.battery)} / ${p.st.cap}` + (p.boosting ? '  부스터 사용 중!' : p.charging ? '  충전 중' : p.braking && Math.hypot(p.vx, p.vy) > 60 ? '  회생 충전' : ''), gx, gy - 11);
+  ctx.textAlign = 'right'; ctx.fillStyle = '#a5b7ca'; ctx.font = F(700, 12);
+  ctx.fillText(`${Math.round(Math.hypot(p.vx, p.vy) / 4)} km/h`, gx + gw, gy - 11);
+  // 안내
+  const midY = gy - 60;
+  if (R.hint) {
+    ctx.font = F(800, 14); const tw = Math.min(W - 24, ctx.measureText(R.hint.text).width + 24);
+    ctx.globalAlpha = clamp(R.hint.t, 0, 1);
+    ctx.fillStyle = 'rgba(21,34,56,0.92)'; rrect(ctx, (W - tw) / 2, midY - 16, tw, 32, 16); ctx.fill(); ctx.strokeStyle = '#64ceeb'; ctx.stroke();
+    ctx.fillStyle = '#eaf1fb'; ctx.textAlign = 'center'; fitText(R.hint.text, W / 2, midY, W - 40); ctx.globalAlpha = 1;
+  }
+  if (p.wrongT > 1.2 && R.phase === 'race') { ctx.font = F(900, 28); ctx.textAlign = 'center'; ctx.fillStyle = '#e77d78'; ctx.fillText('↺ 역주행!', W / 2, H * 0.36); }
+  // 카운트다운 · 메시지
+  ctx.textAlign = 'center';
+  if (R.phase === 'count') {
+    const n = Math.ceil(R.count - 0.6); const txt = n > 0 ? String(n) : '';
+    if (txt) { ctx.font = F(900, 86); ctx.fillStyle = '#f2c66d'; ctx.shadowColor = '#f2c66d'; ctx.shadowBlur = 24; ctx.fillText(txt, W / 2, H * 0.36); ctx.shadowBlur = 0; }
+    ctx.font = F(700, 15); ctx.fillStyle = '#eaf1fb'; ctx.fillText(TRACKS[R.ti].name + ' · ' + R.laps + '바퀴', W / 2, H * 0.36 + 64);
+  } else if (R.t < 1 && R.phase === 'race') { ctx.globalAlpha = 1 - R.t; ctx.font = F(900, 72); ctx.fillStyle = '#78e2ae'; ctx.fillText('출발!', W / 2, H * 0.36); ctx.globalAlpha = 1; }
+  if (R.msg) { ctx.globalAlpha = clamp(R.msg.t * 2, 0, 1); ctx.font = F(900, 34); ctx.fillStyle = R.msg.col; ctx.shadowColor = R.msg.col; ctx.shadowBlur = 16; ctx.fillText(R.msg.text, W / 2, H * 0.3); ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+}
+function fitText(t, x, y, maxW) { let s = 14; while (s > 10 && ctx.measureText(t).width > maxW) { s--; ctx.font = `800 ${s}px system-ui,'Malgun Gothic',sans-serif`; } ctx.fillText(t, x, y); }
+
+// ---------- 7) 화면 · 입력 ----------
+const $ = id => document.getElementById(id);
+let screen = 'title', paused = false, isTouch = false, selTrack = save.last;
+const keys = {}, tb = { L: false, R: false, Br: false, Bo: false };
+function setTouch(v) {
+  isTouch = v; updateControlsVisibility();
+}
+function updateControlsVisibility() {
+  const inRace = screen === 'race';
+  $('ctl').classList.toggle('on', inRace && isTouch);
+  $('kbHint').style.display = inRace && !isTouch ? 'block' : 'none';
+  $('btnPause').style.display = inRace ? 'flex' : 'none';
+  updateCtlTop();
+}
+function show(name) {
+  screen = name;
+  for (const id of ['scrTitle', 'scrHow', 'scrGarage', 'scrPause', 'scrResult']) $(id).classList.remove('on');
+  const map = { title: 'scrTitle', how: 'scrHow', garage: 'scrGarage', pause: 'scrPause', result: 'scrResult' };
+  if (map[name]) $(map[name]).classList.add('on');
+  updateControlsVisibility();
+}
+function refreshTitle() {
+  $('tBest').textContent = bestTotal + '점'; $('tMoney').textContent = save.money.toLocaleString() + ' 💰'; $('tUnl').textContent = save.unlocked + ' / ' + TRACKS.length;
+}
+function goTitle() { paused = false; startDemo(); refreshTitle(); show('title'); }
+function startDemo() { const ti = Math.floor(Math.random() * save.unlocked); newRace(ti, true); }
+function renderGarage() {
+  $('gMoney').textContent = save.money.toLocaleString() + ' 💰';
+  const tl = $('trackList'); tl.innerHTML = '';
+  TRACKS.forEach((t, i) => {
+    const lock = i >= save.unlocked, b = document.createElement('button');
+    b.className = 'tcard' + (i === selTrack ? ' sel' : ''); b.disabled = lock;
+    b.innerHTML = `<span class="no">${lock ? '🔒' : i + 1}</span><span><div class="nm">${t.name}</div><div class="ds">${lock ? '이전 트랙에서 2위 이내로 해금' : t.desc}</div></span><span class="bs">${save.best[i] ? '최고 ' + save.best[i] + '점' : ''}</span>`;
+    b.onclick = () => { sfx.click(); selTrack = i; renderGarage(); };
+    tl.appendChild(b);
+  });
+  const ul = $('upgList'); ul.innerHTML = '';
+  UPGRADES.forEach(u => {
+    const lv = save.up[u.key], max = lv >= UPG_MAX, cost = max ? 0 : UPG_COST[lv];
+    const d = document.createElement('div'); d.className = 'ucard';
+    d.innerHTML = `<div class="nm">${u.name}</div><div class="pips">${Array.from({ length: UPG_MAX }, (_, j) => `<i class="${j < lv ? 'on' : ''}"></i>`).join('')}</div><div class="ds">${u.desc(lv)}${max ? '' : '<br>→ ' + u.desc(lv + 1)}</div>`;
+    const b = document.createElement('button'); b.className = 'btn' + (!max && save.money >= cost ? ' cy' : '');
+    b.textContent = max ? '최대' : `구매 ${cost} 💰`; b.disabled = max || save.money < cost;
+    b.onclick = () => { if (save.money < cost || max) return; save.money -= cost; save.up[u.key]++; persist(); sfx.buy(); renderGarage(); };
+    d.appendChild(b); ul.appendChild(d);
+  });
+}
+function openGarage() { selTrack = clamp(selTrack, 0, save.unlocked - 1); renderGarage(); if (!race || !race.demo) startDemo(); show('garage'); }
+function startRace(ti) {
+  selTrack = ti; save.last = ti; persist(); paused = false;
+  newRace(ti, false); mmFor = null; show('race');
+  for (const k in tb) tb[k] = false;
+}
+function togglePause(force) {
+  if (screen === 'race' && race && !race.demo && race.phase !== 'post') { paused = true; show('pause'); Snd.engine(0, false, false); }
+  else if (screen === 'pause' && force !== true) { paused = false; show('race'); last = performance.now(); }
+}
+function showResult() {
+  const R = race, res = R.result, p = R.player;
+  $('rRank').innerHTML = `<span style="color:${res.rank === 0 ? '#f2c66d' : res.rank === 1 ? '#cfdbe8' : '#64ceeb'}">${res.rank + 1}위</span>`;
+  const bd = $('rBadges'); bd.innerHTML = '';
+  if (res.newBest) bd.innerHTML += `<div class="badge">★ 최고 기록 갱신! ${p.total}점</div>`;
+  if (res.unlockedNew) bd.innerHTML += `<div class="note">🔓 새 트랙 해금: ${res.unlockedNew}</div>`;
+  if (!res.unlockedNew && res.rank > 1 && R.ti + 1 < TRACKS.length && save.unlocked <= R.ti + 1) bd.innerHTML += `<div class="note" style="color:#a5b7ca">2위 이내면 다음 트랙이 열려요. 차고에서 업그레이드해 보세요!</div>`;
+  let h = '<tr><th>#</th><th>이름</th><th>배달</th><th>도착</th><th>합계</th></tr>';
+  res.standings.forEach((c, i) => { h += `<tr class="${c.isPlayer ? 'me' : ''}"><td>${i + 1}</td><td><span class="dot" style="background:${c.color}"></span>${c.name}</td><td>${c.score}</td><td>${c.finishPos + 1}등 +${c.bonus}</td><td>${c.total}</td></tr>`; });
+  $('rTable').innerHTML = h;
+  const s = p.stats;
+  $('rStats').innerHTML = `<div class="stat"><span>트랙 · 기록</span><b>${TRACKS[R.ti].name} · ${p.finished ? fmtTime(res.time) : '미완주'}</b></div>
+    <div class="stat"><span>배달한 전기</span><b>${Math.round(s.delivered)} ⚡ (완료 ${p.completes}곳)</b></div>
+    <div class="stat"><span>부스터로 쓴 전기</span><b>${Math.round(s.boostUsed)} ⚡</b></div>
+    <div class="stat"><span>충전 / 회생 제동</span><b>${Math.round(s.charged)} / ${Math.round(s.regen)} ⚡</b></div>
+    <div class="stat"><span>획득 상금</span><b>+${res.prize} 💰 (보유 ${save.money})</b></div>`;
+  show('result');
+}
+
+// 버튼
+$('btnStart').onclick = () => { sfx.click(); openGarage(); };
+$('btnHow').onclick = () => { sfx.click(); show('how'); };
+$('btnHowBack').onclick = () => { sfx.click(); refreshTitle(); show('title'); };
+$('btnGo').onclick = () => { sfx.click(); startRace(selTrack); };
+$('btnGarageBack').onclick = () => { sfx.click(); refreshTitle(); show('title'); };
+$('btnResume').onclick = () => { sfx.click(); togglePause(); };
+$('btnRestart').onclick = () => { sfx.click(); startRace(race.ti); };
+$('btnPauseGarage').onclick = () => { sfx.click(); paused = false; openGarage(); };
+$('btnPauseTitle').onclick = () => { sfx.click(); goTitle(); };
+$('btnAgain').onclick = () => { sfx.click(); startRace(race.ti); };
+$('btnResGarage').onclick = () => { sfx.click(); openGarage(); };
+$('btnResTitle').onclick = () => { sfx.click(); goTitle(); };
+$('btnPause').onclick = () => { if (screen === 'race') togglePause(); };
+function soundIcon() { $('btnSound').textContent = soundOn ? '🔊' : '🔇'; }
+$('btnSound').onclick = () => { Snd.init(); Snd.setOn(!soundOn); soundIcon(); sfx.click(); };
+soundIcon();
+// 터치 조작 버튼(멀티터치)
+for (const [id, k] of [['tbL', 'L'], ['tbR', 'R'], ['tbBr', 'Br'], ['tbBo', 'Bo']]) {
+  const el = $(id);
+  const on = e => { e.preventDefault(); Snd.init(); tb[k] = true; el.classList.add('down'); try { el.setPointerCapture(e.pointerId); } catch (_) {} };
+  const off = e => { tb[k] = false; el.classList.remove('down'); };
+  el.addEventListener('pointerdown', on); el.addEventListener('pointerup', off); el.addEventListener('pointercancel', off); el.addEventListener('lostpointercapture', off);
+  el.addEventListener('contextmenu', e => e.preventDefault());
+}
+addEventListener('touchstart', () => { if (!isTouch) setTouch(true); Snd.init(); }, { passive: true });
+addEventListener('pointerdown', e => { Snd.init(); if (e.pointerType === 'touch' && !isTouch) setTouch(true); });
+addEventListener('keydown', e => {
+  Snd.init();
+  if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space'].includes(e.code) && screen === 'race') e.preventDefault();
+  if (e.code === 'Escape' || e.code === 'KeyP') { if (screen === 'race' || screen === 'pause') togglePause(); return; }
+  if (e.code === 'Enter' && screen === 'title') { openGarage(); return; }
+  if (isTouch && e.isTrusted && screen === 'race' && ['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD', 'Space'].includes(e.code)) setTouch(false);
+  keys[e.code] = true;
+});
+addEventListener('keyup', e => { keys[e.code] = false; });
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; for (const k in tb) tb[k] = false; });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { for (const k in keys) keys[k] = false; if (screen === 'race') togglePause(); } });
+addEventListener('resize', resize);
+try { if (matchMedia('(pointer: coarse)').matches) isTouch = true; } catch (e) {}
+
+// ---------- 8) 메인 루프 ----------
+let last = performance.now();
+function frame(now) {
+  let dt = (now - last) / 1000; last = now;
+  dt = clamp(dt, 0, C.MAX_DT);
+  if (race && !paused) {
+    const n = Math.max(1, Math.ceil(dt / C.STEP)), h = dt / n;
+    for (let i = 0; i < n; i++) updateRace(h);
+  } else Snd.engine(0, false, false);
+  render(now);
+  requestAnimationFrame(frame);
+}
+resize(); goTitle(); updateControlsVisibility();
+requestAnimationFrame(frame);
+
+// 테스트용 읽기 전용 훅
+window.__game = {
+  state: () => {
+    const R = race; if (!R) return { screen };
+    const p = R.player;
+    return {
+      screen, paused, demo: R.demo, phase: R.phase, track: R.ti, trackName: TRACKS[R.ti].name, t: R.t, laps: R.laps, lap: p.lap, L: R.T.L, hw: R.T.hw,
+      x: p.x, y: p.y, h: p.h, s: p.s, lat: p.lat, dist: p.dist, speed: Math.hypot(p.vx, p.vy), battery: p.battery, cap: p.st.cap, score: p.score,
+      boosting: p.boosting, braking: p.braking, charging: p.charging, finished: p.finished, stats: Object.assign({}, p.stats),
+      position: standingsByDist().indexOf(p) + 1,
+      cars: R.cars.map(c => ({ name: c.name, score: c.score, dist: c.dist, lap: c.lap, battery: c.battery, finished: c.finished, crashes: c.stats.crashes })),
+      requests: R.T.spots.filter(sp => sp.req).map(sp => ({ s: sp.s, side: sp.side, type: sp.type, demand: sp.req.demand, t: sp.req.t, urgent: sp.req.urgent })),
+      result: R.result ? { rank: R.result.rank, prize: R.result.prize, newBest: R.result.newBest, total: p.total } : null,
+      save: JSON.parse(JSON.stringify(save)), soundOn, isTouch,
+    };
+  },
+  track: () => { const T = race.T; return { L: T.L, SP: T.SP, N: T.N, hw: T.hw, X: Array.from(T.X), Y: Array.from(T.Y), NX: Array.from(T.NX), NY: Array.from(T.NY),
+    spots: T.spots.map(sp => ({ s: sp.s, side: sp.side })), chargers: T.chargers.map(pd => ({ s0: pd.s0, len: pd.len, side: pd.side })) }; },
+};
+</script>
+</body>
+</html>
