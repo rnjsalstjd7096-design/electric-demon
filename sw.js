@@ -2,7 +2,7 @@
 // (the game changes often); the cache only answers when the network does not. Query strings (index.html's ?v=
 // cache-busting stamp) are dropped from cache keys so the cache keeps one copy of each file.
 // __BUILD__ is replaced by web/build.mjs on every build; a new value makes the browser install a new worker.
-const CACHE = 'edd-v3.33-b02cea90';
+const CACHE = 'edd-v3.33-28380461';
 const FILES = ['./', 'index.html', 'electric_demon_defense_v2.2.html', 'privacy.html', 'manifest.webmanifest',
   'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
 
