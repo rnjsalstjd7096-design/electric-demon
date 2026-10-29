@@ -14,12 +14,12 @@
   button{font-family:inherit;cursor:pointer;touch-action:manipulation}
   #app{position:relative;margin:0 auto;width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;
     padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
-  header{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 8px;border-bottom:1px solid var(--line);flex:none}
-  header h1{margin:0;font-size:18px;font-weight:800;letter-spacing:-.3px;display:flex;align-items:center;gap:6px}
-  header h1 small{font-size:12px;font-weight:600;color:var(--dim);background:var(--panel);padding:2px 7px;border-radius:9px}
-  .ib{width:40px;height:40px;border:0;border-radius:20px;background:transparent;color:var(--txt);font-size:20px;padding:0}
+  header{display:flex;align-items:center;justify-content:space-between;height:60px;padding:0 8px;border-bottom:1px solid var(--line);flex:none}
+  header h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.3px;display:flex;align-items:center;gap:6px}
+  header h1 small{font-size:18px;font-weight:700;color:#c9cdf0;background:var(--panel);padding:2px 8px;border-radius:9px}
+  .ib{width:56px;height:56px;border:0;border-radius:28px;background:transparent;color:var(--txt);font-size:24px;padding:0}
   .ib:active{background:var(--panel)}
-  #msg{flex:none;text-align:center;font-size:14px;color:var(--dim);height:22px;line-height:22px;margin-top:6px;padding:0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #msg{flex:none;text-align:center;font-size:clamp(18px,5.2vw,20px);color:#c9cdf0;height:28px;line-height:28px;margin-top:6px;padding:0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #msg b{color:var(--acc)}
   #boardWrap{flex:1 1 auto;display:flex;align-items:center;justify-content:center;min-height:0;padding:4px 10px}
   #board{display:grid;gap:var(--gap,6px)}
@@ -40,21 +40,21 @@
   @keyframes glow{0%,100%{border-color:var(--line)}50%{border-color:var(--acc2)}}
   @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
   @keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-14px)}70%{transform:translateY(3px)}}
-  #hint{flex:none;text-align:center;font-size:13px;color:var(--acc);min-height:18px;line-height:18px;padding:0 10px;margin-bottom:4px}
+  #hint{flex:none;text-align:center;font-size:clamp(17px,5vw,20px);color:var(--acc);min-height:24px;line-height:24px;padding:0 10px;margin-bottom:4px}
   #kb{flex:none;padding:4px 6px 8px;display:flex;flex-direction:column;gap:6px}
   #keys{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:6px}
-  .key{height:46px;border:0;border-radius:8px;background:#3a4075;color:var(--txt);font-size:20px;font-weight:700;padding:0}
+  .key{height:clamp(48px,7.2dvh,60px);border:0;border-radius:10px;background:#3a4075;color:var(--txt);font-size:24px;font-weight:700;padding:0}
   .key:active{transform:scale(.95);filter:brightness(1.2)}
   .key.g{background:var(--g)} .key.y{background:var(--y);color:#1a1400} .key.x{background:#23264a;color:#6c7199}
   #act{display:grid;grid-template-columns:1fr 1.4fr;gap:6px}
-  #act button{height:48px;border:0;border-radius:10px;font-size:17px;font-weight:800;background:#3a4075;color:var(--txt)}
-  #enter{background:var(--acc);color:#1a1400}
+  #act button{height:clamp(50px,7.5dvh,62px);border:0;border-radius:12px;font-size:21px;font-weight:800;background:#3a4075;color:var(--txt)}
+  #act #enter{background:var(--acc);color:#1a1400}
   #enter:active,#del:active{filter:brightness(1.15);transform:scale(.97)}
   #enter.go{animation:glowBtn 1.2s ease-in-out infinite}
   @keyframes glowBtn{0%,100%{box-shadow:0 0 0 0 rgba(255,210,63,0)}50%{box-shadow:0 0 0 6px rgba(255,210,63,.35)}}
   /* 토스트 */
-  #toast{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:#f2f4ff;color:#121528;font-weight:700;font-size:15px;
-    padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:30;white-space:nowrap;max-width:90%}
+  #toast{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:#f2f4ff;color:#121528;font-weight:700;font-size:18px;
+    padding:12px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:30;white-space:nowrap;max-width:90%}
   #toast.on{opacity:1}
   /* 모달 */
   .ov{position:absolute;inset:0;background:rgba(5,6,20,.72);display:none;align-items:flex-end;justify-content:center;z-index:20}
@@ -62,32 +62,34 @@
   .md{width:100%;max-width:480px;max-height:92%;overflow:auto;background:var(--panel);border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px));box-sizing:border-box;
     animation:up .22s ease-out}
   @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
-  .md h2{margin:0 0 8px;font-size:21px;display:flex;align-items:center;justify-content:space-between}
-  .md h2 .ib{font-size:18px}
-  .md p{margin:6px 0;font-size:15px;line-height:1.5}
-  .term{font-size:26px;font-weight:900;color:var(--acc);margin:4px 0 2px;letter-spacing:1px}
-  .en{font-size:13px;color:var(--dim)}
-  .def{font-size:15px;line-height:1.55;background:#141734;border-radius:10px;padding:10px 12px;margin:8px 0 10px}
-  .grid{font-size:18px;line-height:1.25;letter-spacing:1px;text-align:center;margin:8px 0;white-space:pre}
+  .md h2{margin:0 0 8px;font-size:24px;display:flex;align-items:center;justify-content:space-between}
+  .md h2 .ib{font-size:22px}
+  .md p{margin:6px 0;font-size:18px;line-height:1.5}
+  .term{font-size:30px;font-weight:900;color:var(--acc);margin:4px 0 2px;letter-spacing:1px}
+  .en{font-size:16px;color:#b4b9e0}
+  .def{font-size:18px;line-height:1.55;background:#141734;border-radius:10px;padding:10px 12px;margin:8px 0 10px}
+  .grid{font-size:22px;line-height:1.25;letter-spacing:1px;text-align:center;margin:8px 0;white-space:pre}
   .btns{display:grid;gap:8px;margin-top:10px}
-  .btn{height:48px;border:0;border-radius:12px;font-size:16px;font-weight:800;background:#3a4075;color:var(--txt);display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+  .btn{height:56px;border:0;border-radius:12px;font-size:19px;font-weight:800;background:#3a4075;color:var(--txt);display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
   .btn.p{background:var(--acc);color:#1a1400}
   .btn.s{background:var(--acc2);color:#061522}
   .btn:active{filter:brightness(1.15);transform:scale(.98)}
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:8px 0;text-align:center}
-  .stats b{display:block;font-size:24px}
-  .stats span{font-size:12px;color:var(--dim)}
+  .stats b{display:block;font-size:28px}
+  .stats span{font-size:15px;color:#b4b9e0}
   .dist{margin:6px 0 2px}
-  .dist div{display:flex;align-items:center;gap:6px;font-size:13px;margin:3px 0}
-  .dist i{display:block;height:18px;background:var(--x);border-radius:4px;min-width:18px;text-align:right;padding-right:6px;box-sizing:border-box;font-style:normal;font-weight:700;font-size:12px;line-height:18px}
+  .dist div{display:flex;align-items:center;gap:6px;font-size:16px;margin:3px 0}
+  .dist i{display:block;height:24px;background:var(--x);border-radius:5px;min-width:24px;text-align:right;padding-right:7px;box-sizing:border-box;font-style:normal;font-weight:700;font-size:15px;line-height:24px}
   .dist i.hi{background:var(--g)}
-  .next{text-align:center;color:var(--dim);font-size:14px;margin-top:10px}
-  .next b{color:var(--txt);font-size:18px;font-variant-numeric:tabular-nums}
+  .next{text-align:center;color:#b4b9e0;font-size:17px;margin-top:10px}
+  .next b{color:var(--txt);font-size:22px;font-variant-numeric:tabular-nums}
   .ex{display:inline-flex;gap:4px;vertical-align:middle;margin-right:6px}
-  .ex i{width:26px;height:26px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:14px;border:2px solid var(--line);box-sizing:border-box}
+  .ex i{width:32px;height:32px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:17px;border:2px solid var(--line);box-sizing:border-box}
   .ex i.g{background:var(--g);border-color:var(--g)} .ex i.y{background:var(--y);border-color:var(--y);color:#1a1400} .ex i.x{background:var(--x);border-color:var(--x)}
-  textarea.share{width:100%;height:90px;box-sizing:border-box;background:#141734;color:var(--txt);border:1px solid var(--line);border-radius:8px;font-size:13px;padding:6px;-webkit-user-select:text;user-select:text}
-  .tiny{font-size:12px;color:var(--dim);text-align:center;margin-top:8px}
+  textarea.share{width:100%;height:90px;box-sizing:border-box;background:#141734;color:var(--txt);border:1px solid var(--line);border-radius:8px;font-size:16px;padding:8px;-webkit-user-select:text;user-select:text}
+  .tiny{font-size:15px;color:#b4b9e0;text-align:center;margin-top:8px}
+  /* 키 작은 폰(높이 700px 미만): 창 안 글씨만 한 단계 줄여 스크롤 줄이기 */
+  @media (max-height:700px){.md p,.def{font-size:16px}.md p{margin:4px 0}.term{font-size:26px}.grid{font-size:18px}.btn{height:52px;font-size:18px}.stats b{font-size:24px}.def{padding:8px 10px;margin:6px 0 8px}}
 </style>
 <meta name="description" content="하루 한 문제, 전기기사·전기기능사 용어를 6번 안에 맞히는 전기 워들. 결과를 복사해 카페·단톡방에서 겨루세요."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/elec-wordle/"><meta property="og:title" content="전기 워들 — 오늘의 전기용어"><meta property="og:description" content="하루 한 문제, 전기기사·전기기능사 용어를 6번 안에 맞히는 전기 워들. 결과를 복사해 카페·단톡방에서 겨루세요."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:44px;top:max(6px,env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="전기 워들 — 오늘의 전기용어",D="하루 한 문제, 전기기사·전기기능사 용어를 6번 안에 맞히는 전기 워들. 결과를 복사해 카페·단톡방에서 겨루세요.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/elec-wordle/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
 <body>
@@ -100,7 +102,7 @@
       <button class="ib" id="mute" aria-label="소리 켜기/끄기">🔊</button>
     </div>
   </header>
-  <div id="msg">음절을 눌러 <b>오늘의 전기용어</b>를 맞혀 보세요 (6번)</div>
+  <div id="msg">음절을 눌러 <b>전기용어</b> 맞히기 (6번)</div>
   <div id="boardWrap"><div id="board"></div></div>
   <div id="hint"></div>
   <div id="kb">
@@ -117,7 +119,7 @@
     <div class="grid" id="resGrid"></div>
     <div class="stats" id="resStats"></div>
     <div class="btns">
-      <button class="btn p" id="copyBtn">📋 결과 복사 (카페·카톡에 붙여넣기)</button>
+      <button class="btn p" id="copyBtn">📋 결과 복사 (카톡·카페용)</button>
       <a class="btn s" id="blogBtn" href="https://blog.naver.com/mms7096" target="_blank" rel="noopener">📖 전기용어 사전 글 보기</a>
       <button class="btn" id="pracBtn">🎲 연습 모드 (무제한)</button>
       <button class="btn" id="todayBtn" style="display:none">📅 오늘 문제로 돌아가기</button>
@@ -398,9 +400,9 @@ function render(initial){
   const best={};G.guesses.forEach((g,i)=>{[...g].forEach((ch,c)=>{const m=G.marks[i][c];const rank={g:3,y:2,x:1}[m];if(!best[ch]||best[ch]<rank)best[ch]=rank;});});
   for(const b of keysEl.children){b.className='key';const rk=best[b.dataset.k];if(rk===3)b.classList.add('g');else if(rk===2)b.classList.add('y');else if(rk===1)b.classList.add('x');}
   $('enter').classList.toggle('go',G.cur.length===G.ans.length&&G.status==='play');
-  hintEl.textContent=G.hintOn?'💡 힌트: '+BY_TERM.get(G.ans)[3]:(G.guesses.length===0&&G.status==='play'?'🟩 자리까지 맞음 · 🟨 있지만 자리 다름 · ⬜ 없음':'');
+  hintEl.textContent=G.hintOn?'💡 힌트: '+BY_TERM.get(G.ans)[3]:(G.guesses.length===0&&G.status==='play'?'🟩 자리 맞음 · 🟨 자리 다름 · ⬜ 없음':'');
   if(G.mode==='daily'&&G.status==='play'){
-    if(G.guesses.length===0&&!G.cur)msgEl.innerHTML='음절을 눌러 <b>오늘의 전기용어</b>를 맞혀 보세요 (6번)';
+    if(G.guesses.length===0&&!G.cur)msgEl.innerHTML='음절을 눌러 <b>전기용어</b> 맞히기 (6번)';
     else if(G.cur.length<G.ans.length)msgEl.innerHTML=G.ans.length+'글자 용어 · '+(6-G.guesses.length)+'번 남음';
     else msgEl.innerHTML='<b>입력</b>을 눌러 확인!';
   }
