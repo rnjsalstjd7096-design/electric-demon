@@ -29,15 +29,15 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer}
   color:var(--txt);font-size:28px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:0;
   box-shadow:0 0 14px rgba(100,206,235,.18) inset}
 .cb.down{background:rgba(100,206,235,.38);transform:scale(.95)}
-.cb small{font-size:12px;font-weight:700;margin-top:3px}
-.cb.brk{width:62px;height:62px;border-color:rgba(231,125,120,.6);font-size:15px}
+.cb small{font-size:12px;font-weight:700;margin-top:3px;white-space:nowrap}
+.cb.brk{width:66px;height:66px;border-color:rgba(231,125,120,.6);font-size:22px}
 .cb.brk.down{background:rgba(231,125,120,.4)}
 .cb.bst{width:84px;height:84px;border-color:rgba(242,198,109,.8);font-size:30px;box-shadow:0 0 18px rgba(242,198,109,.35)}
 .cb.bst.down{background:rgba(242,198,109,.45)}
 #kbHint{position:absolute;left:0;right:0;bottom:calc(6px + var(--sb));text-align:center;font-size:11.5px;white-space:nowrap;overflow:hidden;color:var(--dim);display:none;pointer-events:none;z-index:5}
 /* screens */
 .screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;overflow-x:hidden;
-  padding:calc(16px + var(--st)) calc(16px + var(--sr)) calc(20px + var(--sb)) calc(16px + var(--sl));z-index:20;touch-action:pan-y;
+  padding:calc(62px + var(--st)) calc(16px + var(--sr)) calc(20px + var(--sb)) calc(16px + var(--sl));z-index:20;touch-action:pan-y;
   background:radial-gradient(ellipse at 50% 30%,rgba(16,25,35,.55),rgba(10,19,32,.9))}
 .screen.on{display:flex}
 .box{width:100%;max-width:460px;margin:auto 0;display:flex;flex-direction:column;align-items:stretch;gap:12px}
@@ -54,6 +54,10 @@ h3{margin:4px 0;font-size:16px;color:var(--cyan)}
 .btn.cy{background:linear-gradient(#2b6f86,#1d4a5c);border-color:var(--cyan)}
 .btn:disabled{opacity:.45;cursor:default}
 .row{display:flex;gap:10px}.row>*{flex:1}
+/* 차고: 출발 버튼은 목록이 길어도 항상 화면 아래에 보이게 */
+.goBar{position:sticky;bottom:calc(-20px - var(--sb));z-index:2;margin:0 -16px;padding:14px 16px calc(16px + var(--sb));
+  background:linear-gradient(rgba(10,19,32,0),rgba(10,19,32,.97) 32%);display:flex;gap:10px}
+.goBar #btnGarageBack{flex:0 0 auto}.goBar #btnGo{flex:1;min-height:58px;font-size:20px}
 .stat{display:flex;justify-content:space-between;color:var(--dim);font-size:14px}
 .stat b{color:var(--gold)}
 #backLink{position:absolute;top:calc(10px + var(--st));left:calc(10px + var(--sl));color:var(--cyan);text-decoration:none;font-size:15px;font-weight:700;
@@ -90,7 +94,7 @@ table.res tr.me td{color:var(--gold);font-weight:800}
 @keyframes flick{0%,100%{opacity:1}46%{opacity:1}48%{opacity:.55}50%{opacity:1}52%{opacity:.7}54%{opacity:1}}
 @media (prefers-reduced-motion:reduce){.flick{animation:none}}
 </style>
-<meta name="description" content="배터리를 싣고 달리는 배달 레이싱. 배터리는 화물이자 부스터, CPU 3대와 트랙 5개, 업그레이드."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/power-racing/"><meta property="og:title" content="전력 배달 레이싱"><meta property="og:description" content="배터리를 싣고 달리는 배달 레이싱. 배터리는 화물이자 부스터, CPU 3대와 트랙 5개, 업그레이드."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;right:8px;top:calc(60px + env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="전력 배달 레이싱",D="배터리를 싣고 달리는 배달 레이싱. 배터리는 화물이자 부스터, CPU 3대와 트랙 5개, 업그레이드.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/power-racing/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<meta name="description" content="배터리를 싣고 달리는 배달 레이싱. 배터리는 화물이자 부스터, CPU 3대와 트랙 5개, 업그레이드."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/power-racing/"><meta property="og:title" content="전력 배달 레이싱"><meta property="og:description" content="배터리를 싣고 달리는 배달 레이싱. 배터리는 화물이자 부스터, CPU 3대와 트랙 5개, 업그레이드."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;right:112px;top:calc(13px + env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="전력 배달 레이싱",D="배터리를 싣고 달리는 배달 레이싱. 배터리는 화물이자 부스터, CPU 3대와 트랙 5개, 업그레이드.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/power-racing/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
 <body>
 <div id="wrap">
   <canvas id="cv"></canvas>
@@ -101,7 +105,7 @@ table.res tr.me td{color:var(--gold);font-weight:800}
   </div>
   <div id="ctl">
     <div class="cg"><button class="cb" id="tbL" aria-label="왼쪽">◀</button><button class="cb" id="tbR" aria-label="오른쪽">▶</button></div>
-    <div class="cg"><button class="cb brk" id="tbBr" aria-label="브레이크">브레<br>이크</button><button class="cb bst" id="tbBo" aria-label="부스터">⚡<small>부스터</small></button></div>
+    <div class="cg"><button class="cb brk" id="tbBr" aria-label="브레이크">🛑<small>브레이크</small></button><button class="cb bst" id="tbBo" aria-label="부스터">⚡<small>부스터</small></button></div>
   </div>
   <div id="kbHint">←→ 조향 · <b>Space</b> 부스터 · ↓/S/Shift 브레이크 · Esc 정지</div>
 
@@ -148,8 +152,7 @@ table.res tr.me td{color:var(--gold);font-weight:800}
       <div class="tracks" id="trackList"></div>
       <h3>업그레이드</h3>
       <div class="upg" id="upgList"></div>
-      <button class="btn pri" id="btnGo">출발!</button>
-      <button class="btn" id="btnGarageBack">← 타이틀</button>
+      <div class="goBar"><button class="btn" id="btnGarageBack">← 타이틀</button><button class="btn pri" id="btnGo">출발!</button></div>
     </div>
   </section>
 
