@@ -190,6 +190,12 @@ h1{margin:10px 0 4px;font-size:30px;text-align:center;letter-spacing:1px;text-sh
 .sub{color:var(--mu);text-align:center;font-size:14px;line-height:1.5;margin:0 0 16px;word-break:keep-all}
 .menu{display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px}
 .rec{margin-top:14px;font-size:13px;color:var(--mu);text-align:center;line-height:1.6}
+/* 첫 화면만 글씨·버튼 키움(40~60대 기준: 버튼 56px, 글씨 16px 이상) — 게임 속 버튼은 그대로 */
+#title .menu .btn{min-height:56px;font-size:18px}
+#title .sub{font-size:16px}
+@media (max-width:380px){#title .sub{font-size:14px}}
+#title .rec{font-size:15px}
+#title .back{font-size:16px}
 .rec b{color:var(--au)}
 .how{max-width:460px;width:100%}
 .how h2{text-align:center;margin:40px 0 12px}
