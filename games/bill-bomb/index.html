@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>요금폭탄: 한 달 버티기</title>
+<style>
+html,body{margin:0;height:100%;background:#0e1424;color:#fff;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;overscroll-behavior:none;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+#wrap{position:relative;height:100%;max-width:430px;margin:0 auto;display:flex;flex-direction:column;padding:8px 10px 10px;box-sizing:border-box;gap:8px}
+#top{display:flex;justify-content:space-between;align-items:center;font-size:20px;font-weight:800}
+#top small{font-size:16px;font-weight:600;color:#ffe27a}
+#mute{font-size:20px;padding:4px 10px;min-height:44px;background:#1b2542;color:#fff;border:0;border-radius:10px}
+#ev{background:#1b2542;border-radius:12px;padding:8px 12px;font-size:18px;line-height:1.3;color:#cfd8f0}
+#ev b{color:#ffe27a}
+#meter{position:relative;height:34px;background:#1b2542;border-radius:10px;overflow:hidden}
+#mb{position:absolute;left:0;top:0;bottom:0;background:#3fbf6f;transition:width .25s,background .25s}
+#mp{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.45) 0 6px,rgba(255,255,255,.15) 6px 12px);transition:left .2s,width .2s}
+.tick{position:absolute;top:0;bottom:0;width:2px;background:#fff8}
+#mt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;text-shadow:0 1px 3px #000}
+#lab{display:flex;justify-content:space-between;font-size:15px;color:#9fb0d8;margin-top:-4px;padding:0 2px}
+#cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;align-content:start}
+.c{background:#1b2542;border:3px solid #2c3a63;border-radius:14px;color:#fff;font:inherit;padding:6px 8px;min-height:88px;display:flex;align-items:center;gap:8px;text-align:left}
+.c .e{font-size:34px}
+.c b{display:block;font-size:20px}
+.c span{display:block;font-size:17px;color:#cfd8f0}
+.c.on{background:#18452f;border-color:#58e08a}
+.c.hot{box-shadow:0 0 0 2px #ffd23f inset}
+#bot{display:flex;flex-direction:column;gap:6px}
+#cf{font-size:19px;text-align:center;font-weight:700}
+#go,.btn{font:inherit;font-weight:800;font-size:22px;min-height:60px;border:0;border-radius:14px;background:#ffd23f;color:#1a1a1a;padding:0 30px}
+#go:disabled{background:#4a5370;color:#aab}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(8,12,24,.9);text-align:center;padding:24px;z-index:5}
+#ov.hide{display:none}
+#ov h1{margin:0;font-size:32px}
+#ov p{margin:0;font-size:20px;line-height:1.5;color:#e1e8ff}
+#fact{background:#1b2542;border-radius:12px;padding:12px 14px;font-size:19px;line-height:1.45;color:#ffe27a}
+a{color:#8fc1ff;font-size:16px}
+.pop{animation:pop .35s}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.07)}100%{transform:scale(1)}}
+.shake{animation:shake .5s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
+#fx{position:absolute;left:0;right:0;top:34%;text-align:center;font-size:44px;font-weight:900;pointer-events:none;opacity:0;z-index:4;text-shadow:0 2px 8px #000}
+#fx.show{animation:fx 1s}
+@keyframes fx{0%{opacity:0;transform:scale(.6)}25%{opacity:1;transform:scale(1.15)}100%{opacity:0;transform:translateY(-40px)}}
+</style><meta name="description" content="6주 동안 가전을 골라 켜며 한 달 전기를 400kWh 안에 맞추는 퍼즐. 누진 구간을 넘으면 요금 폭탄, 끝나면 전기 상식 한 줄."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/bill-bomb/"><meta property="og:title" content="요금폭탄: 한 달 버티기"><meta property="og:description" content="6주 동안 가전을 골라 켜며 한 달 전기를 400kWh 안에 맞추는 퍼즐. 누진 구간을 넘으면 요금 폭탄, 끝나면 전기 상식 한 줄."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="요금폭탄: 한 달 버티기",D="6주 동안 가전을 골라 켜며 한 달 전기를 400kWh 안에 맞추는 퍼즐. 누진 구간을 넘으면 요금 폭탄, 끝나면 전기 상식 한 줄.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/bill-bomb/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head><body>
+<div id="wrap">
+<div id="top"><div>📅 <span id="wk">1</span>/6주 <small id="sm"></small></div><button id="mute">🔊</button></div>
+<div id="ev"></div>
+<div id="meter"><div id="mb"></div><div id="mp"></div><div class="tick" style="left:44.4%"></div><div class="tick" style="left:88.9%"></div><div id="mt"></div></div>
+<div id="lab"><span>0</span><span>200 (1단계)</span><span>400 (폭탄선)</span></div>
+<div id="cards"></div>
+<div id="bot"><div id="cf"></div><button id="go">이번 주 확정</button></div>
+<div id="fx"></div>
+<div id="ov"><h1>💸 요금폭탄</h1><p id="msg">가전을 켜고 꺼서<br>한 달 전기를 <b>400kWh 안</b>에!</p><div id="fact" style="display:none"></div><button class="btn" id="start">시작</button><a href="https://blog.naver.com/mms7096" target="_blank" rel="noopener">전기견문록 블로그</a></div>
+</div>
+<script>
+(()=>{
+const KEY='bill-bomb.save.v1',LIMIT=400,WEEKS=6,SCALE=450;
+// 게임용 대략값: [이름, 그림, 한 주 사용량 kWh, 편안함]
+const POOL=[['선풍기','🌀',4,4],['에어컨','❄️',40,12],['히터','🔥',35,11],['전기장판','🛏️',12,7],['건조기','👕',25,8],['세탁기','🧺',8,5],['TV','📺',6,5],['전기밥솥','🍚',10,6],['컴퓨터','💻',10,6],['에어프라이어','🍟',6,5],['인덕션','🍳',15,7],['제습기','💧',12,7],['청소기','🧹',5,4],['정수기','🚰',7,5]];
+const EV=[
+ {n:'평범한 주',e:'🙂',up:{}},
+ {n:'폭염',e:'☀️',up:{'에어컨':6,'선풍기':4},tip:'에어컨·선풍기'},
+ {n:'한파',e:'🥶',up:{'히터':6,'전기장판':5},tip:'히터·전기장판'},
+ {n:'장마',e:'🌧️',up:{'제습기':6,'건조기':6},tip:'제습기·건조기'},
+ {n:'손님 오는 주',e:'👨‍👩‍👧',up:{'인덕션':5,'전기밥솥':4,'세탁기':3},tip:'인덕션·밥솥·세탁기'}];
+const FACTS=[
+ '주택용 전기요금은 쓴 양이 늘수록 kWh당 단가가 올라가는 누진제입니다. 한 달 200kWh, 400kWh 선을 넘길 때마다 단계가 오릅니다.',
+ '에어컨·히터·건조기처럼 열을 내거나 모터를 오래 돌리는 가전이 전기를 많이 먹습니다. 쓰는 시간을 줄이는 게 제일 확실합니다.',
+ '쓰지 않는 가전도 플러그가 꽂혀 있으면 대기전력이 조금씩 샙니다. 멀티탭 스위치로 한 번에 끄면 편합니다.',
+ '전기요금은 W(와트)가 아니라 쓴 시간까지 곱한 kWh로 정해집니다. 1kW 기기를 1시간 쓰면 1kWh입니다.'];
+const NEED=[12,22,26,28,30,32];
+let S=null,mute=false,AC=null,best=load();
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(best))}catch(e){}}
+const $=id=>document.getElementById(id);
+function snd(f,d,t,v){if(mute)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.value=v||.06;g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}}
+function vib(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+function fx(t){const f=$('fx');f.textContent=t;f.classList.remove('show');void f.offsetWidth;f.classList.add('show')}
+function rnd(a){return a[Math.floor(Math.random()*a.length)]}
+function genWeek(w){
+ for(let tries=0;tries<300;tries++){
+  const ev=EV[w===0?0:1+Math.floor(Math.random()*(EV.length-1))];
+  const idx=POOL.map((_,i)=>i).sort(()=>Math.random()-.5).slice(0,6);
+  const cards=idx.map(i=>{const p=POOL[i];return {name:p[0],e:p[1],k:p[2],c:p[3]+(ev.up[p[0]]||0),hot:!!ev.up[p[0]]}});
+  if(w>0&&!cards.some(c=>c.hot))continue;
+  const need=NEED[w];let min=1e9;
+  for(let m=1;m<64;m++){let k=0,c=0;for(let i=0;i<6;i++)if(m>>i&1){k+=cards[i].k;c+=cards[i].c}if(c>=need&&k<min)min=k}
+  const cap=w===0?30:70;
+  if(min<=cap&&min>=(w===0?14:40))return {ev,cards,need,min};
+ }
+ return {ev:EV[0],cards:POOL.slice(0,6).map(p=>({name:p[0],e:p[1],k:p[2],c:p[3],hot:false})),need:NEED[w],min:30};
+}
+function newGame(){S={w:0,total:0,sel:new Set(),over:false};S.week=genWeek(0);render()}
+function sums(){let k=0,c=0;S.sel.forEach(i=>{k+=S.week.cards[i].k;c+=S.week.cards[i].c});return {k,c}}
+function render(){
+ const w=S.week;$('wk').textContent=S.w+1;
+ $('sm').textContent=w.ev.e+' '+w.ev.n;
+ $('ev').innerHTML=w.ev.tip?'<b>'+w.ev.e+' '+w.ev.n+'!</b> '+w.ev.tip+' 편안함이 커졌어요.':'<b>'+w.ev.e+' '+w.ev.n+'</b> 편안함 <b>'+w.need+'점</b> 이상 채우면 돼요.';
+ if(w.ev.tip)$('ev').innerHTML+=' 편안함 <b>'+w.need+'점</b> 이상 채우기.';
+ const box=$('cards');box.innerHTML='';
+ w.cards.forEach((c,i)=>{const b=document.createElement('button');b.className='c'+(S.sel.has(i)?' on':'')+(c.hot?' hot':'');
+  b.innerHTML='<div class="e">'+c.e+'</div><div><b>'+c.name+'</b><span>⚡ '+c.k+'kWh</span><span>😊 편안함 '+c.c+'</span></div>';
+  b.onclick=()=>{if(S.over)return;if(S.sel.has(i))S.sel.delete(i);else S.sel.add(i);snd(S.sel.has(i)?660:440,.08);vib(8);update(true);b.classList.add('pop')};box.appendChild(b)});
+ update(false);
+}
+function update(){
+ const {k,c}=sums(),w=S.week;
+ const base=S.total,pv=base+k;
+ const mb=$('mb'),mp=$('mp');
+ mb.style.width=Math.min(100,base/SCALE*100)+'%';
+ mb.style.background=base>LIMIT?'#e0453f':base>200?'#f0a53a':'#3fbf6f';
+ mp.style.left=Math.min(100,base/SCALE*100)+'%';mp.style.width=Math.max(0,Math.min(100,pv/SCALE*100)-Math.min(100,base/SCALE*100))+'%';
+ $('mt').textContent=pv+' / '+LIMIT+' kWh';
+ document.querySelectorAll('.c').forEach((b,i)=>b.classList.toggle('on',S.sel.has(i)));
+ const ok=c>=w.need;
+ $('cf').innerHTML='😊 편안함 '+c+' / '+w.need+(ok?' ✅':'');
+ $('go').disabled=!ok;
+ $('go').textContent=ok?(pv>LIMIT?'확정하면 폭탄! 💣':'이번 주 확정'):'편안함 '+(w.need-c)+' 더 필요';
+ $('cf').style.color=ok?'#7fe8a8':'#ffe27a';
+}
+function confirmWeek(){
+ if(S.over)return;const {k,c}=sums();if(c<S.week.need)return;
+ S.total+=k;
+ if(S.total>LIMIT){bomb(k);return}
+ snd(523,.12);setTimeout(()=>snd(659,.12),110);setTimeout(()=>snd(784,.2),220);vib([20,30,20]);
+ if(S.w===WEEKS-1){win();return}
+ fx('✅ '+(S.w+1)+'주 통과!');S.w++;S.sel=new Set();S.week=genWeek(S.w);render();
+}
+function stars(t){return t<=280?3:t<=340?2:1}
+function winTip(){return rnd(FACTS)}
+function bomb(k){
+ S.over=true;update();$('mb').style.width='100%';$('mb').style.background='#e0453f';$('wrap').classList.add('shake');
+ snd(120,.5,'sawtooth',.12);setTimeout(()=>snd(70,.6,'sawtooth',.12),150);vib([200,60,200]);
+ setTimeout(()=>{$('wrap').classList.remove('shake');
+  const over=S.total-LIMIT;
+  best.bombs=(best.bombs||0)+1;best.far=Math.max(best.far||0,S.w);save();
+  end('💥 요금 폭탄!','<b>'+(S.w+1)+'주째</b>에 '+S.total+'kWh, 폭탄선을 <b>'+over+'kWh</b> 넘었어요.<br>'+(S.w===WEEKS-1?'마지막 주에 터졌어요! 거의 다 왔는데…':(WEEKS-S.w-1)+'주 남기고 터졌습니다.')+(best.far>S.w?'<br>가장 멀리 간 기록: '+(best.far+1)+'주째':''),'다시 도전')},550);
+}
+function win(){
+ const st=stars(S.total);
+ if(!best.kwh||S.total<best.kwh)best.kwh=S.total;best.clears=(best.clears||0)+1;best.stars=Math.max(best.stars||0,st);save();
+ fx('🎉 한 달 버텼다!');snd(784,.2);setTimeout(()=>snd(988,.3),180);vib([30,40,30,40,60]);
+ const left=LIMIT-S.total,next=st===3?'별 3개 완성!':'별 '+(st+1)+'개까지 '+(S.total-(st===1?340:280))+'kWh 더 아끼기';
+ setTimeout(()=>end('🏆 한 달 버텼다!','이번 달 <b>'+S.total+'kWh</b> (폭탄선까지 '+left+' 남음)<br>'+'⭐'.repeat(st)+' · '+next+'<br>최저 기록 '+best.kwh+'kWh','또 하기'),700);
+}
+function end(t,m,b){
+ $('ov').querySelector('h1').textContent=t;$('msg').innerHTML=m;
+ const f=$('fact');f.style.display='block';f.textContent='⚡ '+winTip();
+ $('start').textContent=b;$('ov').classList.remove('hide');
+}
+$('start').onclick=()=>{$('ov').classList.add('hide');snd(500,.1);newGame()};
+$('go').onclick=confirmWeek;
+$('mute').onclick=()=>{mute=!mute;$('mute').textContent=mute?'🔇':'🔊'};
+if(best.kwh)$('msg').innerHTML+='<br><small style="font-size:17px;color:#ffe27a">최저 기록 '+best.kwh+'kWh · 클리어 '+(best.clears||0)+'회</small>';
+window.__game={get state(){return S},get best(){return best},start:()=>$('start').click(),toggle:i=>document.querySelectorAll('.c')[i].click(),confirm:confirmWeek,sums,limit:LIMIT,genWeek,
+ solve(){const w=S.week;let bm=0,bk=1e9;for(let m=1;m<64;m++){let k=0,c=0;for(let i=0;i<6;i++)if(m>>i&1){k+=w.cards[i].k;c+=w.cards[i].c}if(c>=w.need&&k<bk){bk=k;bm=m}}return bm}};
+})();
+</script></body></html>
