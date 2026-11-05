@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14161b">
+<title>줄줄이 정리: 전선 색 분류</title>
+<meta name="description" content="같은 색 전선을 한 통에 모으는 정리 퍼즐. 옮길 수 있는 횟수 안에 끝내세요.">
+<style>
+html,body{margin:0;height:100%;background:#14161b;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#fff;font-size:20px}
+#app{position:relative;margin:0 auto;max-width:480px;height:100%;display:flex;flex-direction:column;padding:8px 12px 10px;box-sizing:border-box}
+#top{display:flex;align-items:center;justify-content:space-between;padding-left:44px;padding-right:56px;min-height:48px}
+#top b{font-size:20px}#stat{font-size:20px;font-weight:800;color:#ffd23f}
+#sub{font-size:20px;line-height:1.35;color:#e8ebf2;text-align:center;margin:4px 0 8px;word-break:keep-all}
+#board{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.bar{display:flex;gap:10px;margin-top:8px}
+.btn{flex:1;border:0;border-radius:14px;font-size:20px;font-weight:800;min-height:56px;font-family:inherit;cursor:pointer;touch-action:manipulation;background:#3b4252;color:#fff;box-shadow:0 4px 0 #1f232c}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #1f232c}.btn.main{background:#ffd23f;color:#2b2000;box-shadow:0 4px 0 #a98400}
+#mute{position:absolute;top:8px;right:10px;width:48px;height:48px;border:0;border-radius:24px;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;z-index:5}
+#end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,11,16,.78);z-index:4;padding:16px;box-sizing:border-box}
+#end.on{display:flex}
+#card{width:100%;max-width:360px;background:#2b2f3a;border:3px solid #4a505f;border-radius:18px;padding:18px;box-sizing:border-box;text-align:center;animation:pop .22s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#endTitle{font-size:24px;font-weight:800;margin:0 0 6px}#endScore{font-size:52px;font-weight:900;line-height:1.1;color:#ffd23f}
+#endSub{font-size:20px;color:#e8ebf2;margin:4px 0}#endBest{font-size:20px;font-weight:700;color:#9fe1ff;margin:0 0 10px}
+#fact{font-size:20px;line-height:1.45;background:#1d2029;border-radius:12px;padding:10px 12px;margin:0 0 12px;text-align:left;word-break:keep-all}
+.pop{animation:pp .35s ease-out}@keyframes pp{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+.shake{animation:sk .3s}@keyframes sk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.sp{position:absolute;font-size:28px;animation:fl .8s ease-out forwards}@keyframes fl{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-70px) scale(1.6)}}
+
+#tubes{display:flex;flex-wrap:wrap;gap:14px 10px;justify-content:center;align-content:center;width:100%}
+.tube{width:56px;height:210px;border:3px solid #6b7280;border-top:none;border-radius:0 0 18px 18px;display:flex;flex-direction:column-reverse;align-items:center;padding:4px 0;box-sizing:border-box;gap:3px;background:#1c1f26;cursor:pointer;touch-action:manipulation;position:relative}
+.tube.sel{border-color:#ffd23f;background:#2a2d12}
+.tube.full::after{content:'✔';position:absolute;top:-26px;left:0;right:0;text-align:center;color:#6ee08a;font-size:22px}
+.pc{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;box-sizing:border-box;border:2px solid rgba(255,255,255,.25)}
+.tube.sel .pc:last-child{transform:translateY(-8px)}
+</style>
+<meta name="description" content="같은 색 전선을 한 통에 모으는 정리 퍼즐. KEC 전선 색(L1·L2·L3·N·PE)을 익히고, 단계가 올라갈수록 옮길 횟수가 줄어듭니다."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/wire-sort/"><meta property="og:title" content="줄줄이 정리: 전선 색 분류"><meta property="og:description" content="같은 색 전선을 한 통에 모으는 정리 퍼즐. KEC 전선 색(L1·L2·L3·N·PE)을 익히고, 단계가 올라갈수록 옮길 횟수가 줄어듭니다."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;top:max(8px,env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="줄줄이 정리: 전선 색 분류",D="같은 색 전선을 한 통에 모으는 정리 퍼즐. KEC 전선 색(L1·L2·L3·N·PE)을 익히고, 단계가 올라갈수록 옮길 횟수가 줄어듭니다.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/wire-sort/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div id="top"><b id="lv"></b><span id="stat"></span></div>
+  <div id="sub"></div>
+  <div id="board"></div>
+  <div class="bar" id="bar"></div>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  <div id="fx"></div>
+  <div id="end"><div id="card">
+    <div id="endTitle"></div><div id="endScore"></div><div id="endSub"></div><div id="endBest"></div>
+    <div id="fact"></div>
+    <button class="btn main" id="again" style="width:100%">한 번 더</button>
+  </div></div>
+</div>
+<script>
+"use strict";
+const KEY='wire-sort.save.v1';
+let save={best:0,plays:0,fi:0};
+try{const r=localStorage.getItem(KEY);if(r)save=Object.assign(save,JSON.parse(r));}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+const $=id=>document.getElementById(id);
+let muted=false,AC=null;
+try{muted=localStorage.getItem(KEY+'.mute')==='1';}catch(e){}
+function actx(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;AC=new C();}if(AC.state==='suspended')AC.resume();}catch(e){}return AC;}
+function tone(f,d,t,v,when){if(muted)return;const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain();o.type=t||'sine';o.frequency.value=f;const s=a.currentTime+(when||0);g.gain.setValueAtTime(v||.12,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d);}catch(e){}}
+const sfx={tap(){tone(520,.07,'triangle',.1)},ok(){tone(660,.1,'triangle',.14);tone(880,.14,'triangle',.14,.09)},bad(){tone(180,.25,'sawtooth',.12)},
+ done(){[523,659,784,1047].forEach((f,i)=>tone(f,.16,'triangle',.14,i*.08))},win(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,.2,'square',.09,i*.09))},lose(){[330,262,196].forEach((f,i)=>tone(f,.28,'sawtooth',.1,i*.16))}};
+function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function burst(x,y,ch){const fx=$('fx'),r=fx.getBoundingClientRect();for(let i=0;i<5;i++){const s=document.createElement('div');s.className='sp';s.textContent=ch||'✨';s.style.left=(x-r.left-14+(Math.random()*60-30))+'px';s.style.top=(y-r.top-14+(Math.random()*30-15))+'px';fx.appendChild(s);setTimeout(()=>s.remove(),850);}}
+function burstEl(el,ch){const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,ch);}
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a}
+$('mute').textContent=muted?'🔇':'🔊';
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊';try{localStorage.setItem(KEY+'.mute',muted?'1':'0');}catch(e){}if(!muted)sfx.tap();};
+function showEnd(title,score,sub,best,isNew,fact){$('endTitle').textContent=title;$('endScore').textContent=score;$('endSub').textContent=sub;const b=$('endBest');b.textContent=best;b.style.color=isNew?'#ffd23f':'#9fe1ff';$('fact').innerHTML=fact;$('end').classList.add('on');}
+function hideEnd(){$('end').classList.remove('on');}
+
+const COLORS=[
+ {k:'L1',bg:'#8b5a2b',fg:'#fff'},{k:'L2',bg:'#1b1b1b',fg:'#fff',bd:'#8a8f98'},{k:'L3',bg:'#a7adb5',fg:'#111'},
+ {k:'N',bg:'#1f6fe0',fg:'#fff'},{k:'PE',bg:'repeating-linear-gradient(45deg,#2fa84f 0 8px,#f2d21b 8px 16px)',fg:'#000'}];
+const CAP=4;
+let level,n,tubes,sel,left,hist,over,busy;
+function solvable(t){const seen=new Set();let nodes=0;
+ function key(x){return x.map(a=>a.join('')).sort().join('|');}
+ function rec(x,d){if(d>60)return false;if(++nodes>30000)return true;
+  if(x.every(a=>a.length===0||(a.length===CAP&&a.every(v=>v===a[0]))))return true;
+  const k=key(x);if(seen.has(k))return false;seen.add(k);
+  for(let i=0;i<x.length;i++){const a=x[i];if(!a.length)continue;if(a.every(v=>v===a[0])&&a.length===CAP)continue;
+   for(let j=0;j<x.length;j++){if(i===j)continue;const b=x[j];if(b.length>=CAP)continue;
+    if(b.length&&b[b.length-1]!==a[a.length-1])continue;
+    if(!b.length&&a.every(v=>v===a[0]))continue;
+    const y=x.map(q=>q.slice());y[j].push(y[i].pop());if(rec(y,d+1))return true;}}
+  return false;}
+ return rec(t,0);}
+function gen(){let t;do{const p=[];for(let c=0;c<n;c++)for(let i=0;i<CAP;i++)p.push(c);shuffle(p);
+  t=[];for(let i=0;i<n;i++)t.push(p.slice(i*CAP,i*CAP+CAP));t.push([],[]);}
+ while(t.slice(0,n).some(a=>a.every(v=>v===a[0]))||!solvable(t));return t;}
+function newLevel(){n=Math.min(5,3+level);tubes=gen();sel=-1;hist=[];over=false;busy=false;
+ left=Math.max(n*5,n*8-Math.max(0,level-2)*2);render();}
+function start(){hideEnd();level=0;$('bar').innerHTML='<button class="btn" id="undo">↩ 되돌리기</button>';$('undo').onclick=undo;newLevel();}
+function sorted(t){return t.every(a=>a.length===0||(a.length===CAP&&a.every(v=>v===a[0])));}
+function doneCount(t){return t.filter(a=>a.length===CAP&&a.every(v=>v===a[0])).length;}
+function render(){
+ $('lv').textContent=(level+1)+'단계';$('stat').textContent='남은 횟수 '+left;
+ $('sub').textContent='같은 색 전선끼리 한 통에 모으세요';
+ const b=$('board');b.style.alignItems='center';
+ b.innerHTML='<div id="tubes">'+tubes.map((a,i)=>'<div class="tube'+(i===sel?' sel':'')+(a.length===CAP&&a.every(v=>v===a[0])?' full':'')+'" data-i="'+i+'">'+
+  a.map(c=>'<div class="pc" style="background:'+COLORS[c].bg+';color:'+COLORS[c].fg+';border-color:'+(COLORS[c].bd||'rgba(255,255,255,.25)')+'">'+COLORS[c].k+'</div>').join('')+'</div>').join('')+'</div>';
+ b.querySelectorAll('.tube').forEach(el=>{el.onclick=()=>tap(+el.dataset.i,el);});
+}
+function runLen(a){let r=0;for(let i=a.length-1;i>=0&&a[i]===a[a.length-1];i--)r++;return r;}
+function legal(i,j){const a=tubes[i],b=tubes[j];if(i===j||!a.length||b.length>=CAP)return false;
+ if(b.length&&b[b.length-1]!==a[a.length-1])return false;return true;}
+function anyMove(){for(let i=0;i<tubes.length;i++)for(let j=0;j<tubes.length;j++)if(legal(i,j)&&!(tubes[i].every(v=>v===tubes[i][0])&&!tubes[j].length))return true;return false;}
+function tap(i,el){
+ if(over||busy)return;
+ if(sel<0){if(!tubes[i].length)return;sel=i;sfx.tap();render();return;}
+ if(sel===i){sel=-1;render();return;}
+ if(!legal(sel,i)){sfx.bad();const t=document.querySelectorAll('.tube')[i];t.classList.add('shake');vib(40);sel=-1;setTimeout(render,300);return;}
+ hist.push(JSON.stringify(tubes));
+ const a=tubes[sel],b=tubes[i],k=Math.min(runLen(a),CAP-b.length);for(let q=0;q<k;q++)b.push(a.pop());
+ left--;sel=-1;sfx.ok();render();
+ const t=document.querySelectorAll('.tube')[i];
+ if(b.length===CAP&&b.every(v=>v===b[0])){sfx.done();burstEl(t,'⚡');vib(40);t.classList.add('pop');}
+ if(sorted(tubes)){busy=true;sfx.win();burstEl(t,'🎉');level++;save.best=Math.max(save.best,level);persist();
+  $('sub').textContent='다 모았어요! 다음 단계로';setTimeout(()=>newLevel(),1100);return;}
+ if(left<=0||!anyMove())finish(left<=0?'횟수가 다 됐어요':'더 옮길 곳이 없어요');
+}
+function undo(){if(over||busy||!hist.length)return;tubes=JSON.parse(hist.pop());sel=-1;sfx.tap();render();}
+function finish(why){over=true;save.plays++;persist();sfx.lose();
+ const isNew=level>0&&level>=save.best&&level===save.best&&false;
+ const d=doneCount(tubes),f=[
+  'L1은 갈색, L2는 검정(흑색), L3는 회색, N(중성선)은 파랑, 접지(PE)는 녹색-노란색이에요.',
+  '접지선은 녹색-노란색. 현장에서 「초록선은 접지」 이것만 기억해도 됩니다.',
+  '전선 색은 한국전기설비규정(KEC)이 정한 약속이에요. 색만 믿지 말고 검전기로 꼭 확인하세요.',
+  '3상 전선은 L1 갈색, L2 흑색, L3 회색 순서로 구분해요.'][save.fi++%4];persist();
+ showEnd(why,level+'단계 통과',n+'개 중 '+d+'통 완성했어요 (아깝다!)','최고 '+save.best+'단계',false,f);}
+$('again').onclick=()=>{sfx.tap();start();};
+function hint(){let path=null,seen=new Set(),nodes=0;function key(x){return x.map(a=>a.join("")).sort().join("|");}function rec(x,p){if(path||++nodes>200000)return;if(sorted(x)){path=p;return;}const k=x.map(a=>a.join("")).join("|");if(seen.has(k))return;seen.add(k);for(let i=0;i<x.length;i++)for(let j=0;j<x.length;j++){const a=x[i],b=x[j];if(i===j||!a.length||b.length>=CAP)continue;if(b.length&&b[b.length-1]!==a[a.length-1])continue;if(!b.length&&a.every(v=>v===a[0]))continue;const y=x.map(q=>q.slice()),kk=Math.min(runLen(a),CAP-b.length);for(let q=0;q<kk;q++)y[j].push(y[i].pop());rec(y,p.concat([[i,j]]));if(path)return;}}rec(tubes,[]);return path;}
+window.__game={get state(){return {level,n,tubes,left,over}},start,tap,COLORS,hint};
+start();
+
+</script>
+</body>
+</html>
