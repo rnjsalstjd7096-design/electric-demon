@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14161b">
+<title>이어 달려라!: 전기 길 합치기</title>
+<meta name="description" content="같은 설비 둘을 밀어 합치면 전기가 가는 다음 설비가 됩니다. 콘센트(우리 집)까지 가 보세요.">
+<style>
+
+html,body{margin:0;height:100%;background:#14161b;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#fff;font-size:20px}
+#app{position:relative;margin:0 auto;max-width:480px;height:100%;display:flex;flex-direction:column;padding:8px 12px 10px;box-sizing:border-box}
+#top{display:flex;align-items:center;justify-content:space-between;padding-left:44px;padding-right:56px;min-height:48px}
+#top b{font-size:20px}#stat{font-size:20px;font-weight:800;color:#ffd23f}
+#sub{font-size:20px;line-height:1.35;color:#e8ebf2;text-align:center;margin:4px 0 8px;word-break:keep-all}
+#board{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.bar{display:flex;gap:10px;margin-top:8px}
+.btn{flex:1;border:0;border-radius:14px;font-size:20px;font-weight:800;min-height:56px;font-family:inherit;cursor:pointer;touch-action:manipulation;background:#3b4252;color:#fff;box-shadow:0 4px 0 #1f232c}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #1f232c}.btn.main{background:#ffd23f;color:#2b2000;box-shadow:0 4px 0 #a98400}
+#mute{position:absolute;top:8px;right:10px;width:48px;height:48px;border:0;border-radius:24px;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;z-index:5}
+#end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,11,16,.78);z-index:4;padding:16px;box-sizing:border-box}
+#end.on{display:flex}
+#card{width:100%;max-width:360px;background:#2b2f3a;border:3px solid #4a505f;border-radius:18px;padding:18px;box-sizing:border-box;text-align:center;animation:pop .22s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#endTitle{font-size:24px;font-weight:800;margin:0 0 6px}#endScore{font-size:52px;font-weight:900;line-height:1.1;color:#ffd23f}
+#endSub{font-size:20px;color:#e8ebf2;margin:4px 0}#endBest{font-size:20px;font-weight:700;color:#9fe1ff;margin:0 0 10px}
+#fact{font-size:20px;line-height:1.45;background:#1d2029;border-radius:12px;padding:10px 12px;margin:0 0 12px;text-align:left;word-break:keep-all}
+.pop{animation:pp .35s ease-out}@keyframes pp{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+.shake{animation:sk .3s}@keyframes sk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.sp{position:absolute;font-size:28px;animation:fl .8s ease-out forwards}@keyframes fl{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-70px) scale(1.6)}}
+
+
+#g4{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;width:100%;max-width:372px;touch-action:none;background:#23262f;padding:7px;border-radius:14px;box-sizing:border-box}
+.t{aspect-ratio:1/1;border-radius:11px;background:#1c1f26;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.1;word-break:keep-all;padding:2px}
+.t b{font-size:17px}.t small{font-size:13px;color:#e8ebf2;margin-top:2px}
+.l0{background:#2f3e5c}.l1{background:#33527a}.l2{background:#2a6a6a}.l3{background:#3d7a45}.l4{background:#8a7a22}.l5{background:#a0561d}.l6{background:#b02d3c}
+.bar .btn{font-size:28px}
+#goal{font-size:18px;font-weight:800;color:#6ee08a;text-align:center;margin-bottom:6px}
+
+</style>
+<meta name="description" content="같은 설비 둘을 밀어 합치면 전기가 가는 다음 설비가 되고, 콘센트(우리 집)까지 가면 도착. 스와이프나 큰 화살표 버튼."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/route-merge/"><meta property="og:title" content="이어 달려라!: 전기 길 합치기"><meta property="og:description" content="같은 설비 둘을 밀어 합치면 전기가 가는 다음 설비가 되고, 콘센트(우리 집)까지 가면 도착. 스와이프나 큰 화살표 버튼."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;top:max(8px,env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="이어 달려라!: 전기 길 합치기",D="같은 설비 둘을 밀어 합치면 전기가 가는 다음 설비가 되고, 콘센트(우리 집)까지 가면 도착. 스와이프나 큰 화살표 버튼.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/route-merge/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div id="top"><b id="lv"></b><span id="stat"></span></div>
+  <div id="sub"></div>
+  <div id="board"></div>
+  <div class="bar" id="bar"></div>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  <div id="fx"></div>
+  <div id="end"><div id="card">
+    <div id="endTitle"></div><div id="endScore"></div><div id="endSub"></div><div id="endBest"></div>
+    <div id="fact"></div>
+    <button class="btn main" id="again" style="width:100%">한 번 더</button>
+  </div></div>
+</div>
+<script>
+"use strict";
+const KEY='route-merge.save.v1';
+let save={best:0,plays:0,fi:0,far:0};
+try{const r=localStorage.getItem(KEY);if(r)save=Object.assign(save,JSON.parse(r));}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+const $=id=>document.getElementById(id);
+let muted=false,AC=null;
+try{muted=localStorage.getItem(KEY+'.mute')==='1';}catch(e){}
+function actx(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;AC=new C();}if(AC.state==='suspended')AC.resume();}catch(e){}return AC;}
+function tone(f,d,t,v,when){if(muted)return;const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain();o.type=t||'sine';o.frequency.value=f;const s=a.currentTime+(when||0);g.gain.setValueAtTime(v||.12,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d);}catch(e){}}
+const sfx={tap(){tone(520,.07,'triangle',.1)},ok(){tone(660,.1,'triangle',.14);tone(880,.14,'triangle',.14,.09)},bad(){tone(180,.25,'sawtooth',.12)},
+ done(){[523,659,784,1047].forEach((f,i)=>tone(f,.16,'triangle',.14,i*.08))},win(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,.2,'square',.09,i*.09))},lose(){[330,262,196].forEach((f,i)=>tone(f,.28,'sawtooth',.1,i*.16))}};
+function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function burst(x,y,ch){const fx=$('fx'),r=fx.getBoundingClientRect();for(let i=0;i<5;i++){const s=document.createElement('div');s.className='sp';s.textContent=ch||'✨';s.style.left=(x-r.left-14+(Math.random()*60-30))+'px';s.style.top=(y-r.top-14+(Math.random()*30-15))+'px';fx.appendChild(s);setTimeout(()=>s.remove(),850);}}
+function burstEl(el,ch){const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,ch);}
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a}
+$('mute').textContent=muted?'🔇':'🔊';
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊';try{localStorage.setItem(KEY+'.mute',muted?'1':'0');}catch(e){}if(!muted)sfx.tap();};
+function showEnd(title,score,sub,best,isNew,fact){$('endTitle').textContent=title;$('endScore').textContent=score;$('endSub').textContent=sub;const b=$('endBest');b.textContent=best;b.style.color=isNew?'#ffd23f':'#9fe1ff';$('fact').innerHTML=fact;$('end').classList.add('on');}
+function hideEnd(){$('end').classList.remove('on');}
+
+const ST=['발전소','변전소','주상변압기','인입선','전력량계','분전반','콘센트'];
+const SUB=['전기를 만드는 곳','전압을 바꿔 보냄','집용으로 낮춤','건물로 들어옴','쓴 전기 재기','차단기 모인 함','우리 집 도착!'];
+const W=4;
+let b,score,over,far,arrived,moves;
+function spawn(){const e=[];b.forEach((v,i)=>{if(v<0)e.push(i)});if(!e.length)return;b[e[rnd(e.length)]]=Math.random()<.85?0:1;}
+function start(){hideEnd();b=Array(16).fill(-1);spawn();spawn();score=0;over=false;far=Math.max(...b);arrived=false;moves=0;
+ $('bar').innerHTML='<button class="btn" data-d="L">◀</button><button class="btn" data-d="U">▲</button><button class="btn" data-d="D">▼</button><button class="btn" data-d="R">▶</button>';
+ document.querySelectorAll('#bar .btn').forEach(el=>el.onclick=()=>move(el.dataset.d));
+ render();}
+function render(){
+ $('lv').textContent='밀어서 합치기';$('stat').textContent=(far+1)+'/7 단계';
+ $('sub').textContent='같은 설비 둘을 밀어 붙이면 다음 설비가 돼요. 콘센트까지 가 보세요';
+ $('board').innerHTML='<div style="width:100%;display:flex;flex-direction:column;align-items:center"><div id="goal">'+ST.map((s,i)=>i<=far?'<span>'+s+'</span>':'').filter(Boolean).slice(-3).join(' → ')+'</div><div id="g4">'+
+  b.map(v=>'<div class="t'+(v>=0?' l'+v:'')+'">'+(v>=0?'<b>'+ST[v]+'</b><small>'+SUB[v]+'</small>':'')+'</div>').join('')+'</div></div>';
+ attach();}
+function line(d,k){const idx=[];for(let j=0;j<W;j++){idx.push(d==='L'?k*W+j:d==='R'?k*W+(W-1-j):d==='U'?j*W+k:(W-1-j)*W+k);}return idx;}
+function move(d){if(over)return false;let moved=false,gained=0,mergedAt=[];
+ for(let k=0;k<W;k++){const idx=line(d,k);const vals=idx.map(i=>b[i]).filter(v=>v>=0);const out=[];
+  for(let j=0;j<vals.length;j++){if(j+1<vals.length&&vals[j]===vals[j+1]&&vals[j]<6){out.push(vals[j]+1);gained+=(vals[j]+1)*20;mergedAt.push(vals[j]+1);j++;}else out.push(vals[j]);}
+  idx.forEach((i,j)=>{const nv=j<out.length?out[j]:-1;if(b[i]!==nv)moved=true;b[i]=nv;});}
+ if(!moved){sfx.bad();return false;}
+ moves++;score+=gained;spawn();
+ let nt=far;b.forEach(v=>{if(v>nt)nt=v;});
+ const up=nt>far;far=nt;
+ render();
+ if(mergedAt.length){sfx.done();vib(25);const ts=document.querySelectorAll('.t');ts.forEach(e=>{});burst(innerWidth/2,innerHeight/2,'⚡');}else sfx.tap();
+ if(up&&far===6&&!arrived){arrived=true;sfx.win();vib([40,40,80]);$('sub').textContent='🏠 우리 집 도착! 계속 해도 돼요';}
+ else if(up){sfx.ok();}
+ if(!canMove())finish();
+ return true;}
+function canMove(){if(b.some(v=>v<0))return true;for(let r=0;r<W;r++)for(let c=0;c<W;c++){const v=b[r*W+c];if(c+1<W&&b[r*W+c+1]===v&&v<6)return true;if(r+1<W&&b[(r+1)*W+c]===v&&v<6)return true;}return false;}
+function attach(){const g=document.getElementById('g4');let sx=0,sy=0,on=false;
+ g.onpointerdown=e=>{sx=e.clientX;sy=e.clientY;on=true;};
+ g.onpointerup=e=>{if(!on)return;on=false;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<24)return;
+  move(Math.abs(dx)>Math.abs(dy)?(dx>0?'R':'L'):(dy>0?'D':'U'));};}
+const FACTS=[
+ ['주상변압기','전봇대 위 둥근 통이에요. 발전소에서 온 높은 전압을 집에서 쓰는 220V나 380V로 낮춰 줍니다.'],
+ ['높은 전압','멀리 보낼 때는 전압이 높아야 손실이 적어요. 그래서 동네 가까이까지는 높은 전압으로 옵니다.'],
+ ['인입선','「인입선」은 한전에서 들어오는 선입니다. 바깥 전기를 건물 안으로 끌어오는 선이에요.'],
+ ['전력량계','쓴 전기를 재는 기계예요. 현장에서 「계량기 돈다」 하면 전기 쓰고 있다는 말입니다.'],
+ ['분전반','차단기들이 모여 있는 함이에요. 「분전반 열어 봐」는 차단기 함 보라는 말입니다.']];
+function finish(){over=true;save.plays++;const nb=score>save.best;const prev=save.best;if(nb)save.best=score;save.far=Math.max(save.far||0,far);const f=FACTS[save.fi++%FACTS.length];persist();sfx.lose();
+ const left=6-far;
+ showEnd('길이 막혔어요',score+'점',far>=6?'콘센트까지 갔어요! 🏠':'「'+ST[far]+'」까지 왔어요 — 콘센트까지 '+left+'단계 남았어요 (아깝다!)',nb?'신기록! 이전 최고 '+prev+'점':'최고 '+save.best+'점 · 가장 멀리 '+(save.far+1)+'/7단계',nb,'<b>'+f[0]+'</b> — '+f[1]);}
+$('again').onclick=()=>{sfx.tap();start();};
+window.__game={get state(){return {b:b.slice(),score,over,far}},start,move};
+start();
+
+</script>
+</body>
+</html>
