@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>이 콘센트 어디가 문제? v0.1</title>
+<style>
+:root{--bg:#10151f;--card:#1b2333;--ink:#f4f6fb;--sub:#aab4c8;--y:#ffd23f;--r:#ff5d5d;--g:#4ade80;--b:#5aa9ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,"Noto Sans KR",sans-serif}
+#app{max-width:480px;margin:0 auto;min-height:100%;padding:18px 16px 28px;display:flex;flex-direction:column;gap:14px}
+h1{font-size:28px;margin:6px 0 0;line-height:1.25}
+p{font-size:20px;line-height:1.5;margin:0}.sub{color:var(--sub)}
+.bar{display:flex;justify-content:space-between;align-items:center;font-size:18px;color:var(--sub)}
+.big{font-size:60px;text-align:center}
+.q{font-size:24px;font-weight:700;line-height:1.35}
+.scene{background:var(--card);border:2px solid #2d3a55;border-radius:18px;padding:10px;display:flex;flex-direction:column;gap:10px}
+.scene .t{font-size:18px;color:var(--sub)}
+button{font:inherit;font-size:20px;font-weight:700;min-height:68px;border-radius:16px;padding:12px 14px;color:var(--ink);background:#0e1420;border:2px solid #2d3a55;text-align:left;cursor:pointer;display:flex;gap:12px;align-items:center}
+button .e{font-size:34px}
+button:active{transform:scale(.98)}
+button.ok{border-color:var(--g);background:#12301f}button.bad{border-color:var(--r);background:#3a1717}
+button.go{background:var(--y);color:#111;text-align:center;justify-content:center;border-color:var(--y)}
+.exp{border-radius:16px;padding:14px;border:3px solid var(--y);background:var(--card);font-size:20px;line-height:1.5}
+a{color:var(--b);font-size:20px}.sp{flex:1}
+.flash{animation:fl .5s}@keyframes fl{0%{box-shadow:0 0 0 0 var(--y)}100%{box-shadow:0 0 0 24px transparent}}
+#mute{position:fixed;right:10px;top:10px;min-height:44px;font-size:18px;padding:6px 12px;text-align:center;display:block}
+</style><meta name="description" content="그림 3장(세탁기·욕실·배관)에서 접지선을 자르거나 젖은 손 같은 틀린 곳을 고르는 20초 판별 게임."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/where-outlet/"><meta property="og:title" content="이 콘센트 어디가 문제?"><meta property="og:description" content="그림 3장(세탁기·욕실·배관)에서 접지선을 자르거나 젖은 손 같은 틀린 곳을 고르는 20초 판별 게임."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="이 콘센트 어디가 문제?",D="그림 3장(세탁기·욕실·배관)에서 접지선을 자르거나 젖은 손 같은 틀린 곳을 고르는 20초 판별 게임.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/where-outlet/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head><body>
+<button id="mute" aria-label="소리">🔊</button>
+<div id="app"></div>
+<script>
+(function(){
+var KEY='where-outlet.save.v1';
+var save={best:0,plays:0};
+try{var r=localStorage.getItem(KEY);if(r)save=Object.assign(save,JSON.parse(r)||{})}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
+var muted=false,ac=null;
+function beep(f,d,t){if(muted)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=.12;o.connect(g);g.connect(ac.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.stop(ac.currentTime+d)}catch(e){}}
+function vib(p){try{navigator.vibrate&&navigator.vibrate(p||30)}catch(e){}}
+document.getElementById('mute').onclick=function(){muted=!muted;this.textContent=muted?'🔇':'🔊'};
+// 3장면, 장면마다 틀린 곳 1개(w). 설명은 일반 상식 수준만(FACTS.md 참고).
+var S=[
+ {t:'🧺 세탁기 옆 콘센트',q:'그림 1: 세탁기를 쓰는 베란다 콘센트예요. 틀린 곳은?',
+  p:[{e:'🔌',n:'접지 단자가 있는 콘센트에 꽂음'},{e:'✂️',n:'세탁기 접지선(초록·노랑)을 잘라서 치워 둠',w:1},{e:'💧',n:'세탁기 옆에 물이 튀는 곳'}],
+  x:'접지선은 전기가 새어 나왔을 때 사람 대신 땅으로 길을 내 주는 선이에요. 잘라 버리면 기계 겉이 전기가 흐르는 채로 남을 수 있어요.'},
+ {t:'🛁 욕실 앞 콘센트',q:'그림 2: 드라이어를 꽂는 욕실 앞 콘센트예요. 틀린 곳은?',
+  p:[{e:'🧴',n:'젖은 손으로 플러그를 잡음',w:1},{e:'🔌',n:'플러그가 끝까지 꽂혀 있음'},{e:'🧹',n:'콘센트 주변이 깨끗함'}],
+  x:'물은 전기를 통하게 해서 감전 위험을 키워요. 젖은 손으로는 플러그를 만지지 말고, 손을 닦은 뒤에 꽂고 빼요.'},
+ {t:'🔧 가스·수도 배관 옆',q:'그림 3: 접지선을 연결하려는 사람이 있어요. 틀린 곳은?',
+  p:[{e:'⛽',n:'접지선을 가스 배관에 감아 둠',w:1},{e:'🟢',n:'접지선 색이 초록·노랑'},{e:'🪛',n:'단자에 나사로 단단히 조임'}],
+  x:'가스 배관은 접지선을 연결하는 곳으로 쓰면 안 돼요. 접지는 전기 설비 기준에 맞는 접지 단자나 접지극에 연결하고, 모르면 전기 전문가에게 맡겨요.'}
+];
+var app=document.getElementById('app'),idx=0,score=0;
+function home(){idx=0;score=0;
+ app.innerHTML='<div class="big">🔌🔍</div><h1>이 콘센트 어디가 문제?</h1><p class="sub">그림 3장을 보고 틀린 곳 하나씩 골라요. 20초면 끝나요.</p><div class="sp"></div><button class="go" id="st">시작하기</button><p class="sub" style="font-size:18px">최고 기록 '+(save.best||0)+' / 3 · '+(save.plays||0)+'번 했어요</p>';
+ document.getElementById('st').onclick=function(){beep(660,.12);scene()};}
+function scene(){var s=S[idx];
+ app.innerHTML='<div class="bar"><span>그림 '+(idx+1)+' / 3</span><span>맞힌 개수 '+score+'</span></div><div class="scene"><div class="t">'+s.t+'</div><div class="q">'+s.q+'</div>'+s.p.map(function(o,i){return '<button data-i="'+i+'"><span class="e">'+o.e+'</span><span>'+o.n+'</span></button>'}).join('')+'</div><div id="fb"></div><div class="sp"></div>';
+ [].forEach.call(app.querySelectorAll('button[data-i]'),function(b){b.onclick=function(){pick(+b.dataset.i)}});}
+function pick(i){var s=S[idx],right=!!s.p[i].w;
+ [].forEach.call(app.querySelectorAll('button[data-i]'),function(b){var k=+b.dataset.i;b.disabled=true;if(s.p[k].w)b.classList.add('ok');else if(k===i)b.classList.add('bad')});
+ if(right){score++;beep(880,.2);vib(30)}else{beep(220,.3,'square');vib([40,40,40])}
+ var last=idx===S.length-1;
+ document.getElementById('fb').innerHTML='<div class="exp flash"><b>'+(right?'⭕ 맞아요!':'❌ 아쉬워요')+'</b><br>'+s.x+'</div><button class="go" id="nx" style="margin-top:12px">'+(last?'결과 보기':'다음 그림')+'</button>';
+ document.getElementById('nx').onclick=function(){idx++;if(idx<S.length)scene();else end()};
+ window.__game.last=right;}
+function end(){save.plays=(save.plays||0)+1;if(score>(save.best||0))save.best=score;persist();beep(990,.3);
+ app.innerHTML='<div class="big">'+(score===3?'🎉':'🔌')+'</div><h1>'+score+' / 3 맞혔어요</h1><p>'+(score===3?'접지 눈썰미가 좋아요!':'다시 하면 더 잘 보여요.')+'</p><p class="sub" style="font-size:18px">참고용 상식이에요. 실제 접지 공사는 전기 전문가에게 맡기세요.</p><p>▶ 접지선 이야기 더 보기: <a href="https://blog.naver.com/mms7096/224457425997" target="_blank" rel="noopener">접지선은 뭘까?(PE선 쉽게 이해하기)</a></p><div class="sp"></div><button class="go" id="again">다시 해 보기</button>';
+ document.getElementById('again').onclick=home;}
+window.__game={last:null,score:function(){return score},home:home,pick:pick};
+home();
+})();
+</script></body></html>
