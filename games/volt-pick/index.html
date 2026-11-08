@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14161b">
+<title>두 가닥!: 전압 만들기 퍼즐</title>
+<meta name="description" content="3상 4선에서 두 가닥을 골라 220V와 380V를 만들어 보세요.">
+<style>
+html,body{margin:0;height:100%;background:#14161b;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#fff;font-size:20px}
+#app{position:relative;margin:0 auto;max-width:480px;height:100%;display:flex;flex-direction:column;padding:8px 12px 10px;box-sizing:border-box}
+#top{display:flex;align-items:center;justify-content:space-between;padding-left:44px;padding-right:56px;min-height:48px}
+#top b{font-size:20px}#stat{font-size:20px;font-weight:800;color:#ffd23f}
+#sub{font-size:20px;line-height:1.35;color:#e8ebf2;text-align:center;margin:4px 0 8px;word-break:keep-all}
+#board{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.btn{flex:1;border:0;border-radius:14px;font-size:20px;font-weight:800;min-height:56px;font-family:inherit;cursor:pointer;touch-action:manipulation;background:#3b4252;color:#fff;box-shadow:0 4px 0 #1f232c}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #1f232c}.btn.main{background:#ffd23f;color:#2b2000;box-shadow:0 4px 0 #a98400}
+#mute{position:absolute;top:8px;right:10px;width:48px;height:48px;border:0;border-radius:24px;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;z-index:5}
+#end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,11,16,.78);z-index:4;padding:16px;box-sizing:border-box}
+#end.on{display:flex}
+#card{width:100%;max-width:360px;background:#2b2f3a;border:3px solid #4a505f;border-radius:18px;padding:18px;box-sizing:border-box;text-align:center;animation:pop .22s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#endTitle{font-size:24px;font-weight:800;margin:0 0 6px}#endScore{font-size:52px;font-weight:900;line-height:1.1;color:#ffd23f}
+#endSub{font-size:20px;color:#e8ebf2;margin:4px 0}#endBest{font-size:20px;font-weight:700;color:#9fe1ff;margin:0 0 10px}
+#fact{font-size:20px;line-height:1.45;background:#1d2029;border-radius:12px;padding:10px 12px;margin:0 0 12px;text-align:left;word-break:keep-all}
+.pp{animation:pp .35s ease-out}@keyframes pp{0%{transform:scale(1)}40%{transform:scale(1.15)}100%{transform:scale(1)}}
+.shake{animation:sk .3s}@keyframes sk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.sp{position:absolute;font-size:28px;animation:fl .8s ease-out forwards}@keyframes fl{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-70px) scale(1.6)}}
+
+#wires{display:flex;gap:10px;width:100%;max-width:372px;justify-content:center}
+.w{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;border:4px solid transparent;border-radius:14px;padding:6px 2px 8px;background:#1d2029;cursor:pointer;font-family:inherit;color:#fff;touch-action:manipulation;min-height:260px;justify-content:space-between}
+.w .bar{width:26px;flex:1;border-radius:13px;border:3px solid #fff3}
+.w b{font-size:24px}.w small{font-size:18px;color:#e8ebf2}
+.w.sel{border-color:#ffd23f;background:#3a3420}
+.w.hl{border-color:#6ee08a}
+#ask{font-size:26px;font-weight:900;text-align:center;color:#ffd23f;margin:2px 0 10px;word-break:keep-all}
+#meter{margin-top:10px;min-height:56px;font-size:30px;font-weight:900;text-align:center;color:#9fe1ff}
+#ch{display:flex;gap:10px;width:100%;max-width:372px;margin-top:10px}
+#ch .btn{font-size:30px;min-height:72px}
+#bar{width:100%}
+
+</style>
+<meta name="description" content="3상 4선(L1·L2·L3·N)에서 두 가닥을 눌러 220V나 380V를 만들고, 빛나는 두 가닥 사이 전압을 맞히는 퍼즐. 쇼트 3번이면 끝."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/volt-pick/"><meta property="og:title" content="두 가닥!: 전압 만들기 퍼즐"><meta property="og:description" content="3상 4선(L1·L2·L3·N)에서 두 가닥을 눌러 220V나 380V를 만들고, 빛나는 두 가닥 사이 전압을 맞히는 퍼즐. 쇼트 3번이면 끝."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;top:max(8px,env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="두 가닥!: 전압 만들기 퍼즐",D="3상 4선(L1·L2·L3·N)에서 두 가닥을 눌러 220V나 380V를 만들고, 빛나는 두 가닥 사이 전압을 맞히는 퍼즐. 쇼트 3번이면 끝.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/volt-pick/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div id="top"><b id="lv"></b><span id="stat"></span></div>
+  <div id="sub"></div>
+  <div id="board"></div>
+  <div id="bar"></div>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  <div id="fx"></div>
+  <div id="end"><div id="card">
+    <div id="endTitle"></div><div id="endScore"></div><div id="endSub"></div><div id="endBest"></div>
+    <div id="fact"></div>
+    <button class="btn main" id="again" style="width:100%">한 번 더</button>
+  </div></div>
+</div>
+<script>
+"use strict";
+const KEY='volt-pick.save.v1';
+let save={best:0,plays:0,fi:0};
+try{const r=localStorage.getItem(KEY);if(r)save=Object.assign(save,JSON.parse(r));}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+const $=id=>document.getElementById(id);
+let muted=false,AC=null;
+try{muted=localStorage.getItem(KEY+'.mute')==='1';}catch(e){}
+function actx(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;AC=new C();}if(AC.state==='suspended')AC.resume();}catch(e){}return AC;}
+function tone(f,d,t,v,when){if(muted)return;const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain();o.type=t||'sine';o.frequency.value=f;const s=a.currentTime+(when||0);g.gain.setValueAtTime(v||.12,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d);}catch(e){}}
+const sfx={tap(){tone(520,.07,'triangle',.1)},ok(){tone(660,.1,'triangle',.14);tone(880,.14,'triangle',.14,.09)},bad(){tone(180,.25,'sawtooth',.12)},
+ done(){[523,659,784,1047].forEach((f,i)=>tone(f,.16,'triangle',.14,i*.08))},win(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,.2,'square',.09,i*.09))},lose(){[330,262,196].forEach((f,i)=>tone(f,.28,'sawtooth',.1,i*.16))}};
+function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function burst(x,y,ch){const fx=$('fx'),r=fx.getBoundingClientRect();for(let i=0;i<5;i++){const s=document.createElement('div');s.className='sp';s.textContent=ch||'✨';s.style.left=(x-r.left-14+(Math.random()*60-30))+'px';s.style.top=(y-r.top-14+(Math.random()*30-15))+'px';fx.appendChild(s);setTimeout(()=>s.remove(),850);}}
+function burstEl(el,ch){const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,ch);}
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a}
+$('mute').textContent=muted?'🔇':'🔊';
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊';try{localStorage.setItem(KEY+'.mute',muted?'1':'0');}catch(e){}if(!muted)sfx.tap();};
+function showEnd(title,score,sub,best,isNew,fact){$('endTitle').textContent=title;$('endScore').textContent=score;$('endSub').textContent=sub;const b=$('endBest');b.textContent=best;b.style.color=isNew?'#ffd23f':'#9fe1ff';$('fact').innerHTML=fact;$('end').classList.add('on');}
+function hideEnd(){$('end').classList.remove('on');}
+
+const WIRES=[{id:'L1',name:'갈색',col:'#8b5a2b'},{id:'L2',name:'검정',col:'#111'},{id:'L3',name:'회색',col:'#9aa0a6'},{id:'N',name:'파랑',col:'#2f6fdc'}];
+const GOAL=10;
+let order,sel,q,score,lives,solved,over,streak;
+function volt(a,b){return (a==='N'||b==='N')?220:380}
+function newQ(){
+ const t=rnd(10);
+ if(t<4)q={k:'make',v:220};else if(t<7)q={k:'make',v:380};else{
+  const ids=shuffle(['L1','L2','L3','N']).slice(0,2);q={k:'read',pair:ids,v:volt(ids[0],ids[1])};}
+ order=shuffle(WIRES.slice());sel=[];}
+function start(){hideEnd();score=0;lives=3;solved=0;over=false;streak=0;newQ();render('');}
+function render(msg){
+ $('lv').textContent='3상 4선';$('stat').textContent='✔'+solved+'/'+GOAL+'  '+'🔌'.repeat(lives)+'·'.repeat(3-lives);
+ $('sub').textContent=q.k==='make'?'두 가닥을 눌러서 전압을 만들어요':'빛나는 두 가닥 사이는 몇 V일까요?';
+ let h='<div style="width:100%;display:flex;flex-direction:column;align-items:center">';
+ h+='<div id="ask">'+(q.k==='make'?q.v+'V 만들기':'두 가닥 사이 전압은?')+'</div><div id="wires">';
+ order.forEach(w=>{const on=sel.includes(w.id),hl=q.k==='read'&&q.pair.includes(w.id);
+  h+='<button class="w'+(on?' sel':'')+(hl?' hl':'')+'" data-id="'+w.id+'"><b>'+w.id+'</b><div class="bar" style="background:'+w.col+'"></div><small>'+w.name+'</small></button>';});
+ h+='</div><div id="meter">'+(msg||'')+'</div>';
+ if(q.k==='read')h+='<div id="ch"><button class="btn" data-v="220">220V</button><button class="btn" data-v="380">380V</button></div>';
+ h+='</div>';$('board').innerHTML=h;
+ document.querySelectorAll('.w').forEach(el=>el.onclick=()=>pickWire(el.dataset.id,el));
+ document.querySelectorAll('#ch .btn').forEach(el=>el.onclick=()=>answer(+el.dataset.v,el));}
+function pickWire(id,el){if(over||q.k!=='make')return;sfx.tap();
+ if(sel.includes(id))sel=sel.filter(x=>x!==id);else sel.push(id);
+ if(sel.length<2){render('');return;}
+ answer(volt(sel[0],sel[1]),el,true);}
+function answer(v,el,made){
+ if(over)return;const ok=made?(v===q.v):(v===q.v);
+ if(ok){solved++;streak++;score+=10+Math.min(streak,5)*2;sfx.done();vib(25);burstEl(el||$('board'),'⚡');
+  const msg='⚡ 맞아요! '+(made?v+'V':'정답 '+q.v+'V');
+  if(solved>=GOAL&&!save.won){save.won=1;persist();sfx.win();}
+  newQ();render(msg);}
+ else{lives--;streak=0;sfx.bad();vib([60,40,60]);$('board').classList.add('shake');setTimeout(()=>$('board').classList.remove('shake'),320);
+  const msg='🔥 쇼트! 그 두 가닥은 '+(made?v:(v===220?380:220))+'V예요';
+  if(lives<=0){finish();return;}
+  if(made){sel=[];render(msg);}else{newQ();render(msg);}}}
+const FACTS=[
+ ['상전압','상선(L1·L2·L3) 한 가닥과 중성선(N) 사이는 220V예요. 이걸 상전압이라고 불러요.'],
+ ['선간전압','상선과 상선 사이는 380V예요. 이걸 선간전압이라고 불러요.'],
+ ['단상 380V','현장에서 「단상 380V」라고 하면 3상 전원 중 두 상선 사이의 380V를 단상 부하에 쓴다는 뜻인 경우가 많아요.'],
+ ['단상 220V','단상 220V는 상선 한 가닥과 중성선을 연결해 쓰는 경우가 일반적이에요.'],
+ ['어디와 어디 사이','220V냐 380V냐는 선이 몇 가닥이냐가 아니라 「어디와 어디 사이를 재느냐」의 차이예요.']];
+function finish(){over=true;save.plays++;const nb=score>save.best;const prev=save.best;if(nb)save.best=score;const f=FACTS[save.fi++%FACTS.length];persist();sfx.lose();
+ const left=Math.max(0,GOAL-solved);
+ showEnd('차단기가 떨어졌어요',score+'점',solved>=GOAL?'열 문제 넘게 풀었어요! ✔'+solved:'열 문제까지 '+left+'문제 남았어요 (✔'+solved+'/'+GOAL+', 아깝다!)',nb?'신기록! 이전 최고 '+prev+'점':'최고 '+save.best+'점',nb,'<b>'+f[0]+'</b> — '+f[1]);}
+$('again').onclick=()=>{sfx.tap();start();};
+window.__game={get state(){return {q,sel,score,lives,solved,over,order:order.map(w=>w.id)}},start,pickWire,answer};
+start();
+
+</script>
+</body>
+</html>
