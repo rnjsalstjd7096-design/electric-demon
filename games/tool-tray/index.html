@@ -8,7 +8,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overflow:hidden}
 #app{max-width:430px;margin:0 auto;height:100%;display:flex;flex-direction:column;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
-h1{font-size:21px;margin:2px 0;padding:0 36px;text-align:center;color:var(--y)}
+h1{font-size:clamp(17px,5.2vw,21px);white-space:nowrap;margin:2px 0;padding:0 36px;text-align:center;color:var(--y)}
 .top{display:flex;justify-content:space-between;font-size:20px;font-weight:700;margin:4px 2px 6px}
 #board{position:relative;flex:1;min-height:300px}
 .t{position:absolute;width:var(--s);height:var(--s);border-radius:12px;background:var(--tile);border:3px solid #5d4037;box-shadow:0 4px 0 #5d4037;display:flex;align-items:center;justify-content:center;font-size:calc(var(--s)*.58);cursor:pointer;transition:filter .15s}
