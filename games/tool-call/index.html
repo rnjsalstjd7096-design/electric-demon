@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14161b">
+<title>뺀찌 줘!: 공구 이름 고르기 퀴즈</title>
+<meta name="description" content="반장님이 말한 뜻을 듣고 맞는 공구 이름을 고르는 퀴즈.">
+<style>
+html,body{margin:0;height:100%;background:#14161b;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#fff;font-size:20px}
+#app{position:relative;margin:0 auto;max-width:480px;height:100%;display:flex;flex-direction:column;padding:8px 12px 10px;box-sizing:border-box}
+#top{display:flex;align-items:center;justify-content:space-between;padding-left:44px;padding-right:56px;min-height:48px}
+#top b{font-size:20px;white-space:nowrap}#stat{white-space:nowrap;font-size:20px;font-weight:800;color:#ffd23f}
+#sub{font-size:20px;line-height:1.35;color:#e8ebf2;text-align:center;margin:4px 0 8px;word-break:keep-all}
+#board{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center}
+.btn{flex:1;border:0;border-radius:14px;font-size:20px;font-weight:800;min-height:56px;font-family:inherit;cursor:pointer;touch-action:manipulation;background:#3b4252;color:#fff;box-shadow:0 4px 0 #1f232c}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #1f232c}.btn.main{background:#ffd23f;color:#2b2000;box-shadow:0 4px 0 #a98400}
+#mute{position:absolute;top:8px;right:10px;width:48px;height:48px;border:0;border-radius:24px;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;z-index:5}
+#end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,11,16,.78);z-index:4;padding:16px;box-sizing:border-box}
+#end.on{display:flex}
+#card{width:100%;max-width:360px;background:#2b2f3a;border:3px solid #4a505f;border-radius:18px;padding:18px;box-sizing:border-box;text-align:center;animation:pop .22s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#endTitle{font-size:24px;font-weight:800;margin:0 0 6px}#endScore{font-size:52px;font-weight:900;line-height:1.1;color:#ffd23f}
+#endSub{font-size:20px;color:#e8ebf2;margin:4px 0}#endBest{font-size:20px;font-weight:700;color:#9fe1ff;margin:0 0 10px}
+#fact{font-size:20px;line-height:1.45;background:#1d2029;border-radius:12px;padding:10px 12px;margin:0 0 12px;text-align:left;word-break:keep-all}
+.shake{animation:sk .3s}@keyframes sk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.sp{position:absolute;font-size:28px;animation:fl .8s ease-out forwards}@keyframes fl{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-70px) scale(1.6)}}
+#bar{width:100%;text-align:center;min-height:56px;font-size:20px;font-weight:700;color:#9fe1ff;margin-top:6px;line-height:1.3;word-break:keep-all}
+.nb{background:repeating-linear-gradient(45deg,#2f9e44 0 9px,#f2d21b 9px 18px);color:#111;text-shadow:0 1px 0 #fff8}
+.bl{background:#2f6fdc;color:#fff}
+
+#boss{display:flex;gap:10px;align-items:flex-start;width:100%;max-width:400px;margin:4px 0 12px}
+#face{font-size:52px;line-height:1}
+#talk{flex:1;background:#fff;color:#111;border-radius:16px;padding:12px 14px;font-size:22px;line-height:1.4;word-break:keep-all;position:relative}
+#talk b{color:#b3261e}
+#opts{display:flex;flex-direction:column;gap:12px;width:100%;max-width:400px}
+.op{min-height:64px;border:3px solid #4a505f;border-radius:14px;background:#2b2f3a;color:#fff;font-family:inherit;font-size:24px;font-weight:800;cursor:pointer;touch-action:manipulation;padding:6px 10px;word-break:keep-all}
+.op small{font-size:18px;font-weight:600;color:#c9d1e0;margin-left:6px}
+.op:active{transform:scale(.97)}.op.ok{background:#2f9e44;border-color:#8ce99a}.op.no{background:#b3261e;border-color:#ff8787}
+#sub{color:#ffd23f}
+
+</style>
+<meta name="description" content="반장님이 말한 뜻(「전선 피복을 벗기는 공구」 등)에 맞는 공구·자재 이름을 3~4개 중 고르는 퀴즈. 틀리면 ❤ 하나 줄어듦"><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/tool-call/"><meta property="og:title" content="뺀찌 줘!: 공구 이름 고르기 퀴즈"><meta property="og:description" content="반장님이 말한 뜻(「전선 피복을 벗기는 공구」 등)에 맞는 공구·자재 이름을 3~4개 중 고르는 퀴즈. 틀리면 ❤ 하나 줄어듦"><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;top:max(8px,env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="뺀찌 줘!: 공구 이름 고르기 퀴즈",D="반장님이 말한 뜻(「전선 피복을 벗기는 공구」 등)에 맞는 공구·자재 이름을 3~4개 중 고르는 퀴즈. 틀리면 ❤ 하나 줄어듦",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/tool-call/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div id="top"><b id="lv"></b><span id="stat"></span></div>
+  <div id="sub"></div>
+  <div id="board"></div>
+  <div id="bar"></div>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  <div id="fx"></div>
+  <div id="end"><div id="card">
+    <div id="endTitle"></div><div id="endScore"></div><div id="endSub"></div><div id="endBest"></div>
+    <div id="fact"></div>
+    <button class="btn main" id="again" style="width:100%">한 번 더</button>
+  </div></div>
+</div>
+<script>
+const KEY='tool-call.save.v1';
+"use strict";
+const $=id=>document.getElementById(id);
+let save={best:0,plays:0,fi:0};
+try{const r=localStorage.getItem(KEY);if(r)save=Object.assign(save,JSON.parse(r));}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+let muted=false,AC=null;
+try{muted=localStorage.getItem(KEY+'.mute')==='1';}catch(e){}
+function actx(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;AC=new C();}if(AC.state==='suspended')AC.resume();}catch(e){}return AC;}
+function tone(f,d,t,v,when){if(muted)return;const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain();o.type=t||'sine';o.frequency.value=f;const s=a.currentTime+(when||0);g.gain.setValueAtTime(v||.12,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d);}catch(e){}}
+const sfx={tap(){tone(520,.07,'triangle',.1)},ok(){tone(660,.1,'triangle',.14);tone(880,.14,'triangle',.14,.09)},bad(){tone(180,.25,'sawtooth',.12)},
+ done(){[523,659,784,1047].forEach((f,i)=>tone(f,.16,'triangle',.14,i*.08))},lose(){[330,262,196].forEach((f,i)=>tone(f,.28,'sawtooth',.1,i*.16))}};
+function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function burst(x,y,ch){const fx=$('fx'),r=fx.getBoundingClientRect();for(let i=0;i<5;i++){const s=document.createElement('div');s.className='sp';s.textContent=ch||'✨';s.style.left=(x-r.left-14+(Math.random()*60-30))+'px';s.style.top=(y-r.top-14+(Math.random()*30-15))+'px';fx.appendChild(s);setTimeout(()=>s.remove(),850);}}
+function burstEl(el,ch){if(!el)return burst(innerWidth/2,innerHeight/3,ch);const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,ch);}
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a}
+$('mute').textContent=muted?'🔇':'🔊';
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊';try{localStorage.setItem(KEY+'.mute',muted?'1':'0');}catch(e){}if(!muted)sfx.tap();};
+function showEnd(title,score,sub,best,isNew,fact){$('endTitle').textContent=title;$('endScore').textContent=score;$('endSub').textContent=sub;const b=$('endBest');b.textContent=best;b.style.color=isNew?'#ffd23f':'#9fe1ff';$('fact').innerHTML=fact;$('end').classList.add('on');}
+function hideEnd(){$('end').classList.remove('on');}
+function endGame(t,n,unit,extra,facts){over=true;save.plays++;const nb=n>save.best;const prev=save.best;if(nb)save.best=n;const f=facts[save.fi++%facts.length];persist();sfx.lose();
+ const gap=nb?0:save.best-n;
+ showEnd(t,n+unit,extra+(nb?'':' · 최고 기록까지 '+(gap+1)+unit+' (아깝다!)'),nb?'신기록! 이전 최고 '+prev+unit:'최고 '+save.best+unit,nb,'<b>'+f[0]+'</b> — '+f[1]);}
+
+
+const TERMS=[{"n": "뺀찌", "s": "펜치", "m": "전선을 잡고 자르고 구부리는 공구"}, {"n": "니빠", "s": "니퍼", "m": "전선을 깔끔하게 자르는 공구"}, {"n": "롱노즈", "s": "", "m": "좁은 곳의 선을 잡는 코 긴 집게"}, {"n": "도라이바", "s": "드라이버", "m": "나사를 돌리는 공구, 십자와 일자"}, {"n": "검전 드라이버", "s": "", "m": "전기가 있으면 불이 켜지는 드라이버"}, {"n": "스트리퍼", "s": "", "m": "전선 피복을 벗기는 공구"}, {"n": "압착기", "s": "", "m": "단자를 전선에 꽉 눌러 붙이는 공구"}, {"n": "압착 단자", "s": "터미널", "m": "전선 끝에 끼워 조이는 쇠 조각"}, {"n": "와고", "s": "전선 커넥터", "m": "전선을 끼워 연결하는 작은 부품"}, {"n": "절연 테이프", "s": "", "m": "전기가 안 통하는 접착 테이프"}, {"n": "케이블 타이", "s": "", "m": "선을 묶는 플라스틱 띠"}, {"n": "테스터", "s": "멀티미터", "m": "전압과 저항을 재는 계기"}, {"n": "후크 미터", "s": "클램프 미터", "m": "선을 물려서 전류를 재는 계기"}, {"n": "메거", "s": "절연 저항계", "m": "전선 피복이 멀쩡한지 재는 계기"}, {"n": "접지 저항계", "s": "", "m": "접지가 잘 됐는지 재는 계기"}, {"n": "전동 드릴", "s": "", "m": "전기로 구멍 뚫는 공구"}, {"n": "함마 드릴", "s": "해머 드릴", "m": "콘크리트에 구멍 뚫는 드릴"}, {"n": "기리", "s": "드릴 날(비트)", "m": "드릴에 끼우는 날"}, {"n": "홀쏘", "s": "", "m": "크고 둥근 구멍을 뚫는 날"}, {"n": "그라인더", "s": "", "m": "둥근 날이 돌며 쇠를 자르는 공구"}, {"n": "쇠톱", "s": "", "m": "쇠를 자르는 톱"}, {"n": "벤더", "s": "", "m": "전선관을 구부리는 공구"}, {"n": "몽키", "s": "몽키 스패너", "m": "입 크기가 조절되는 스패너"}, {"n": "빠루", "s": "쇠지렛대(노루발)", "m": "못 빼고 뜯어내는 쇠막대"}, {"n": "함마", "s": "해머(큰 망치)", "m": "머리가 쇠로 된 큰 망치"}, {"n": "줄자", "s": "", "m": "길이를 재는 말려 들어가는 자"}, {"n": "먹통", "s": "먹줄", "m": "줄에 먹을 묻혀 직선을 긋는 도구"}, {"n": "요비선", "s": "피시 테이프", "m": "전선관 속으로 전선을 끌어넣는 줄"}, {"n": "전선관", "s": "파이프", "m": "전선을 보호하며 지나가는 관"}, {"n": "CD관", "s": "", "m": "주름진 검은 플라스틱 전선관"}, {"n": "자바라", "s": "가요 전선관(후렉시블)", "m": "구부러지는 주름 전선관"}, {"n": "커플링", "s": "", "m": "전선관 두 개를 잇는 부속"}, {"n": "새들", "s": "", "m": "전선관을 벽에 고정하는 ㄷ자 쇠"}, {"n": "박스", "s": "아웃렛 박스", "m": "스위치나 콘센트가 들어가는 통"}, {"n": "풀박스", "s": "", "m": "긴 배관 중간에서 선을 당기는 큰 통"}, {"n": "트레이", "s": "", "m": "전선을 얹어 가는 선반 모양 길"}, {"n": "앙카", "s": "앵커", "m": "콘크리트에 박아 볼트를 거는 부속"}, {"n": "칼블럭", "s": "", "m": "벽에 박아 나사가 물리게 하는 심"}, {"n": "행거", "s": "", "m": "배관이나 트레이를 천장에 매다는 쇠"}, {"n": "사라", "s": "접시머리 나사", "m": "머리가 납작한 나사"}, {"n": "비스", "s": "나사(스크류)", "m": "돌려 박는 작은 나사"}, {"n": "토크 렌치", "s": "", "m": "정해진 힘으로 조이는 렌치"}, {"n": "토치", "s": "", "m": "불꽃을 내는 공구"}, {"n": "수축 튜브", "s": "", "m": "열을 주면 줄어드는 절연 튜브"}, {"n": "공구 벨트", "s": "", "m": "공구를 끼워 허리에 차는 벨트"}];
+const FACTS=[
+ ['그라인더','보안경 없이 그라인더 잡지 않습니다.'],
+ ['토크 렌치','차단기 단자는 정해진 힘으로 조여야 합니다.'],
+ ['공구 벨트','위에서 공구 떨어지면 큰일, 벨트에 꽂습니다.'],
+ ['검전 드라이버','전기가 있으면 불이 켜지는 드라이버 — 콘센트에 대 보면 불이 켜집니다.'],
+ ['메거','「메거 쳐 봐」는 절연 저항 재 보라는 말입니다.']];
+let save2={seen:{}};try{const r=localStorage.getItem(KEY+'.book');if(r)save2=JSON.parse(r)||save2;}catch(e){}
+function book(){return Object.keys(save2.seen).length}
+function persist2(){try{localStorage.setItem(KEY+'.book',JSON.stringify(save2));}catch(e){}}
+let lives,score,q,over,cur,deck,lock;
+function nChoices(){return q<8?3:4}
+function next(){if(!deck.length)deck=shuffle(TERMS.map((_,i)=>i));cur=deck.pop();
+ const others=shuffle(TERMS.map((_,i)=>i).filter(i=>i!==cur)).slice(0,nChoices()-1);
+ const opts=shuffle([cur,...others]);render(opts);}
+function nm(t){return t.n+(t.s?'<small>('+t.s+')</small>':'')}
+function render(opts,msg){lock=false;
+ $('lv').textContent='뺀찌 줘!';$('stat').textContent='❤'.repeat(lives)+' '+score+'점';
+ $('sub').innerHTML='📒 공구 수첩 '+book()+'/'+TERMS.length;
+ let h='<div id="boss"><div id="face">👷</div><div id="talk">「<b>'+TERMS[cur].m+'</b>」<br>그거 가져와!</div></div><div id="opts">';
+ opts.forEach(i=>{h+='<button class="op" data-i="'+i+'">'+nm(TERMS[i])+'</button>'});
+ h+='</div>';$('board').innerHTML=h;$('bar').textContent=msg||'반장님 말에 맞는 공구를 눌러요';
+ document.querySelectorAll('.op').forEach(el=>el.onclick=()=>pick(+el.dataset.i,el));}
+function pick(i,el){if(over||lock)return;lock=true;
+ const right=document.querySelector('.op[data-i="'+cur+'"]');
+ if(i===cur){score++;q++;save2.seen[TERMS[cur].n]=1;persist2();el.classList.add('ok');sfx.ok();vib(20);burstEl(el,'⚡');
+  $('bar').textContent='옳지! '+TERMS[cur].n+(TERMS[cur].s?' = '+TERMS[cur].s:'');setTimeout(next,700);return}
+ lives--;q++;el.classList.add('no');if(right)right.classList.add('ok');sfx.bad();vib([60,40,60]);$('board').classList.add('shake');setTimeout(()=>$('board').classList.remove('shake'),320);
+ $('bar').textContent='아니, 그건 '+TERMS[i].m;
+ if(lives<=0){setTimeout(()=>{$('bar').textContent='';endGame('❤이 다 떨어졌어요',score,'점','공구 수첩 '+book()+'/'+TERMS.length+'개 모음',FACTS)},900);return}
+ setTimeout(next,1300);}
+function start(){hideEnd();over=false;lives=3;score=0;q=0;deck=[];next();}
+$('again').onclick=()=>{sfx.tap();start();};
+window.__game={get state(){return {cur,lives,score,over,q,book:book()}},start,answer:()=>cur,pick:i=>pick(i,document.querySelector('.op[data-i="'+i+'"]')),opts:()=>[...document.querySelectorAll('.op')].map(e=>+e.dataset.i)};
+start();
+
+</script>
+</body>
+</html>
