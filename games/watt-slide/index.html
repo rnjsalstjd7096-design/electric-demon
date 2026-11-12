@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14161b">
+<title>와트와트!: 밀어서 합치기 숫자 퍼즐</title>
+<meta name="description" content="같은 W 숫자 칸을 밀어서 합쳐 더 큰 숫자를 만드는 숫자 밀기 퍼즐. 칸이 꽉 차 움직일 수 없으면 끝.">
+<style>
+html,body{margin:0;height:100%;background:#14161b;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#fff;font-size:20px}
+#app{position:relative;margin:0 auto;max-width:480px;height:100%;display:flex;flex-direction:column;padding:8px 12px 10px;box-sizing:border-box}
+#top{display:flex;align-items:center;justify-content:space-between;padding-left:44px;padding-right:56px;min-height:48px}
+#top b{font-size:20px;white-space:nowrap}#stat{white-space:nowrap;font-size:20px;font-weight:800;color:#ffd23f}
+#sub{font-size:20px;line-height:1.35;color:#e8ebf2;text-align:center;margin:4px 0 8px;word-break:keep-all}
+#board{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center}
+.btn{flex:1;border:0;border-radius:14px;font-size:20px;font-weight:800;min-height:56px;font-family:inherit;cursor:pointer;touch-action:manipulation;background:#3b4252;color:#fff;box-shadow:0 4px 0 #1f232c}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #1f232c}.btn.main{background:#ffd23f;color:#2b2000;box-shadow:0 4px 0 #a98400}
+#mute{position:absolute;top:8px;right:10px;width:48px;height:48px;border:0;border-radius:24px;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;z-index:5}
+#end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,11,16,.78);z-index:4;padding:16px;box-sizing:border-box}
+#end.on{display:flex}
+#card{width:100%;max-width:360px;background:#2b2f3a;border:3px solid #4a505f;border-radius:18px;padding:18px;box-sizing:border-box;text-align:center;animation:pop .22s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#endTitle{font-size:24px;font-weight:800;margin:0 0 6px}#endScore{font-size:52px;font-weight:900;line-height:1.1;color:#ffd23f}
+#endSub{font-size:20px;color:#e8ebf2;margin:4px 0}#endBest{font-size:20px;font-weight:700;color:#9fe1ff;margin:0 0 10px}
+#fact{font-size:20px;line-height:1.45;background:#1d2029;border-radius:12px;padding:10px 12px;margin:0 0 12px;text-align:left;word-break:keep-all}
+.shake{animation:sk .3s}@keyframes sk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.sp{position:absolute;font-size:28px;animation:fl .8s ease-out forwards}@keyframes fl{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-70px) scale(1.6)}}
+#bar{width:100%;text-align:center;min-height:56px;font-size:20px;font-weight:700;color:#9fe1ff;margin-top:6px;line-height:1.3;word-break:keep-all}
+
+#grid{flex:none;position:relative;width:min(100%,372px,calc(100vh - 370px));aspect-ratio:1;background:#2b2f3a;border-radius:16px;padding:8px;box-sizing:border-box;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;touch-action:none;margin-top:4px}
+.c{border-radius:12px;background:#3b4252;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:#2b2000;line-height:1.05;text-align:center;word-break:keep-all}
+.c.n{animation:pop .18s ease-out}.c.m{animation:mg .22s ease-out}@keyframes mg{50%{transform:scale(1.18)}}
+#pad{flex:none;display:grid;grid-template-columns:repeat(3,72px);grid-template-rows:repeat(2,64px);gap:8px;margin-top:10px;justify-content:center}
+#pad .btn{min-height:64px;font-size:30px;padding:0}
+#note{font-size:18px;color:#aeb4c2;text-align:center;margin-top:6px;word-break:keep-all}
+</style>
+<meta name="description" content="판을 밀어 같은 W 숫자 칸끼리 합쳐 더 큰 숫자(kW)를 만드는 숫자 퍼즐. 칸이 꽉 차면 끝."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/watt-slide/"><meta property="og:title" content="와트와트!: 밀어서 합치기 숫자 퍼즐"><meta property="og:description" content="판을 밀어 같은 W 숫자 칸끼리 합쳐 더 큰 숫자(kW)를 만드는 숫자 퍼즐. 칸이 꽉 차면 끝."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;top:max(8px,env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="와트와트!: 밀어서 합치기 숫자 퍼즐",D="판을 밀어 같은 W 숫자 칸끼리 합쳐 더 큰 숫자(kW)를 만드는 숫자 퍼즐. 칸이 꽉 차면 끝.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/watt-slide/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div id="top"><b id="lv"></b><span id="stat"></span></div>
+  <div id="sub"></div>
+  <div id="board"></div>
+  <div id="bar"></div>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  <div id="fx"></div>
+  <div id="end"><div id="card">
+    <div id="endTitle"></div><div id="endScore"></div><div id="endSub"></div><div id="endBest"></div>
+    <div id="fact"></div>
+    <button class="btn main" id="again" style="width:100%">한 번 더</button>
+  </div></div>
+</div>
+<script>
+"use strict";
+const KEY='watt-slide.save.v1';
+const $=id=>document.getElementById(id);
+let save={best:0,plays:0,fi:0};
+try{const r=localStorage.getItem(KEY);if(r)save=Object.assign(save,JSON.parse(r));}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+let muted=false,AC=null;
+try{muted=localStorage.getItem(KEY+'.mute')==='1';}catch(e){}
+function actx(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;AC=new C();}if(AC.state==='suspended')AC.resume();}catch(e){}return AC;}
+function tone(f,d,t,v,when){if(muted)return;const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain();o.type=t||'sine';o.frequency.value=f;const s=a.currentTime+(when||0);g.gain.setValueAtTime(v||.12,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d);}catch(e){}}
+const sfx={tap(){tone(520,.07,'triangle',.1)},ok(){tone(660,.1,'triangle',.14);tone(880,.14,'triangle',.14,.09)},bad(){tone(180,.25,'sawtooth',.12)},
+ done(){[523,659,784,1047].forEach((f,i)=>tone(f,.16,'triangle',.14,i*.08))},lose(){[330,262,196].forEach((f,i)=>tone(f,.28,'sawtooth',.1,i*.16))}};
+function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function burst(x,y,ch){const fx=$('fx'),r=fx.getBoundingClientRect();for(let i=0;i<5;i++){const s=document.createElement('div');s.className='sp';s.textContent=ch||'✨';s.style.left=(x-r.left-14+(Math.random()*60-30))+'px';s.style.top=(y-r.top-14+(Math.random()*30-15))+'px';fx.appendChild(s);setTimeout(()=>s.remove(),850);}}
+function burstEl(el,ch){if(!el)return burst(innerWidth/2,innerHeight/3,ch);const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,ch);}
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a}
+$('mute').textContent=muted?'🔇':'🔊';
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊';try{localStorage.setItem(KEY+'.mute',muted?'1':'0');}catch(e){}if(!muted)sfx.tap();};
+function showEnd(title,score,sub,best,isNew,fact){$('endTitle').textContent=title;$('endScore').textContent=score;$('endSub').textContent=sub;const b=$('endBest');b.textContent=best;b.style.color=isNew?'#ffd23f':'#9fe1ff';$('fact').innerHTML=fact;$('end').classList.add('on');}
+function hideEnd(){$('end').classList.remove('on');}
+function endGame(t,n,unit,extra,facts){over=true;save.plays++;const nb=n>save.best;const prev=save.best;if(nb)save.best=n;const f=facts[save.fi++%facts.length];persist();sfx.lose();
+ const gap=nb?0:save.best-n;
+ showEnd(t,n+unit,extra+(nb?'':' · 최고 기록까지 '+(gap+1)+unit+' (아깝다!)'),nb?'신기록! 이전 최고 '+prev+unit:'최고 '+save.best+unit,nb,'<b>'+f[0]+'</b> — '+f[1]);}
+// 숫자 밀기 퍼즐. 화면 사실은 FACTS.md(1kW=1000W, 전력=전압×전류)만. 타일의 W 숫자는 게임 점수일 뿐 실제 기기 값이 아님.
+const N=4,COL={100:'#ffe9a8',200:'#ffd96b',400:'#ffc23f',800:'#ff9f3f',1600:'#ff7a45',3200:'#ff5a5a',6400:'#e84393',12800:'#9b59ff',25600:'#4fa3ff',51200:'#2ed1a2'};
+function lab(v){return v>=1000?(v/1000)+'kW':v+'W'}
+let g,score,over,moves,topv,newAt,mergedAt;
+function empties(){const e=[];for(let i=0;i<16;i++)if(!g[i])e.push(i);return e}
+function spawn(){const e=empties();if(!e.length)return;const i=e[rnd(e.length)];g[i]=Math.random()<.85?100:200;newAt.add(i);}
+function start(){hideEnd();g=Array(16).fill(0);score=0;over=false;moves=0;topv=100;newAt=new Set();mergedAt=new Set();spawn();spawn();render('밀면 같은 숫자끼리 합쳐져요');}
+function line(idx){const v=idx.map(i=>g[i]).filter(x=>x);const out=[];const mg=[];let gain=0;
+ for(let k=0;k<v.length;k++){if(v[k]===v[k+1]){out.push(v[k]*2);mg.push(out.length-1);gain+=v[k]*2;k++}else out.push(v[k])}
+ while(out.length<N)out.push(0);return {out,mg,gain}}
+function lines(d){const L=[];for(let a=0;a<N;a++){const r=[];for(let b=0;b<N;b++){
+ if(d==='L')r.push(a*N+b);else if(d==='R')r.push(a*N+(N-1-b));else if(d==='U')r.push(b*N+a);else r.push((N-1-b)*N+a)}L.push(r)}return L}
+function canMove(){if(empties().length)return true;for(let i=0;i<16;i++){if(i%N<N-1&&g[i]===g[i+1])return true;if(i<12&&g[i]===g[i+N])return true}return false}
+function move(d){if(over)return false;const before=g.join();let gain=0;newAt=new Set();mergedAt=new Set();
+ for(const idx of lines(d)){const r=line(idx);idx.forEach((i,k)=>g[i]=r.out[k]);r.mg.forEach(k=>mergedAt.add(idx[k]));gain+=r.gain}
+ if(g.join()===before){sfx.tap();return false}
+ moves++;score+=gain;spawn();let msg='';
+ if(gain){const mx=Math.max(...g);sfx.ok();vib(15);if(mx>topv){topv=mx;msg='⚡ 새 최고 칸 '+lab(mx)+'!';sfx.done()}else msg='합쳐서 +'+gain}
+ render(msg);if(mergedAt.size){const c=document.querySelectorAll('.c');mergedAt.forEach(i=>burstEl(c[i],'⚡'))}
+ if(!canMove()){over=true;save.plays++;const prevTop=save.top||0;const nb=score>save.best,prev=save.best;if(nb)save.best=score;if(topv>prevTop)save.top=topv;persist();sfx.lose();
+  const f=FACTS[save.fi++%FACTS.length];persist();
+  showEnd('칸이 꽉 찼어요!',score+'점','오늘 최고 칸 '+lab(topv)+(nb?'':' · 최고 기록까지 '+(save.best-score+1)+'점'),nb?'신기록! 이전 최고 '+prev+'점':'최고 '+save.best+'점 · 역대 최고 칸 '+lab(save.top),nb,'<b>'+f[0]+'</b> — '+f[1])}
+ return true}
+function render(msg){$('lv').textContent='와트와트!';$('stat').textContent=score+'점';
+ $('sub').textContent='화살표를 누르거나 밀어서 같은 숫자를 합치세요';
+ let h='<div id="grid">';for(let i=0;i<16;i++){const v=g[i];h+='<div class="c'+(newAt.has(i)?' n':'')+(mergedAt.has(i)?' m':'')+'" style="background:'+(v?(COL[v]||'#fff'):'#3b4252')+(v>=3200?';color:#fff':'')+'">'+(v?lab(v):'')+'</div>'}
+ h+='</div><div id="pad"><span></span><button class="btn" id="bu">⬆</button><span></span><button class="btn" id="bl">⬅</button><button class="btn" id="bd">⬇</button><button class="btn" id="br">➡</button></div><div id="note">최고 '+save.best+'점 · 역대 최고 칸 '+lab(save.top||100)+'</div>';
+ $('board').innerHTML=h;$('bar').textContent=msg||'';
+ $('bu').onclick=()=>move('U');$('bd').onclick=()=>move('D');$('bl').onclick=()=>move('L');$('br').onclick=()=>move('R');
+ const gr=$('grid');let sx=0,sy=0;gr.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY});
+ gr.addEventListener('pointerup',e=>{const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<30)return;if(Math.abs(dx)>Math.abs(dy))move(dx>0?'R':'L');else move(dy>0?'D':'U')});}
+addEventListener('keydown',e=>{const m={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R'}[e.key];if(m){e.preventDefault();move(m)}});
+const FACTS=[
+ ['킬로와트','1kW는 1000W예요. 그래서 이 게임에서 800W 둘을 합치면 1.6kW가 돼요.'],
+ ['전력 공식','전력(W)은 전압(V)에 전류(A)를 곱한 값이에요. 같은 전압이면 전력이 클수록 전류도 커져요.'],
+ ['게임 숫자는 점수','칸에 적힌 W는 게임 점수예요. 실제 가전 소비전력은 제품 이름표에서 확인하세요.']];
+$('again').onclick=()=>{sfx.tap();start();};
+window.__game={get state(){return {g:g.slice(),score,over,moves,topv}},start,move};
+start();
+</script>
+</body>
+</html>
