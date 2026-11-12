@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14161b">
+<title>볼까? 부를까?: 접지 없는 집 카드 가르기</title>
+<meta name="description" content="접지 없는 옛날 집에서 할 일 카드를 눈으로 볼 것과 집주인·업체를 부를 것으로 가르는 분류 게임.">
+<style>
+html,body{margin:0;height:100%;background:#14161b;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#fff;font-size:20px}
+#app{position:relative;margin:0 auto;max-width:480px;height:100%;display:flex;flex-direction:column;padding:8px 12px 10px;box-sizing:border-box}
+#top{display:flex;align-items:center;justify-content:space-between;padding-left:44px;padding-right:56px;min-height:48px}
+#top b{font-size:20px;white-space:nowrap}#stat{white-space:nowrap;font-size:20px;font-weight:800;color:#ffd23f}
+#sub{font-size:20px;line-height:1.35;color:#e8ebf2;text-align:center;margin:4px 0 8px;word-break:keep-all}
+#board{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center}
+.btn{flex:1;border:0;border-radius:14px;font-size:20px;font-weight:800;min-height:56px;font-family:inherit;cursor:pointer;touch-action:manipulation;background:#3b4252;color:#fff;box-shadow:0 4px 0 #1f232c}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #1f232c}.btn.main{background:#ffd23f;color:#2b2000;box-shadow:0 4px 0 #a98400}
+#mute{position:absolute;top:8px;right:10px;width:48px;height:48px;border:0;border-radius:24px;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;z-index:5}
+#end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,11,16,.78);z-index:4;padding:16px;box-sizing:border-box}
+#end.on{display:flex}
+#card{width:100%;max-width:360px;background:#2b2f3a;border:3px solid #4a505f;border-radius:18px;padding:18px;box-sizing:border-box;text-align:center;animation:pop .22s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#endTitle{font-size:24px;font-weight:800;margin:0 0 6px}#endScore{font-size:52px;font-weight:900;line-height:1.1;color:#ffd23f}
+#endSub{font-size:20px;color:#e8ebf2;margin:4px 0}#endBest{font-size:20px;font-weight:700;color:#9fe1ff;margin:0 0 10px}
+#fact{font-size:20px;line-height:1.45;background:#1d2029;border-radius:12px;padding:10px 12px;margin:0 0 12px;text-align:left;word-break:keep-all}
+.shake{animation:sk .3s}@keyframes sk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.sp{position:absolute;font-size:28px;animation:fl .8s ease-out forwards}@keyframes fl{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-70px) scale(1.6)}}
+#bar{width:100%;text-align:center;min-height:56px;font-size:20px;font-weight:700;color:#9fe1ff;margin-top:6px;line-height:1.3;word-break:keep-all}
+
+#qcard{width:100%;max-width:372px;margin-top:6px;background:#2b2f3a;border:4px solid #4a505f;border-radius:18px;padding:14px;box-sizing:border-box;text-align:center}
+#qic{font-size:54px;line-height:1.1}
+#qtxt{font-size:28px;font-weight:900;line-height:1.3;word-break:keep-all;min-height:110px;display:flex;align-items:center;justify-content:center}
+#btns{display:flex;gap:12px;width:100%;max-width:372px;margin-top:14px}
+#btns .btn{min-height:100px;font-size:27px;line-height:1.25}
+#bl{background:#1f8a5b;box-shadow:0 4px 0 #0f5034}#bc{background:#c2452d;box-shadow:0 4px 0 #7a2414}
+#note{font-size:18px;color:#aeb4c2;text-align:center;margin-top:8px;word-break:keep-all}
+#prog{width:100%;max-width:372px;height:14px;background:#2b2f3a;border-radius:7px;margin-top:10px;overflow:hidden}#pf{height:100%;background:#ffd23f;width:0;transition:width .3s}
+</style>
+<meta name="description" content="접지 없는 옛날 집에서 할 일 카드를 눈으로 볼 것과 집주인·업체를 부를 것으로 가르는 분류 게임. 3번 틀리면 끝."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/see-or-call/"><meta property="og:title" content="볼까? 부를까?: 접지 없는 집 카드 가르기"><meta property="og:description" content="접지 없는 옛날 집에서 할 일 카드를 눈으로 볼 것과 집주인·업체를 부를 것으로 가르는 분류 게임. 3번 틀리면 끝."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;top:max(8px,env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="볼까? 부를까?: 접지 없는 집 카드 가르기",D="접지 없는 옛날 집에서 할 일 카드를 눈으로 볼 것과 집주인·업체를 부를 것으로 가르는 분류 게임. 3번 틀리면 끝.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/see-or-call/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div id="top"><b id="lv"></b><span id="stat"></span></div>
+  <div id="sub"></div>
+  <div id="board"></div>
+  <div id="bar"></div>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  <div id="fx"></div>
+  <div id="end"><div id="card">
+    <div id="endTitle"></div><div id="endScore"></div><div id="endSub"></div><div id="endBest"></div>
+    <div id="fact"></div>
+    <button class="btn main" id="again" style="width:100%">한 번 더</button>
+  </div></div>
+</div>
+<script>
+"use strict";
+const KEY='see-or-call.save.v1';
+const $=id=>document.getElementById(id);
+let save={best:0,plays:0,fi:0};
+try{const r=localStorage.getItem(KEY);if(r)save=Object.assign(save,JSON.parse(r));}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+let muted=false,AC=null;
+try{muted=localStorage.getItem(KEY+'.mute')==='1';}catch(e){}
+function actx(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;AC=new C();}if(AC.state==='suspended')AC.resume();}catch(e){}return AC;}
+function tone(f,d,t,v,when){if(muted)return;const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain();o.type=t||'sine';o.frequency.value=f;const s=a.currentTime+(when||0);g.gain.setValueAtTime(v||.12,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d);}catch(e){}}
+const sfx={tap(){tone(520,.07,'triangle',.1)},ok(){tone(660,.1,'triangle',.14);tone(880,.14,'triangle',.14,.09)},bad(){tone(180,.25,'sawtooth',.12)},
+ done(){[523,659,784,1047].forEach((f,i)=>tone(f,.16,'triangle',.14,i*.08))},lose(){[330,262,196].forEach((f,i)=>tone(f,.28,'sawtooth',.1,i*.16))}};
+function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function burst(x,y,ch){const fx=$('fx'),r=fx.getBoundingClientRect();for(let i=0;i<5;i++){const s=document.createElement('div');s.className='sp';s.textContent=ch||'✨';s.style.left=(x-r.left-14+(Math.random()*60-30))+'px';s.style.top=(y-r.top-14+(Math.random()*30-15))+'px';fx.appendChild(s);setTimeout(()=>s.remove(),850);}}
+function burstEl(el,ch){if(!el)return burst(innerWidth/2,innerHeight/3,ch);const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,ch);}
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a}
+$('mute').textContent=muted?'🔇':'🔊';
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊';try{localStorage.setItem(KEY+'.mute',muted?'1':'0');}catch(e){}if(!muted)sfx.tap();};
+function showEnd(title,score,sub,best,isNew,fact){$('endTitle').textContent=title;$('endScore').textContent=score;$('endSub').textContent=sub;const b=$('endBest');b.textContent=best;b.style.color=isNew?'#ffd23f':'#9fe1ff';$('fact').innerHTML=fact;$('end').classList.add('on');}
+function hideEnd(){$('end').classList.remove('on');}
+function endGame(t,n,unit,extra,facts){over=true;save.plays++;const nb=n>save.best;const prev=save.best;if(nb)save.best=n;const f=facts[save.fi++%facts.length];persist();sfx.lose();
+ const gap=nb?0:save.best-n;
+ showEnd(t,n+unit,extra+(nb?'':' · 최고 기록까지 '+(gap+1)+unit+' (아깝다!)'),nb?'신기록! 이전 최고 '+prev+unit:'최고 '+save.best+unit,nb,'<b>'+f[0]+'</b> — '+f[1]);}
+// 카드 문구 근거: FACTS.md (질문수집 2026-11-11 3번 · 아이디어실 2026-11-11 1번). 숫자·법 조항 없음.
+const BANK=[
+ {l:1,i:'🔌',t:'콘센트 구멍 옆에 접지 단자(쇠붙이)가 있나 보기',h:'눈으로 보는 건 세입자도 할 수 있어요'},
+ {l:1,i:'🗄️',t:'분전반에 누전차단기가 있나 보기',h:'덮개 열지 않고 겉에서 보기만'},
+ {l:1,i:'🏠',t:'우리 집 분전반이 어디 있는지 찾아 두기',h:'위치를 알아 두면 급할 때 바로 내려요'},
+ {l:1,i:'🔥',t:'콘센트가 그을리거나 녹은 데가 있나 보기',h:'보이면 쓰지 말고 바로 알리기'},
+ {l:1,i:'📷',t:'콘센트·분전반 겉모습 사진 찍어 두기',h:'집주인·업체에 보여 주기 좋아요'},
+ {l:0,i:'🧱',t:'벽 속에 숨은 선 찾기',h:'벽 속 일은 업체가 해요'},
+ {l:0,i:'🟢',t:'접지선 새로 끌어오기',h:'공사라서 집주인·업체를 불러요'},
+ {l:0,i:'🪛',t:'검전기로 어느 선에 전기가 오는지 가려내기',h:'선 가려내기는 사람 손 아닌 업체 손'},
+ {l:0,i:'🔧',t:'콘센트 뜯어서 속 선 들여다보기',h:'뜯는 순간 감전 위험, 부르세요'},
+ {l:0,i:'⚡',t:'분전반 덮개 열고 속 선 만지기',h:'속은 손대지 말고 부르세요'},
+ {l:0,i:'🛠️',t:'누전차단기 새로 달기',h:'다는 일은 업체 몫이에요'}
+];
+const GOAL=20;
+let deck,cur,score,lives,over,count,lastSide;
+function start(){hideEnd();deck=[];score=0;lives=3;over=false;count=0;lastSide=-1;nextCard(true);render('카드를 보고 아래 두 버튼 중 하나를 누르세요');}
+function nextCard(first){if(!deck.length)deck=shuffle(BANK.slice());
+ if(first){const i=deck.findIndex(x=>x.l===1&&x.i==='🔌');cur=deck.splice(i>=0?i:0,1)[0];}else cur=deck.pop();count++;}
+function render(msg){
+ $('lv').textContent='볼까? 부를까?';$('stat').textContent='✔'+score+' · 기회 '+lives;
+ $('sub').textContent='접지 없는 옛날 집. 이 일은 내가 볼 것? 사람을 부를 것?';
+ $('board').innerHTML='<div id="qcard"><div id="qic">'+cur.i+'</div><div id="qtxt">'+cur.t+'</div></div><div id="btns"><button class="btn" id="bl">👀<br>볼 것</button><button class="btn" id="bc">📞<br>부를 것</button></div><div id="prog"><div id="pf" style="width:'+Math.min(100,score/GOAL*100)+'%"></div></div><div id="note">'+score+' / '+GOAL+'장 · 직접 손대는 일은 집주인·업체에게</div>';
+ $('bar').textContent=msg||'';
+ $('bl').onclick=()=>pick(1);$('bc').onclick=()=>pick(0);}
+function pick(side){if(over)return;const ok=cur.l===side;
+ if(ok){score++;sfx.ok();vib(20);burstEl($(side?'bl':'bc'),side?'👀':'📞');
+  if(score>=GOAL){over=true;save.plays++;const nb=score>save.best;if(nb)save.best=score;save.clear=(save.clear||0)+1;persist();sfx.done();
+   showEnd('다 갈랐어요! 안전 반장',score+'장','기회 '+lives+'개 남기고 '+GOAL+'장 완주 · 완주 '+save.clear+'번째','최고 '+save.best+'장',nb,'<b>'+FACTS[0][0]+'</b> — '+FACTS[0][1]);return}
+  const m='⭕ 맞아요! '+cur.h;nextCard();render(m);}
+ else{lives--;sfx.bad();vib([60,40,60]);$('board').classList.add('shake');setTimeout(()=>$('board').classList.remove('shake'),320);
+  if(lives<=0){endGame('뿌레카 내려감! 세 번 틀렸어요',score,'장','완주까지 '+(GOAL-score)+'장 남음',FACTS);return}
+  const m='❌ 이건 '+(cur.l?'눈으로 볼 것':'사람을 부를 것')+'이에요. '+cur.h;nextCard();render(m);}}
+const FACTS=[
+ ['직접 손대지 말고 부르세요','접지선 없는 옛날 집이라도 벽 속 선 찾기·접지선 끌어오기는 세입자 일이 아니에요. 집주인·업체를 부르세요.'],
+ ['세입자가 할 수 있는 것','콘센트 모양(접지 단자 있나)과 분전반에 누전차단기가 있나를 눈으로 보는 것까지예요.'],
+ ['보이면 알리기','콘센트가 그을리거나 녹아 있으면 그 콘센트는 쓰지 말고 집주인에게 바로 알리세요.']];
+$('again').onclick=()=>{sfx.tap();start();};
+window.__game={get state(){return {cur,score,lives,over,count}},start,pick,BANK};
+start();
+</script>
+</body>
+</html>
