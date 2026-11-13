@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>감은 수 시소: 변압기 코일 고르기</title>
+<style>
+:root{--bg:#10151f;--card:#1d2636;--ink:#fff;--sub:#c9d3e3;--v:#ffcf33;--a:#4fd1ff;--ok:#3ddc84;--bad:#ff5a5a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+#app{max-width:430px;margin:0 auto;min-height:100%;padding:10px 14px 70px;display:flex;flex-direction:column;gap:10px}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:20px;font-weight:700}
+.top .h{color:var(--bad);letter-spacing:2px}
+.rule{font-size:20px;color:var(--sub);text-align:center;margin:0}
+.q{background:var(--card);border-radius:16px;padding:12px;text-align:center;font-size:22px;line-height:1.45}
+.q b{font-size:28px}
+.q .v{color:var(--v)} .q .a{color:var(--a)}
+#seesaw{position:relative;height:120px}
+#plank{position:absolute;left:8%;right:8%;top:52px;height:16px;border-radius:8px;background:#8a96ad;transition:transform .7s cubic-bezier(.3,1.6,.5,1)}
+#plank .l,#plank .r{position:absolute;top:-44px;font-size:20px;font-weight:800;padding:4px 10px;border-radius:10px;white-space:nowrap}
+#plank .l{left:-4px;background:var(--v);color:#222}
+#plank .r{right:-4px;background:var(--a);color:#122}
+#pivot{position:absolute;left:50%;top:66px;width:0;height:0;margin-left:-18px;border:18px solid transparent;border-bottom:30px solid #5d6a82;border-top:0}
+.p{position:absolute;left:0;right:0;top:100px;text-align:center;font-size:18px;color:var(--sub)}
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{min-height:64px;border:3px solid #3a4862;background:#243049;color:var(--ink);border-radius:14px;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.card small{font-size:18px;color:var(--sub);font-weight:600}
+.card.ok{border-color:var(--ok);background:#1c4a33}.card.bad{border-color:var(--bad);background:#4a1c22}
+.card:disabled{opacity:1}
+#msg{min-height:58px;font-size:20px;text-align:center;line-height:1.4}
+#next{min-height:60px;border:0;border-radius:14px;background:var(--v);color:#222;font-size:24px;font-weight:900;display:none}
+#over{position:fixed;inset:0;background:rgba(5,8,14,.94);display:none;align-items:center;justify-content:center;padding:20px;z-index:5}
+#over .box{max-width:400px;width:100%;background:var(--card);border-radius:18px;padding:20px;text-align:center;font-size:21px;line-height:1.5}
+#over h2{margin:0 0 8px;font-size:30px}
+#over .big{font-size:44px;font-weight:900;color:var(--v)}
+#over .tip{background:#0f1622;border-radius:12px;padding:10px;margin:12px 0;font-size:19px;color:var(--sub);text-align:left}
+#again{width:100%;min-height:64px;border:0;border-radius:14px;background:var(--ok);color:#062;font-size:26px;font-weight:900}
+.spark{position:fixed;pointer-events:none;font-size:30px;animation:fly .8s ease-out forwards;z-index:9}
+@keyframes fly{to{transform:translate(var(--x),var(--y)) scale(.4);opacity:0}}
+</style><meta name="description" content="변압기 코일 카드 3장 중 목표 전압·전류를 만드는 것을 고르는 퍼즐. 감은 수를 늘리면 전압↑ 전류↓."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/coil-seesaw/"><meta property="og:title" content="감은 수 시소: 변압기 코일 고르기"><meta property="og:description" content="변압기 코일 카드 3장 중 목표 전압·전류를 만드는 것을 고르는 퍼즐. 감은 수를 늘리면 전압↑ 전류↓."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="감은 수 시소: 변압기 코일 고르기",D="변압기 코일 카드 3장 중 목표 전압·전류를 만드는 것을 고르는 퍼즐. 감은 수를 늘리면 전압↑ 전류↓.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/coil-seesaw/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head><body>
+<div id="app">
+ <div class="top"><span>✅ <span id="sc">0</span>문제</span><span>최고 <span id="best">0</span></span><span class="h" id="hp">❤❤❤</span></div>
+ <p class="rule">감은 수를 골라 목표 전압·전류를 맞춘다</p>
+ <div class="q" id="q"></div>
+ <div id="seesaw"><div id="plank"><span class="l" id="lv">전압 ?</span><span class="r" id="la">전류 ?</span></div><div id="pivot"></div><div class="p" id="pw"></div></div>
+ <div class="cards" id="cards"></div>
+ <div id="msg"></div>
+ <button id="next">다음 ▶</button>
+</div>
+<div id="over"><div class="box">
+ <h2>오늘은 여기까지</h2>
+ <div class="big" id="oScore">0문제</div>
+ <div id="oGap"></div>
+ <div class="tip" id="oTip"></div>
+ <button id="again">한 번 더</button>
+ <div style="font-size:17px;color:var(--sub);margin-top:8px">모은 시소 ⚡ <span id="oTot">0</span>개</div>
+</div></div>
+<script>
+(function(){
+const KEY='coil-seesaw.save.v1';
+let save={best:0,total:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)save=Object.assign(save,s);}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+let ac=null;
+function tone(f,d,t,v){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=v||.15;o.connect(g);g.connect(ac.destination);const n=ac.currentTime;g.gain.exponentialRampToValueAtTime(.001,n+d);o.start(n);o.stop(n+d);}catch(e){}}
+function good(){tone(660,.12);setTimeout(()=>tone(880,.18),110);setTimeout(()=>tone(1320,.25,'triangle',.1),230);if(navigator.vibrate)navigator.vibrate(30);}
+function badS(){tone(180,.35,'sawtooth',.12);if(navigator.vibrate)navigator.vibrate([60,40,60]);}
+function sparks(el){const r=el.getBoundingClientRect();for(let i=0;i<10;i++){const s=document.createElement('div');s.className='spark';s.textContent=i%2?'⚡':'✨';s.style.left=(r.left+r.width/2)+'px';s.style.top=(r.top+r.height/2)+'px';const a=Math.random()*6.28,d=60+Math.random()*80;s.style.setProperty('--x',Math.cos(a)*d+'px');s.style.setProperty('--y',Math.sin(a)*d+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),900);}}
+const $=id=>document.getElementById(id);
+const fmt=x=>{const r=Math.round(x*100)/100;return String(r);};
+const LV=[[[2,1],[1,2]],[[3,1],[1,3],[2,1],[1,2]],[[3,2],[2,3],[5,2],[4,1],[1,4],[5,1]]];
+const TIPS=['감은 수를 2배로 늘리면 전압은 2배, 전류는 반으로. 힘(전력)은 그대로다.','변압기는 힘을 만들어 내는 게 아니라 전압과 전류를 바꿔 주는 것. 전압↑이면 전류↓.','멀리 보내는 송전선은 전압을 높여 전류를 줄인다. 전류가 작으면 선에서 버리는 열이 적다.','감은 수 비 = 전압 비. 전류 비는 그 반대로 뒤집힌다(손실 없는 이상 변압기 기준).'];
+let st;
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function newGame(){st={score:0,hp:3,round:null};$('over').style.display='none';draw();next();}
+function level(){return st.score<4?0:st.score<9?1:2;}
+function next(){
+ const lv=level();const pool=LV.slice(0,lv+1).flat();
+ const k=rnd(LV[lv].concat(lv?LV[lv-1]:[]));
+ const V1=rnd([100,200]),P=rnd([200,400,600,1200]);
+ const m=rnd([1,2]),N1=100*k[1]*m,N2=100*k[0]*m;
+ const V2=V1*k[0]/k[1],I1=P/V1,I2=P/V2;
+ const type=(st.score>=3&&Math.random()<.45)?'I':'V';
+ // distractors: inverse ratio + other
+ const opts=[[N1,N2]];
+ if(k[0]!==k[1])opts.push([N2,N1]);
+ let tries=0;while(opts.length<3&&tries<50){tries++;const o=rnd(pool.concat([[1,1]]));const r=o[0]/o[1];if(opts.some(p=>Math.abs(p[1]/p[0]-r)<1e-9))continue;const mm=rnd([1,2]);opts.push([100*o[1]*mm,100*o[0]*mm]);}
+ st.round={V1,P,I1,V2,I2,N1,N2,type,opts:shuffle(opts),done:false};
+ const q=$('q');
+ q.innerHTML='1차에 <b class="v">'+V1+'V</b> · 힘(전력) <b>'+P+'W</b><br>'+(type==='V'?'2차 전압을 <b class="v">'+fmt(V2)+'V</b>로 만들 코일은?':'2차 전류를 <b class="a">'+fmt(I2)+'A</b>로 만들 코일은?<br><small style="font-size:18px;color:var(--sub)">(지금 1차 전류 '+fmt(I1)+'A)</small>');
+ setSaw(1,null);
+ const c=$('cards');c.innerHTML='';
+ st.round.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='card';b.innerHTML='1차 '+o[0]+'회 : 2차 '+o[1]+'회';b.onclick=()=>pick(i,b);c.appendChild(b);});
+ $('msg').textContent='';$('next').style.display='none';
+}
+function setSaw(r,vals){
+ const ang=Math.max(-22,Math.min(22,Math.log2(r)*11));
+ $('plank').style.transform='rotate('+ang+'deg)';
+ if(!vals){$('lv').textContent='전압 ?';$('la').textContent='전류 ?';$('pw').textContent='고르면 시소가 움직여요';return;}
+ $('lv').textContent='전압 '+fmt(vals.V)+'V';$('la').textContent='전류 '+fmt(vals.I)+'A';
+ $('pw').textContent='힘 = '+fmt(vals.V)+'V × '+fmt(vals.I)+'A = '+fmt(vals.V*vals.I)+'W (그대로)';
+}
+function pick(i,btn){
+ const R=st.round;if(R.done)return;R.done=true;
+ const o=R.opts[i],r=o[1]/o[0],V=R.V1*r,I=R.P/V;
+ setSaw(r,{V,I});
+ const right=Math.abs(r-R.N2/R.N1)<1e-9;
+ [...$('cards').children].forEach((b,j)=>{b.disabled=true;const oo=R.opts[j];if(Math.abs(oo[1]/oo[0]-R.N2/R.N1)<1e-9)b.classList.add('ok');else if(j===i)b.classList.add('bad');});
+ if(right){st.score++;good();sparks(btn);$('msg').innerHTML='찌잉! 맞음 ⚡<br>'+(r>1?'감은 수 늘림 → 전압↑ 전류↓':r<1?'감은 수 줄임 → 전압↓ 전류↑':'같은 감은 수 → 그대로');}
+ else{st.hp--;badS();$('msg').innerHTML='아깝다! 이 코일이면 '+fmt(V)+'V · '+fmt(I)+'A<br>'+(Math.abs(r*R.N2/R.N1-1)<1e-9?'거꾸로 감았어요. 전압과 전류는 반대로 움직여요':'감은 수 비 = 전압 비');}
+ draw();
+ if(st.hp<=0){setTimeout(over,1300);}else{$('next').style.display='block';}
+}
+function draw(){$('sc').textContent=st.score;$('best').textContent=save.best;$('hp').textContent='❤'.repeat(st.hp)+'♡'.repeat(3-st.hp);}
+function over(){
+ const prev=save.best;save.total+=st.score;if(st.score>save.best)save.best=st.score;store();
+ $('oScore').textContent=st.score+'문제';
+ $('oGap').textContent=st.score>prev?'🎉 새 최고 기록! (전 기록 '+prev+')':'최고 기록 '+prev+'문제까지 '+(prev-st.score+1)+'문제 남았어요';
+ $('oTip').textContent='💡 '+rnd(TIPS);$('oTot').textContent=save.total;
+ $('over').style.display='flex';draw();
+ if(st.score>prev)tone(988,.4,'triangle',.12);
+}
+$('next').onclick=next;$('again').onclick=newGame;
+window.__game={get state(){return st;},save:()=>save,newGame,pick:i=>pick(i,$('cards').children[i]),answer:()=>st.round.opts.findIndex(o=>Math.abs(o[1]/o[0]-st.round.N2/st.round.N1)<1e-9)};
+newGame();
+})();
+</script></body></html>
