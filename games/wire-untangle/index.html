@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>꼬임 풀어!: 전선 줄 풀기 퍼즐</title>
+<style>
+:root{--bg:#141a12;--ink:#fff;--sub:#d2dccb;--ok:#46e07a;--bad:#ff5050;--y:#ffd23a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overflow:hidden;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;height:100%;display:flex;flex-direction:column;padding:8px 12px 64px}
+.top{display:flex;justify-content:space-between;font-size:20px;font-weight:800;padding:4px 2px}
+.rule{font-size:20px;color:var(--sub);text-align:center;margin:4px 0}
+.stat{display:flex;justify-content:space-around;font-size:22px;font-weight:800;margin:4px 0}
+.stat .x{color:var(--bad)} .stat .m{color:var(--y)}
+#cv{flex:1;width:100%;touch-action:none;background:#1c2419;border-radius:16px;border:2px solid #2f3b2a}
+#over{position:fixed;inset:0;background:rgba(6,9,5,.94);display:none;align-items:center;justify-content:center;padding:20px;z-index:5}
+.box{max-width:400px;width:100%;background:#222c1f;border-radius:18px;padding:20px;text-align:center;font-size:21px;line-height:1.5}
+.box h2{margin:0 0 6px;font-size:30px}.big{font-size:42px;font-weight:900;color:var(--y)}
+.tip{background:#121810;border-radius:12px;padding:10px;margin:12px 0;font-size:19px;color:var(--sub);text-align:left}
+#again{width:100%;min-height:64px;border:0;border-radius:14px;background:var(--ok);color:#052;font-size:26px;font-weight:900}
+#toast{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.6);font-size:34px;font-weight:900;color:var(--y);opacity:0;transition:.35s;pointer-events:none;text-shadow:0 2px 8px #000;z-index:4}
+#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+</style><meta name="description" content="단자를 끌어 옮겨 서로 겹친(꼬인) 전선을 0개로 만드는 줄 풀기 퍼즐. 옮기기 횟수 안에 풀면 다음 판."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/wire-untangle/"><meta property="og:title" content="꼬임 풀어!: 전선 줄 풀기 퍼즐"><meta property="og:description" content="단자를 끌어 옮겨 서로 겹친(꼬인) 전선을 0개로 만드는 줄 풀기 퍼즐. 옮기기 횟수 안에 풀면 다음 판."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="꼬임 풀어!: 전선 줄 풀기 퍼즐",D="단자를 끌어 옮겨 서로 겹친(꼬인) 전선을 0개로 만드는 줄 풀기 퍼즐. 옮기기 횟수 안에 풀면 다음 판.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/wire-untangle/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head><body>
+<div id="app">
+ <div class="top"><span>판 <span id="lv">1</span></span><span>최고 <span id="best">0</span>판</span></div>
+ <p class="rule">단자를 끌어 옮겨 꼬인 전선을 다 푼다</p>
+ <div class="stat"><span class="x">⚡ 꼬임 <span id="cr">0</span></span><span class="m">✋ 남은 옮기기 <span id="mv">0</span></span></div>
+ <canvas id="cv"></canvas>
+</div>
+<div id="toast">찌릿 해결! ⚡</div>
+<div id="over"><div class="box">
+ <h2>옮기기를 다 썼어요</h2>
+ <div class="big" id="oScore">0판</div>
+ <div id="oGap"></div>
+ <div class="tip" id="oTip"></div>
+ <button id="again">한 번 더</button>
+ <div style="font-size:17px;color:var(--sub);margin-top:8px">지금까지 푼 전선 <span id="oTot">0</span>판</div>
+</div></div>
+<script>
+(function(){
+const KEY='wire-untangle.save.v1';let save={best:0,total:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)save=Object.assign(save,s);}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+let ac=null;
+function tone(f,d,t,v){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=v||.14;o.connect(g);g.connect(ac.destination);const n=ac.currentTime;g.gain.exponentialRampToValueAtTime(.001,n+d);o.start(n);o.stop(n+d);}catch(e){}}
+const $=id=>document.getElementById(id);
+const cv=$('cv'),cx=cv.getContext('2d');let W=0,H=0,DPR=1;
+const COL=['#ff8a3d','#3da5ff','#ffd23a','#c77dff','#46e07a','#ff5fa2'];
+const TIPS=['릴에 감긴 채로 큰 전류를 쓰면 열이 쌓여 위험하다. 전선은 다 풀어서 쓰자.','단자가 헐거우면 그 자리에서 열이 난다. 단자 나사는 꽉 조여야 한다.','전선이 엉켜 있으면 어느 선이 어느 단자 건지 헷갈린다. 풀어서 정리하면 점검이 쉽다.'];
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+let sol=[],st,nodes=[],edges=[],drag=null,parts=[];
+function size(){const r=cv.getBoundingClientRect();DPR=window.devicePixelRatio||1;W=r.width;H=r.height;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);}
+function cross(a,b,c,d){if(a===c||a===d||b===c||b===d)return false;const o=(p,q,r)=>(q.x-p.x)*(r.y-p.y)-(q.y-p.y)*(r.x-p.x);const d1=o(c,d,a),d2=o(c,d,b),d3=o(a,b,c),d4=o(a,b,d);return d1*d2<0&&d3*d4<0;}
+function crossings(){let n=0;const pts=[];for(let i=0;i<edges.length;i++)for(let j=i+1;j<edges.length;j++){const A=nodes[edges[i][0]],B=nodes[edges[i][1]],C=nodes[edges[j][0]],D=nodes[edges[j][1]];if(cross(A,B,C,D)){n++;edges[i].bad=edges[j].bad=1;}}return n;}
+function build(level){
+ const n=Math.min(5+level,16);const cols=n<=6?2:n<=9?3:4;const rows=Math.ceil(n/cols);
+ const g=[];for(let i=0;i<n;i++)g.push({c:i%cols,r:Math.floor(i/cols)});
+ const id=(c,r)=>{const k=r*cols+c;return k<n?k:-1;};
+ const E=[];const add=(a,b)=>{if(a>=0&&b>=0&&a!==b)E.push([a,b]);};
+ for(let i=0;i<n;i++){const {c,r}=g[i];if(c+1<cols)add(i,id(c+1,r));add(i,id(c,r+1));}
+ for(let r=0;r<rows;r++)for(let c=0;c+1<cols;c++){const a=id(c,r),b=id(c+1,r),d=id(c,r+1),e=id(c+1,r+1);if(Math.random()<.5){if(a>=0&&e>=0)add(a,e);}else{if(b>=0&&d>=0)add(b,d);}}
+ // drop a few edges for variety but keep degree>=2
+ for(let t=0;t<Math.floor(E.length/5);t++){const k=Math.floor(Math.random()*E.length);const [a,b]=E[k];const deg=v=>E.filter(e=>e[0]===v||e[1]===v).length;if(deg(a)>2&&deg(b)>2)E.splice(k,1);}
+ sol=g.map(q=>({x:W*(q.c+.5)/cols,y:H*(q.r+.5)/rows}));
+ edges=E.map(e=>{const x=[e[0],e[1]];x.col=rnd(COL);return x;});
+ let tries=0;do{const ord=[...Array(n).keys()].sort(()=>Math.random()-.5);const R=Math.min(W,H)*.38;nodes=ord.map((o,i)=>({x:W/2+R*Math.cos(i/n*6.283+.3),y:H/2+R*Math.sin(i/n*6.283+.3)}));tries++;}while(count()<Math.max(2,Math.floor(n/2))&&tries<40);
+ st.moves=n+3+Math.max(0,4-Math.floor(level/2));
+ st.start=count();
+}
+function count(){edges.forEach(e=>e.bad=0);return crossings();}
+function draw(){
+ cx.clearRect(0,0,W,H);const c=count();
+ edges.forEach(e=>{const a=nodes[e[0]],b=nodes[e[1]];cx.lineCap='round';cx.lineWidth=9;cx.strokeStyle=e.bad?'#ff5050':e.col;cx.globalAlpha=e.bad?1:.95;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke();});
+ cx.globalAlpha=1;
+ nodes.forEach((p,i)=>{cx.fillStyle=drag&&drag.i===i?'#ffe680':'#e8ece4';cx.strokeStyle='#333';cx.lineWidth=3;cx.beginPath();cx.roundRect?cx.roundRect(p.x-20,p.y-20,40,40,8):cx.rect(p.x-20,p.y-20,40,40);cx.fill();cx.stroke();cx.fillStyle='#555';cx.beginPath();cx.arc(p.x,p.y,7,0,6.283);cx.fill();cx.strokeStyle='#ddd';cx.lineWidth=2;cx.beginPath();cx.moveTo(p.x-5,p.y);cx.lineTo(p.x+5,p.y);cx.stroke();});
+ parts=parts.filter(s=>s.t>0);parts.forEach(s=>{s.x+=s.vx;s.y+=s.vy;s.vy+=.2;s.t--;cx.globalAlpha=s.t/40;cx.font='26px sans-serif';cx.fillText('⚡',s.x,s.y);});cx.globalAlpha=1;
+ $('cr').textContent=c;$('mv').textContent=st.moves;$('lv').textContent=st.level;$('best').textContent=save.best;
+ return c;
+}
+function loop(){draw();if(parts.length)requestAnimationFrame(loop);}
+function burst(){for(let i=0;i<24;i++)parts.push({x:W/2,y:H/2,vx:(Math.random()-.5)*9,vy:(Math.random()-.8)*8,t:40});loop();}
+function pos(ev){const r=cv.getBoundingClientRect();return {x:ev.clientX-r.left,y:ev.clientY-r.top};}
+cv.addEventListener('pointerdown',ev=>{if(st.busy)return;const p=pos(ev);let best=-1,bd=40*40;nodes.forEach((n,i)=>{const d=(n.x-p.x)**2+(n.y-p.y)**2;if(d<bd){bd=d;best=i;}});if(best<0)return;drag={i:best,ox:nodes[best].x,oy:nodes[best].y};cv.setPointerCapture(ev.pointerId);tone(440,.06,'square',.05);draw();});
+cv.addEventListener('pointermove',ev=>{if(!drag)return;const p=pos(ev);nodes[drag.i].x=Math.max(22,Math.min(W-22,p.x));nodes[drag.i].y=Math.max(22,Math.min(H-22,p.y));draw();});
+function up(){if(!drag)return;const n=nodes[drag.i];const moved=Math.hypot(n.x-drag.ox,n.y-drag.oy)>6;const before=st.last;drag=null;
+ if(moved)st.moves--;const c=draw();
+ if(moved&&c<before){tone(520+(st.start-c)*40,.12,'triangle',.12);}
+ st.last=c;
+ if(c===0){st.busy=true;st.level++;st.cleared++;tone(660,.12);setTimeout(()=>tone(880,.14),110);setTimeout(()=>tone(1320,.3,'triangle',.1),230);if(navigator.vibrate)navigator.vibrate(40);burst();$('toast').classList.add('on');setTimeout(()=>{$('toast').classList.remove('on');start(false);},1200);}
+ else if(st.moves<=0){st.busy=true;tone(160,.4,'sawtooth',.12);if(navigator.vibrate)navigator.vibrate([60,40,60]);setTimeout(over,600);}
+}
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+function start(fresh){if(fresh)st={level:1,cleared:0};st.busy=false;size();build(st.level);st.last=count();draw();}
+function over(){const prev=save.best;save.total+=st.cleared;if(st.cleared>prev)save.best=st.cleared;store();
+ $('oScore').textContent=st.cleared+'판 풀었음';
+ $('oGap').textContent='이번 판 꼬임 '+st.last+'개 남았어요 · '+(st.cleared>prev?'🎉 새 최고 기록!':'최고 '+prev+'판까지 '+(prev-st.cleared+1)+'판');
+ $('oTip').textContent='💡 '+rnd(TIPS);$('oTot').textContent=save.total;$('over').style.display='flex';}
+$('again').onclick=()=>{$('over').style.display='none';start(true);};
+window.addEventListener('resize',()=>{if(!st)return;const ow=W,oh=H;size();nodes.forEach(n=>{n.x=n.x*W/ow;n.y=n.y*H/oh;});draw();});
+window.__game={get state(){return st;},get sol(){return sol;},get nodes(){return nodes;},get edges(){return edges;},count,draw,save:()=>save,
+ // test helper: move node i to (x,y) as a drag
+ move(i,x,y){drag={i,ox:nodes[i].x,oy:nodes[i].y};nodes[i].x=x;nodes[i].y=y;up();}};
+start(true);
+})();
+</script></body></html>
