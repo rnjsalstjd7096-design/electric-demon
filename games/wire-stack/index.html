@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>착착 묶음!: 전선 색 쌓기 퍼즐</title>
+<style>
+:root{--bg:#15131b;--ink:#fff;--sub:#d6d2e2;--ok:#46e07a;--bad:#ff5050;--y:#ffd23a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overflow:hidden}
+#app{max-width:430px;margin:0 auto;height:100%;display:flex;flex-direction:column;padding:8px 12px 64px}
+.top{display:flex;justify-content:space-between;font-size:20px;font-weight:800;padding:4px 2px}
+.rule{font-size:20px;color:var(--sub);text-align:center;margin:4px 0;font-weight:700}
+#grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(5,1fr);gap:6px;min-height:0}
+.cell{background:#2a2735;border:2px solid #403b52;border-radius:12px;position:relative;display:flex;flex-direction:column-reverse;align-items:center;padding:4px 3px;overflow:hidden}
+.cell.empty::after{content:'+';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;color:#5d5672}
+.cell.flash{animation:fl .5s}
+@keyframes fl{0%{background:#fff6b0}100%{background:#2a2735}}
+.bar{width:100%;height:7px;border-radius:3px;margin-top:2px;flex:none;border:1px solid rgba(0,0,0,.35)}
+.cnt{position:absolute;top:1px;right:5px;font-size:15px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000}
+#tray{display:flex;gap:10px;margin-top:8px;height:96px}
+.slot{flex:1;background:#2a2735;border:3px solid #403b52;border-radius:14px;display:flex;flex-direction:column-reverse;align-items:center;padding:8px 14px}
+.slot.sel{border-color:var(--y);background:#3a3550}
+.slot .bar{height:12px;margin-top:3px}
+#hint{font-size:18px;color:var(--sub);text-align:center;margin-top:4px}
+#over{position:fixed;inset:0;background:rgba(6,5,9,.94);display:none;align-items:center;justify-content:center;padding:20px;z-index:5}
+.box{max-width:400px;width:100%;background:#2a2735;border-radius:18px;padding:20px;text-align:center;font-size:21px;line-height:1.5}
+.box h2{margin:0 0 6px;font-size:30px}.big{font-size:42px;font-weight:900;color:var(--y)}
+.tip{background:#121018;border-radius:12px;padding:10px;margin:12px 0;font-size:19px;color:var(--sub);text-align:left}
+#again{width:100%;min-height:64px;border:0;border-radius:14px;background:var(--ok);color:#052;font-size:26px;font-weight:900}
+#toast{position:fixed;left:50%;top:40%;white-space:nowrap;transform:translate(-50%,-50%) scale(.6);font-size:32px;font-weight:900;color:var(--y);opacity:0;transition:.3s;pointer-events:none;text-shadow:0 2px 8px #000;z-index:4}
+#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.spark{position:fixed;font-size:24px;pointer-events:none;z-index:4;transition:transform .7s ease-out,opacity .7s}
+</style><meta name="description" content="전선 다발 3개 중 골라 빈칸에 놓으면 옆의 같은 색이 건너와 쌓이고, 같은 색 6가닥이 모이면 사라지는 쌓기 퍼즐. 칸이 다 차면 끝."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/wire-stack/"><meta property="og:title" content="착착 묶음!: 전선 색 쌓기 퍼즐"><meta property="og:description" content="전선 다발 3개 중 골라 빈칸에 놓으면 옆의 같은 색이 건너와 쌓이고, 같은 색 6가닥이 모이면 사라지는 쌓기 퍼즐. 칸이 다 차면 끝."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="착착 묶음!: 전선 색 쌓기 퍼즐",D="전선 다발 3개 중 골라 빈칸에 놓으면 옆의 같은 색이 건너와 쌓이고, 같은 색 6가닥이 모이면 사라지는 쌓기 퍼즐. 칸이 다 차면 끝.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/wire-stack/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head><body>
+<div id="app">
+ <div class="top"><span>정리 <span id="sc">0</span>가닥</span><span>최고 <span id="best">0</span></span></div>
+ <p class="rule">같은 색 옆에 놓아 6가닥 모이면 묶여 사라진다</p>
+ <div id="grid"></div>
+ <div id="tray"></div>
+ <div id="hint">아래 다발을 고르고 빈칸을 누르세요</div>
+</div>
+<div id="toast"></div>
+<div id="over"><div class="box">
+ <h2>빈칸이 없어요</h2>
+ <div class="big" id="oScore">0가닥</div>
+ <div id="oGap"></div>
+ <div class="tip" id="oTip"></div>
+ <button id="again">한 번 더</button>
+ <div style="font-size:17px;color:var(--sub);margin-top:8px">지금까지 묶은 전선 <span id="oTot">0</span>가닥</div>
+</div></div>
+<script>
+(function(){
+const KEY='wire-stack.save.v1';let save={best:0,total:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)save=Object.assign(save,s);}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+let ac=null;
+function tone(f,d,t,v){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=v||.14;o.connect(g);g.connect(ac.destination);const n=ac.currentTime;g.gain.exponentialRampToValueAtTime(.001,n+d);o.start(n);o.stop(n+d);}catch(e){}}
+const $=id=>document.getElementById(id);const rnd=a=>a[Math.floor(Math.random()*a.length)];const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const C=4,R=5,GOAL=6;
+const COL=['#8b4a1c','#1b1b1b','#9aa0a6','#2f7fff','linear-gradient(90deg,#2fbf4a 0 50%,#ffd23a 50% 100%)'];
+const NAME=['갈색','검정','회색','파랑','초록-노랑'];
+const TIPS=['전선 색: L1 갈색 · L2 검정 · L3 회색 · N(중성선) 파랑 · 접지(보호도체) 초록-노랑 줄무늬.','중성선은 파랑, 접지선은 초록-노랑. 색만 맞게 써 놔도 나중에 점검하는 사람이 헷갈리지 않는다.','같은 색끼리 묶어 정리해 두면 어느 선이 어느 회로인지 바로 찾는다.'];
+let st,grid=[],tray=[],sel=0;
+function ncol(){return st.score>=60?5:st.score>=18?4:3;}
+function newStack(){const k=ncol(),seg=st.score<12?ri(1,2):ri(2,3),s=[];let c=-1;for(let g=0;g<seg;g++){let d;do{d=Math.floor(Math.random()*k);}while(d===c);c=d;const n=ri(1,st.score<12?3:2);for(let i=0;i<n;i++)s.push(c);}return s;}
+function topRun(s){if(!s.length)return 0;const c=s[s.length-1];let n=0;for(let i=s.length-1;i>=0&&s[i]===c;i--)n++;return n;}
+function bars(el,s,max){el.innerHTML='';const v=s.slice(-max);v.forEach(c=>{const b=document.createElement('div');b.className='bar';b.style.background=COL[c];el.appendChild(b);});}
+function render(){
+ const g=$('grid');g.innerHTML='';grid.forEach((s,i)=>{const d=document.createElement('div');d.className='cell'+(s.length?'':' empty');if(st.flash&&st.flash.includes(i))d.classList.add('flash');bars(d,s,12);if(s.length){const n=document.createElement('div');n.className='cnt';n.textContent=topRun(s)+'/'+GOAL;d.appendChild(n);}d.onclick=()=>place(i);g.appendChild(d);});
+ const t=$('tray');t.innerHTML='';tray.forEach((s,i)=>{const d=document.createElement('div');d.className='slot'+(i===sel?' sel':'');bars(d,s,6);d.onclick=()=>{sel=i;tone(500,.05,'square',.05);render();};t.appendChild(d);});
+ $('sc').textContent=st.score;$('best').textContent=save.best;st.flash=null;
+}
+function nb(i){const x=i%C,y=Math.floor(i/C),o=[];if(x>0)o.push(i-1);if(x<C-1)o.push(i+1);if(y>0)o.push(i-C);if(y<R-1)o.push(i+C);return o;}
+function settle(p){
+ let cleared=0,flash=[],guard=0,changed=true;
+ while(changed&&guard++<60){changed=false;
+  const order=[p,...grid.map((_,i)=>i).filter(i=>i!==p)];
+  for(const i of order){const s=grid[i];if(!s.length)continue;const c=s[s.length-1];
+   for(const j of nb(i)){const t=grid[j];if(t.length&&t[t.length-1]===c){const n=topRun(t);for(let k=0;k<n;k++)s.push(t.pop());changed=true;}}
+   const r=topRun(s);if(r>=GOAL){s.splice(s.length-r,r);cleared+=r;flash.push(i);changed=true;}
+   if(changed)break;}
+ }
+ return {cleared,flash};
+}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),900);}
+function burst(){for(let i=0;i<14;i++){const s=document.createElement('div');s.className='spark';s.textContent='⚡';s.style.left=(innerWidth/2)+'px';s.style.top=(innerHeight*.4)+'px';document.body.appendChild(s);requestAnimationFrame(()=>{s.style.transform='translate('+((Math.random()-.5)*300)+'px,'+((Math.random()-.7)*300)+'px)';s.style.opacity=0;});setTimeout(()=>s.remove(),750);}}
+function place(i){
+ if(st.over||grid[i].length)return;
+ grid[i]=tray[sel].slice();tray[sel]=newStack();tone(380,.06,'triangle',.08);
+ const before=ncol();const r=settle(i);
+ if(r.cleared){st.score+=r.cleared;save.total+=r.cleared;store();st.flash=r.flash;tone(660,.1);setTimeout(()=>tone(880,.12),90);setTimeout(()=>tone(1320,.22,'triangle',.1),180);if(navigator.vibrate)navigator.vibrate(35);burst();toast(r.cleared>=12?'한꺼번에 '+r.cleared+'가닥! ⚡':'착! 묶음 완성 ⚡');
+  if(ncol()>before)setTimeout(()=>toast('새 색 등장: '+NAME[ncol()-1]),1000);}
+ render();
+ if(!grid.some(s=>!s.length)){st.over=true;tone(160,.4,'sawtooth',.12);if(navigator.vibrate)navigator.vibrate([60,40,60]);setTimeout(over,700);}
+}
+function over(){const prev=save.best;if(st.score>prev)save.best=st.score;store();
+ const most=Math.max(0,...grid.map(topRun));
+ $('oScore').textContent=st.score+'가닥 묶음';
+ $('oGap').textContent='가장 긴 다발 '+most+'/'+GOAL+' · '+(st.score>prev?'🎉 새 최고 기록!':'최고 '+prev+'가닥까지 '+(prev-st.score+1)+'가닥');
+ $('oTip').textContent='💡 '+rnd(TIPS);$('oTot').textContent=save.total;$('over').style.display='flex';}
+function start(){st={score:0,over:false};grid=Array.from({length:C*R},()=>[]);
+ // 처음 몇 칸에 다발을 깔아 둠(판마다 다름)
+ for(let k=0;k<4;k++){let i;do{i=ri(0,C*R-1);}while(grid[i].length);grid[i]=newStack();}
+ settle(0);tray=[newStack(),newStack(),newStack()];sel=0;$('over').style.display='none';render();}
+$('again').onclick=start;
+window.__game={get state(){return st;},get grid(){return grid;},get tray(){return tray;},place,select:i=>{sel=i;render();},save:()=>save};
+start();
+})();
+</script></body></html>
