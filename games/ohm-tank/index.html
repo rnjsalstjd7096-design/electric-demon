@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>콸콸!: 옴의 법칙 물탱크 퍼즐</title>
+<style>
+:root{--bg:#0f1a24;--ink:#fff;--sub:#cfe0ee;--ok:#46e07a;--bad:#ff5a5a;--y:#ffd23a;--w:#3fb4ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overflow:hidden}
+#app{max-width:430px;margin:0 auto;height:100%;display:flex;flex-direction:column;padding:8px 12px 64px}
+.top{display:flex;justify-content:space-between;font-size:20px;font-weight:800;padding:4px 2px}
+.rule{font-size:20px;color:var(--sub);text-align:center;margin:4px 0;font-weight:700}
+#scene{flex:1;min-height:0;width:100%}
+.eq{display:flex;align-items:center;justify-content:center;gap:6px;font-size:22px;font-weight:900;margin:6px 0}
+.eq .b{min-width:92px;padding:8px 6px;border-radius:12px;background:#1d2d3c;border:2px solid #34506a;text-align:center}
+.eq .b small{display:block;font-size:15px;color:var(--sub);font-weight:700}
+.eq .b.q{border-color:var(--y);color:var(--y);animation:pul 1s infinite}
+@keyframes pul{50%{background:#33402a}}
+#ch{display:flex;gap:10px;margin-top:6px}
+#ch button{flex:1;min-height:68px;border-radius:14px;border:3px solid #4b6a86;background:#20364a;color:#fff;font-size:28px;font-weight:900}
+#ch button:disabled{opacity:.55}
+#ch button.good{background:#1f6a3a;border-color:var(--ok)}#ch button.bad{background:#6a1f1f;border-color:var(--bad)}
+#hint{font-size:19px;color:var(--sub);text-align:center;margin-top:8px;min-height:50px}
+#over{position:fixed;inset:0;background:rgba(5,9,13,.94);display:none;align-items:center;justify-content:center;padding:20px;z-index:5}
+.box{max-width:400px;width:100%;background:#1d2d3c;border-radius:18px;padding:20px;text-align:center;font-size:21px;line-height:1.5}
+.box h2{margin:0 0 6px;font-size:30px}.big{font-size:42px;font-weight:900;color:var(--y)}
+.tip{background:#0c141c;border-radius:12px;padding:10px;margin:12px 0;font-size:19px;color:var(--sub);text-align:left}
+#again{width:100%;min-height:64px;border:0;border-radius:14px;background:var(--ok);color:#052;font-size:26px;font-weight:900}
+#toast{position:fixed;left:50%;top:34%;white-space:nowrap;transform:translate(-50%,-50%) scale(.6);font-size:32px;font-weight:900;color:var(--y);opacity:0;transition:.3s;pointer-events:none;text-shadow:0 2px 8px #000;z-index:4}
+#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.spark{position:fixed;font-size:24px;pointer-events:none;z-index:4;transition:transform .7s ease-out,opacity .7s}
+#wheel{transform-box:fill-box;transform-origin:center}
+#wheel.spin{animation:sp 1.2s linear 2}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style><meta name="description" content="물탱크(전압)·호스(저항)·물줄기(전류) 식에서 빈 ? 칸 숫자를 3개 중 골라 물레방아를 돌리는 옴의 법칙 퍼즐. 3번 틀리면 끝."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/ohm-tank/"><meta property="og:title" content="콸콸!: 옴의 법칙 물탱크 퍼즐"><meta property="og:description" content="물탱크(전압)·호스(저항)·물줄기(전류) 식에서 빈 ? 칸 숫자를 3개 중 골라 물레방아를 돌리는 옴의 법칙 퍼즐. 3번 틀리면 끝."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="콸콸!: 옴의 법칙 물탱크 퍼즐",D="물탱크(전압)·호스(저항)·물줄기(전류) 식에서 빈 ? 칸 숫자를 3개 중 골라 물레방아를 돌리는 옴의 법칙 퍼즐. 3번 틀리면 끝.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/ohm-tank/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head><body>
+<div id="app">
+ <div class="top"><span>돌린 바퀴 <span id="sc">0</span></span><span id="life">💧💧💧</span><span>최고 <span id="best">0</span></span></div>
+ <p class="rule">물줄기가 딱 맞게 ? 칸 숫자를 골라라</p>
+ <svg id="scene" viewBox="0 0 360 240" preserveAspectRatio="xMidYMid meet">
+  <rect x="0" y="222" width="360" height="18" fill="#2b3a2a"/>
+  <rect id="tower" x="40" y="150" width="14" height="72" fill="#5b4a3a"/>
+  <rect id="tower2" x="86" y="150" width="14" height="72" fill="#5b4a3a"/>
+  <g id="tank"><rect x="28" y="110" width="84" height="44" rx="6" fill="#3a5a78" stroke="#9cc6e8" stroke-width="3"/>
+   <rect x="32" y="118" width="76" height="32" rx="4" fill="#3fb4ff" opacity=".85"/>
+   <text id="tV" x="70" y="141" text-anchor="middle" font-size="20" font-weight="900" fill="#fff">?V</text></g>
+  <path id="hose" d="M112 140 C 180 140, 170 200, 236 200" fill="none" stroke="#7a8a3a" stroke-width="16" stroke-linecap="round"/>
+  <path id="flow" d="M112 140 C 180 140, 170 200, 236 200" fill="none" stroke="#3fb4ff" stroke-width="0" stroke-linecap="round" stroke-dasharray="10 8"/>
+  <text id="tR" x="170" y="160" text-anchor="middle" font-size="18" font-weight="900" fill="#e8f08a">?Ω</text>
+  <g id="wheel"><circle cx="290" cy="185" r="34" fill="none" stroke="#c89a5a" stroke-width="6"/>
+   <g stroke="#c89a5a" stroke-width="6"><line x1="290" y1="151" x2="290" y2="219"/><line x1="256" y1="185" x2="324" y2="185"/><line x1="266" y1="161" x2="314" y2="209"/><line x1="314" y1="161" x2="266" y2="209"/></g>
+   <circle cx="290" cy="185" r="7" fill="#c89a5a"/></g>
+  <text id="tA" x="290" y="140" text-anchor="middle" font-size="20" font-weight="900" fill="#fff">목표 ?A</text>
+ </svg>
+ <div class="eq"><div class="b" id="bV"><small>전압<br>탱크 높이</small><span></span></div>÷<div class="b" id="bR"><small>저항<br>호스 굵기</small><span></span></div>=<div class="b" id="bA"><small>전류<br>물줄기</small><span></span></div></div>
+ <div id="ch"></div>
+ <div id="hint">전압 ÷ 저항 = 전류. ? 칸에 맞는 숫자를 누르세요</div>
+</div>
+<div id="toast"></div>
+<div id="over"><div class="box">
+ <h2>물이 다 샜어요</h2>
+ <div class="big" id="oScore">0바퀴</div>
+ <div id="oGap"></div>
+ <div class="tip" id="oTip"></div>
+ <button id="again">한 번 더</button>
+ <div style="font-size:17px;color:var(--sub);margin-top:8px">지금까지 돌린 물레방아 <span id="oTot">0</span>바퀴</div>
+</div></div>
+<script>
+(function(){
+const KEY='ohm-tank.save.v1';let save={best:0,total:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)save=Object.assign(save,s);}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+let ac=null;
+function tone(f,d,t,v){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=v||.14;o.connect(g);g.connect(ac.destination);const n=ac.currentTime;g.gain.exponentialRampToValueAtTime(.001,n+d);o.start(n);o.stop(n+d);}catch(e){}}
+const $=id=>document.getElementById(id);const rnd=a=>a[Math.floor(Math.random()*a.length)];const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const TIPS=['물탱크가 높을수록 물을 미는 힘이 세다. 전기에선 이게 전압(V)이다.','호스가 가늘거나 막히면 물이 적게 흐른다. 이 방해하는 정도가 저항(Ω)이다.','전압 = 전류 × 저항. 10V에 5Ω이면 전류는 2A.','저항이 같을 때 전압을 올리면 전류도 늘고, 전압이 같을 때 저항이 크면 전류는 준다.','거꾸로도 된다. 12V에 3A면 저항은 12 ÷ 3 = 4Ω.'];
+let st,q;
+function stage(){return st.score<4?0:st.score<9?1:2;}
+function newQ(){
+ const s=stage();let A,R;
+ if(s===0){A=ri(1,3);R=ri(1,4);}else if(s===1){A=ri(1,4);R=ri(2,5);}else{A=ri(2,6);R=ri(2,6);}
+ const V=A*R;const miss=s===0?'A':s===1?rnd(['A','R']):rnd(['A','R','V']);
+ const ans={V,R,A}[miss];const set=new Set([ans]);let g=0;
+ const near=miss==='V'?[ans+A,ans-A,ans+R,ans-R,ans+1,ans+2]:[ans+1,ans-1,ans+2,ans-2,ans+3];
+ while(set.size<3&&g++<50){const c=rnd(near);if(c>0&&c!==ans)set.add(c);}
+ while(set.size<3)set.add(ans+set.size+2);
+ q={V,R,A,miss,ans,opts:[...set].sort(()=>Math.random()-.5),done:false};
+ draw(null);
+}
+function unit(k){return k==='V'?'V':k==='R'?'Ω':'A';}
+function draw(pk){
+ const show=k=>k===q.miss?(pk==null?'?':pk):q[k];
+ const v=show('V'),r=show('R'),a=show('A');
+ ['V','R','A'].forEach(k=>{const b=$('b'+k);b.classList.toggle('q',k===q.miss&&pk==null);b.querySelector('span').textContent=show(k)+unit(k);});
+ $('tV').textContent=v+'V';$('tR').textContent=r+'Ω';$('tA').textContent=(q.miss==='A'?'물줄기 ':'목표 ')+a+'A';
+ const vv=typeof v==='number'?v:6,rr=typeof r==='number'?r:3;
+ const h=Math.min(100,18+vv*3.2);$('tank').setAttribute('transform','translate(0,'+(-h+30)+')');
+ ['tower','tower2'].forEach(id=>{$(id).setAttribute('y',150-h+30);$(id).setAttribute('height',72+h-30);});
+ $('hose').setAttribute('stroke-width',Math.max(6,26-rr*3));
+ const ch=$('ch');ch.innerHTML='';q.opts.forEach(o=>{const b=document.createElement('button');b.textContent=o+unit(q.miss);b.onclick=()=>pick(o,b);ch.appendChild(b);});
+ $('sc').textContent=st.score;$('best').textContent=save.best;$('life').textContent='💧'.repeat(st.life)+'▫️'.repeat(3-st.life);
+}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1000);}
+function burst(){for(let i=0;i<14;i++){const s=document.createElement('div');s.className='spark';s.textContent=i%2?'💦':'⚡';s.style.left=(innerWidth*.7)+'px';s.style.top=(innerHeight*.3)+'px';document.body.appendChild(s);requestAnimationFrame(()=>{s.style.transform='translate('+((Math.random()-.5)*300)+'px,'+((Math.random()-.7)*300)+'px)';s.style.opacity=0;});setTimeout(()=>s.remove(),750);}}
+function pick(o,btn){
+ if(q.done||st.over)return;q.done=true;
+ [...$('ch').children].forEach(b=>b.disabled=true);
+ const ok=o===q.ans;const realA=q.miss==='A'?o:q.miss==='V'?o/q.R:q.V/o;
+ draw(o);[...$('ch').children].forEach(b=>{b.disabled=true;if(b.textContent===q.ans+unit(q.miss))b.classList.add('good');else if(b.textContent===o+unit(q.miss))b.classList.add('bad');});
+ const f=$('flow');f.setAttribute('stroke-width',Math.max(2,Math.min(22,realA*3.5)));
+ const line=q.V+'V ÷ '+q.R+'Ω = '+q.A+'A';
+ if(ok){st.score++;save.total++;store();
+  const w=$('wheel');w.classList.remove('spin');void w.getBBox();w.classList.add('spin');
+  tone(523,.1);setTimeout(()=>tone(659,.1),100);setTimeout(()=>tone(784,.2,'triangle',.12),200);if(navigator.vibrate)navigator.vibrate(30);burst();
+  toast(rnd(['콸콸! 딱 맞다','물레방아 돈다!','정답! '+line]));$('hint').textContent='✔ '+line;
+  if(st.score===4)setTimeout(()=>toast('이제 저항(Ω)도 묻는다'),1100);if(st.score===9)setTimeout(()=>toast('이제 전압(V)도 묻는다'),1100);
+ }else{st.life--;tone(180,.35,'sawtooth',.12);if(navigator.vibrate)navigator.vibrate([50,30,50]);
+  toast(realA>q.A?'물이 넘쳐요!':'물줄기가 약해요!');$('hint').textContent='정답: '+line;}
+ $('sc').textContent=st.score;$('life').textContent='💧'.repeat(st.life)+'▫️'.repeat(3-st.life);
+ setTimeout(()=>{f.setAttribute('stroke-width',0);if(st.life<=0){st.over=true;over();}else{$('hint').textContent='전압 ÷ 저항 = 전류. ? 칸에 맞는 숫자를 누르세요';newQ();}},ok?1500:2200);
+}
+function over(){const prev=save.best;if(st.score>prev)save.best=st.score;store();
+ $('oScore').textContent=st.score+'바퀴 돌림';
+ $('oGap').textContent=st.score>prev?'🎉 새 최고 기록!':(prev===st.score?'최고 기록과 같아요! 1바퀴만 더':'최고 '+prev+'바퀴까지 '+(prev-st.score+1)+'바퀴 남음');
+ $('oTip').textContent='💡 '+rnd(TIPS);$('oTot').textContent=save.total;$('over').style.display='flex';}
+function start(){st={score:0,life:3,over:false};$('over').style.display='none';newQ();}
+$('again').onclick=start;
+window.__game={get state(){return st;},get q(){return q;},pick:o=>{const b=[...$('ch').children].find(x=>x.textContent===o+unit(q.miss));pick(o,b);},save:()=>save};
+start();
+})();
+</script></body></html>
