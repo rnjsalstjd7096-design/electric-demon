@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>뒤집어 짝!: 전기 공구 짝 찾기</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0f1a14;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:10px 12px 16px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #3b5a48;background:#183022;color:#fff;font-size:24px}
+.rule{margin:6px 0;font-size:21px;font-weight:800;color:#ffd84a;text-align:center}
+.bar{display:flex;justify-content:space-between;font-size:20px;font-weight:700;margin:4px 2px 8px}
+.bar .miss{color:#ff9c7a}
+#grid{display:grid;gap:8px}
+.c{position:relative;aspect-ratio:3/4;perspective:600px;border:0;background:none;padding:0}
+.c .in{position:absolute;inset:0;transition:transform .3s;transform-style:preserve-3d}
+.c.open .in,.c.done .in{transform:rotateY(180deg)}
+.c .f,.c .b{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.c .b{background:repeating-linear-gradient(45deg,#2a6b45 0 10px,#245e3c 10px 20px);border:3px solid #4fa070;font-size:30px;color:#d8ffe6}
+.c .f{background:#f4f1e6;color:#111;transform:rotateY(180deg);border:3px solid #c9c3ad}
+.c .f .e{font-size:38px;line-height:1}
+.c .f .n{font-size:17px;font-weight:800;margin-top:4px;white-space:nowrap;letter-spacing:-1px}
+.c.done .f{background:#d9ffd9;border-color:#2ee66b;box-shadow:0 0 16px #2ee66b}
+.c.bad .f{border-color:#ff5a2a;background:#ffe2d8}
+.msg{min-height:30px;text-align:center;font-size:20px;font-weight:800;margin-top:8px}
+.rec{text-align:center;font-size:18px;color:#9fbcaa;margin-top:auto;padding-top:8px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:40px;font-weight:900;transition:transform .8s ease-out,opacity .8s;z-index:9}
+#over{position:fixed;inset:0;background:rgba(4,10,6,.92);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#183022;border:3px solid #ffd84a;border-radius:20px;padding:20px;text-align:center}
+#over h2{margin:0 0 8px;font-size:28px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#0f1a14;border-radius:12px;padding:10px;margin:12px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="엎어 둔 전기 공구 그림 카드를 두 장씩 뒤집어 같은 짝을 찾는 기억력 퍼즐. 판 시작에 잠깐 다 보여 주고, 헛손 한도 안에 짝을 다 찾으면 다음 판."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/pair-flip/"><meta property="og:title" content="뒤집어 짝!: 전기 공구 짝 찾기"><meta property="og:description" content="엎어 둔 전기 공구 그림 카드를 두 장씩 뒤집어 같은 짝을 찾는 기억력 퍼즐. 판 시작에 잠깐 다 보여 주고, 헛손 한도 안에 짝을 다 찾으면 다음 판."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="뒤집어 짝!: 전기 공구 짝 찾기",D="엎어 둔 전기 공구 그림 카드를 두 장씩 뒤집어 같은 짝을 찾는 기억력 퍼즐. 판 시작에 잠깐 다 보여 주고, 헛손 한도 안에 짝을 다 찾으면 다음 판.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/pair-flip/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="stage">1판</span><span class="sp"></span><span id="score">0쌍</span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">카드 두 장을 뒤집어 같은 짝을 찾기</div>
+  <div class="bar"><span id="left">남은 짝 6</span><span class="miss" id="miss">헛손 0/8</span></div>
+  <div id="grid"></div>
+  <div class="msg" id="msg"></div>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>헛손 다 썼어요</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='pair-flip.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+
+// 그림 카드: 이름만 적힌 놀이용 무늬(전기 규칙 없음)
+var ITEMS=[['🔌','플러그'],['💡','전구'],['🔋','건전지'],['🧰','공구함'],['⚡','번개'],['🪛','드라이버'],['🔦','손전등'],['🔧','스패너'],['🧯','소화기'],['🪜','사다리'],['🧤','장갑'],['⛑️','안전모']];
+var TIPS=[ // FACTS.md 근거
+ '배선용 차단기는 전선을 지키고, 누전차단기는 사람을 지킨다.',
+ '누전차단기는 들어간 전류와 돌아온 전류의 차이를 본다. 차이가 나면 어딘가로 새는 것.',
+ '많이 써서 떨어지는 건 과전류 쪽, 새서 떨어지는 건 누전 쪽 일이다.',
+ '전선 색: L1 갈색 · L2 검정 · L3 회색 · 중성선 파랑 · 접지선 초록-노랑 줄무늬.'
+];
+// 판 구성: [열, 짝 수, 헛손 한도]
+function cfg(n){if(n===1)return[3,6,8];if(n===2)return[4,8,10];if(n===3)return[4,10,12];return[4,10,Math.max(7,12-(n-3))];}
+
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function sFlip(){tone(420,.06,'square',.06);}
+function sPair(){tone(700,.12,'triangle',.18);tone(1050,.16,'triangle',.15,.09);}
+function sMiss(){tone(220,.18,'sawtooth',.08);}
+function sClear(){[523,659,784,1046,1318].forEach(function(f,i){tone(f,.18,'triangle',.15,i*.08);});}
+function buzz(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function fx(txt,x,y,color){var e=document.createElement('div');e.className='fx';e.textContent=txt;e.style.color=color;e.style.transform='translate('+(x-30)+'px,'+(y-20)+'px)';document.body.appendChild(e);requestAnimationFrame(function(){e.style.transform='translate('+(x-30)+'px,'+(y-90)+'px) scale(1.3)';e.style.opacity='0';});setTimeout(function(){e.parentNode&&e.parentNode.removeChild(e);},900);}
+
+var $=function(id){return document.getElementById(id);};
+var st;
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.random()*(i+1)|0;var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function newGame(){st={stage:0,pairs:0,over:false};$('over').style.display='none';nextStage();}
+function nextStage(){
+  st.stage++;var c=cfg(st.stage);st.cols=c[0];st.need=c[1];st.maxMiss=c[2];st.miss=0;st.found=0;st.open=[];st.lock=true;
+  var pick=shuffle(ITEMS.slice()).slice(0,st.need);
+  st.cards=shuffle(pick.concat(pick).map(function(it,i){return{e:it[0],n:it[1],done:false};}));
+  render();
+  // 판 시작에 잠깐 전부 보여 줌(첫 판은 길게)
+  var els=$('grid').children;for(var i=0;i<els.length;i++)els[i].classList.add('open');
+  $('msg').textContent='잘 봐 두세요!';$('msg').style.color='#ffd84a';
+  setTimeout(function(){for(var i=0;i<els.length;i++)els[i].classList.remove('open');st.lock=false;$('msg').textContent='';},st.stage===1?2200:1600);
+}
+function render(){
+  var g=$('grid');g.innerHTML='';g.style.gridTemplateColumns='repeat('+st.cols+',1fr)';
+  var w=Math.min(innerWidth,430)-24;var rows=Math.ceil(st.cards.length/st.cols);var maxH=innerHeight-210;var cw=(w-(st.cols-1)*8)/st.cols;
+  var ch=cw*4/3;if(ch*rows+(rows-1)*8>maxH){ch=(maxH-(rows-1)*8)/rows;cw=ch*3/4;}
+  g.style.gridTemplateColumns='repeat('+st.cols+','+cw+'px)';g.style.justifyContent='center';
+  st.cards.forEach(function(c,i){var b=document.createElement('button');b.className='c'+(c.done?' done':'');b.style.width=cw+'px';b.style.height=ch+'px';
+    b.innerHTML='<div class="in"><div class="b">⚡</div><div class="f"><span class="e">'+c.e+'</span><span class="n">'+c.n+'</span></div></div>';
+    b.onclick=function(){tap(i,b);};g.appendChild(b);});
+  hud();
+}
+function hud(){
+  $('stage').textContent=st.stage+'판';$('score').textContent=st.pairs+'쌍';
+  $('left').textContent='남은 짝 '+(st.need-st.found);$('miss').textContent='헛손 '+st.miss+'/'+st.maxMiss;
+  $('rec').textContent='최고 '+save.best+'쌍 · 지금까지 찾은 짝 '+save.total+'쌍';
+}
+function tap(i,b){
+  if(st.over||st.lock)return;var c=st.cards[i];if(c.done||st.open.indexOf(i)>=0)return;
+  b.classList.add('open');sFlip();st.open.push(i);
+  if(st.open.length<2)return;
+  var a=st.open[0],d=st.open[1],els=$('grid').children;st.open=[];
+  if(st.cards[a].e===st.cards[d].e){
+    st.cards[a].done=st.cards[d].done=true;els[a].classList.add('done');els[d].classList.add('done');
+    st.found++;st.pairs++;save.total++;store();sPair();buzz(20);
+    var r=b.getBoundingClientRect();fx('찰칵!',r.left+r.width/2,r.top,'#2ee66b');
+    hud();
+    if(st.found===st.need){st.lock=true;sClear();buzz([30,40,30]);$('msg').style.color='#2ee66b';$('msg').textContent='판 끝! 다음 판으로';fx('불 켜짐 💡',innerWidth/2,innerHeight/2,'#ffd84a');setTimeout(nextStage,1300);}
+  }else{
+    st.lock=true;st.miss++;sMiss();els[a].classList.add('bad');els[d].classList.add('bad');hud();
+    setTimeout(function(){els[a].classList.remove('open','bad');els[d].classList.remove('open','bad');st.lock=false;if(st.miss>=st.maxMiss)gameOver();},750);
+  }
+}
+function gameOver(){
+  st.over=true;st.lock=true;
+  var prev=save.best,nb=st.pairs>prev;if(nb)save.best=st.pairs;store();
+  $('oScore').textContent=st.pairs+'쌍 · '+st.stage+'판까지';
+  var left=st.need-st.found;
+  $('oNear').textContent='이번 판 '+left+'짝만 더 찾으면 넘어갔어요 · '+(nb&&prev>0?'최고 기록 '+(st.pairs-prev)+'쌍 넘음!':nb?'첫 기록!':'최고 기록 넘기까지 '+(prev-st.pairs+1)+'쌍');
+  $('oTip').textContent='💡 '+TIPS[Math.random()*TIPS.length|0];
+  setTimeout(function(){$('over').style.display='flex';},300);
+}
+$('again').onclick=function(){ac();newGame();};
+$('mute').onclick=function(){muted=!muted;$('mute').textContent=muted?'🔇':'🔊';};
+addEventListener('resize',function(){if(st&&!st.over){render();}});
+window.__game={get state(){return st;},save:save,newGame:newGame,
+  pairOf:function(i){for(var j=0;j<st.cards.length;j++)if(j!==i&&st.cards[j].e===st.cards[i].e)return j;return -1;}};
+newGame();
+})();
+</script>
+</body>
+</html>
