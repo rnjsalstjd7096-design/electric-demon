@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>차례로 뒤집어!: 안전 순서 기억 카드</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#1a1426;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:10px 14px 16px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+.lives{font-size:24px;letter-spacing:2px}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #4b3d6a;background:#281f3a;color:#fff;font-size:24px}
+.rule{margin:6px 0 4px;font-size:21px;font-weight:800;color:#ffd84a;text-align:center}
+.scene{background:#281f3a;border:2px solid #4b3d6a;border-radius:16px;padding:8px 12px;margin:4px 0 8px;font-size:21px;text-align:center;line-height:1.35}
+.scene b{color:#b9a2ff}
+#grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.c{position:relative;height:96px;border:0;background:none;padding:0;perspective:700px}
+.c .in{position:absolute;inset:0;transition:transform .3s;transform-style:preserve-3d}
+.c.open .in{transform:rotateY(180deg)}
+.c .f,.c .b{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;align-items:center;justify-content:center;padding:6px 8px}
+.c .b{background:repeating-linear-gradient(-45deg,#4a3a7a 0 10px,#41336c 10px 20px);border:3px solid #7d68c4;font-size:34px}
+.c .f{background:#f4f1e6;color:#111;transform:rotateY(180deg);border:3px solid #c9c3ad;font-size:19px;font-weight:800;line-height:1.25;text-align:center}
+.c.done .f{background:#d9ffd9;border-color:#2ee66b;box-shadow:0 0 14px #2ee66b}
+.c.bad .f{background:#ffe0d6;border-color:#ff5a2a}
+.c .num{position:absolute;top:-8px;left:-6px;width:32px;height:32px;border-radius:50%;background:#2ee66b;color:#111;font-weight:900;font-size:20px;display:none;align-items:center;justify-content:center;z-index:2}
+.c.done .num{display:flex}
+.bar{display:flex;justify-content:center;gap:10px;margin-top:12px}
+#peek{height:56px;padding:0 18px;border-radius:14px;border:2px solid #ffd84a;background:#3a2f12;color:#ffd84a;font-size:20px;font-weight:800}
+#peek:disabled{opacity:.4}
+.msg{min-height:30px;text-align:center;font-size:20px;font-weight:800;margin-top:8px}
+.rec{text-align:center;font-size:18px;color:#b3a6cf;margin-top:auto;padding-top:8px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:40px;font-weight:900;transition:transform .8s ease-out,opacity .8s;z-index:9}
+#over{position:fixed;inset:0;background:rgba(8,5,14,.92);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#281f3a;border:3px solid #ffd84a;border-radius:20px;padding:20px;text-align:center}
+#over h2{margin:0 0 8px;font-size:28px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#1a1426;border-radius:12px;padding:10px;margin:12px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="판 시작에 콘센트 작업 카드와 함정 카드를 잠깐 보여 준 뒤 엎어 두고, 기억한 자리를 작업 순서대로 뒤집는 퍼즐. 실수 3번이면 끝."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/flip-order/"><meta property="og:title" content="차례로 뒤집어!: 안전 순서 기억 카드"><meta property="og:description" content="판 시작에 콘센트 작업 카드와 함정 카드를 잠깐 보여 준 뒤 엎어 두고, 기억한 자리를 작업 순서대로 뒤집는 퍼즐. 실수 3번이면 끝."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="차례로 뒤집어!: 안전 순서 기억 카드",D="판 시작에 콘센트 작업 카드와 함정 카드를 잠깐 보여 준 뒤 엎어 두고, 기억한 자리를 작업 순서대로 뒤집는 퍼즐. 실수 3번이면 끝.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/flip-order/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="stage">1번째 현장</span><span class="sp"></span><span class="lives" id="lives">❤❤❤</span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">엎은 카드를 작업 순서대로 뒤집기</div>
+  <div class="scene" id="scene"></div>
+  <div id="grid"></div>
+  <div class="bar"><button id="peek">👀 다시 보기 (1번)</button></div>
+  <div class="msg" id="msg"></div>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>팍! 작업 중지</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='flip-order.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+
+// 문구 근거: FACTS.md (2026-11-17 블로그 「2.」「3.」)
+var SCENES=[
+ {t:'콘센트를 <b>새것으로 바꾸려고</b> 한다',steps:['마른 손으로 차단기 내리기','검전기로 전기 없음 확인','확인되면 작업']},
+ {t:'콘센트 바꾸다 <b>스파크가 튀었다</b>',steps:['마른 손으로 차단기 내리기','검전기로 전기 없음 확인','스파크 튄 자리 살피기','탄 자국이면 업체 부르기']},
+ {t:'<b>어느 차단기인지 모르겠다</b>',steps:['집 전체 차단기 내리기','검전기로 전기 없음 확인','확인되면 작업']},
+ {t:'작업 끝났는데 <b>콘센트가 따뜻하다</b>',steps:['바로 사용 멈추기','점검 받기']},
+ {t:'콘센트에서 <b>타는 냄새가 난다</b>',steps:['직접 고치지 않기','전기 업체 부르기']}
+];
+var TRAPS=['차단기 안 내리고 바로 작업','젖은 손으로 차단기 만지기','검전 없이 전선 잡기','탄 콘센트 다시 쓰기','냄새 나도 그냥 쓰기'];
+var TIPS=[
+ '차단기를 내린 뒤에도 검전기로 전기 없는지 꼭 확인한다. 확인 안 되면 작업 안 한다.',
+ '스파크는 그 자리에서 열이 났다는 신호다. 그냥 넘기면 안 된다.',
+ '어느 차단기인지 모르면 집 전체 차단기를 내리는 방법을 쓴다.',
+ '차단기가 바로 떨어지거나 타는 냄새가 나면 직접 고치지 말고 업체를 부른다.',
+ '작업 끝났는데 콘센트가 따뜻하거나 냄새 나면 바로 쓰지 말고 점검받는다.'
+];
+
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function sGood(n){tone(520+n*120,.12,'triangle',.18);tone(780+n*120,.14,'triangle',.14,.08);}
+function sClear(){[523,659,784,1046].forEach(function(f,i){tone(f,.18,'triangle',.16,i*.09);});}
+function sBad(){if(muted)return;var a=ac();if(!a)return;var n=a.sampleRate*.25,b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);var s=a.createBufferSource(),g=a.createGain();g.gain.value=.3;s.buffer=b;s.connect(g);g.connect(a.destination);s.start();tone(110,.25,'sawtooth',.12);}
+function buzz(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function fx(txt,x,y,color){var e=document.createElement('div');e.className='fx';e.textContent=txt;e.style.color=color;e.style.transform='translate('+(x-30)+'px,'+(y-20)+'px)';document.body.appendChild(e);requestAnimationFrame(function(){e.style.transform='translate('+(x-30)+'px,'+(y-90)+'px) scale(1.3)';e.style.opacity='0';});setTimeout(function(){e.parentNode&&e.parentNode.removeChild(e);},900);}
+
+var $=function(id){return document.getElementById(id);};
+var st;
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.random()*(i+1)|0;var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function newGame(){st={round:0,lives:3,score:0,last:-1,over:false};$('over').style.display='none';nextRound();}
+function nextRound(){
+  st.round++;var idx;do{idx=Math.random()*SCENES.length|0;}while(idx===st.last);
+  if(st.round===1)idx=Math.random()<.5?0:2;
+  st.last=idx;st.sc=SCENES[idx];st.step=0;st.peeks=1;st.lock=true;
+  // 카드 수는 짝수로 맞춤(2열). 판이 갈수록 함정 카드 늘어남
+  var n=st.sc.steps.length;var total=Math.min(8,Math.max(4,n+(st.round<=1?1:st.round<=3?2:4)));if(total%2)total++;
+  var traps=shuffle(TRAPS.slice()).slice(0,total-n);
+  st.cards=shuffle(st.sc.steps.map(function(s,i){return{t:s,k:i};}).concat(traps.map(function(s){return{t:s,k:-1};})));
+  render();showAll(st.round===1?3500:2500+n*300);
+}
+function render(){
+  $('stage').textContent=st.round+'번째 현장';
+  $('lives').textContent='❤'.repeat(Math.max(0,st.lives))+'♡'.repeat(3-Math.max(0,st.lives));
+  $('scene').innerHTML=st.sc.t+' — <b>'+st.sc.steps.length+'단계</b>';
+  var g=$('grid');g.innerHTML='';
+  st.cards.forEach(function(c,i){var b=document.createElement('button');b.className='c'+(c.done?' done open':'');
+    b.innerHTML='<span class="num">'+(c.done?c.k+1:'')+'</span><div class="in"><div class="b">⚡</div><div class="f">'+c.t+'</div></div>';
+    b.onclick=function(){tap(i,b);};g.appendChild(b);});
+  $('peek').textContent='👀 다시 보기 ('+st.peeks+'번)';$('peek').disabled=st.peeks<=0;
+  $('rec').textContent='최고 '+save.best+'점 · 지금까지 안전하게 끝낸 현장 '+save.total+'곳';
+}
+function showAll(ms){
+  st.lock=true;var els=$('grid').children;for(var i=0;i<els.length;i++)els[i].classList.add('open');
+  $('msg').style.color='#ffd84a';$('msg').textContent='자리를 잘 봐 두세요!';
+  setTimeout(function(){if(st.over)return;for(var i=0;i<els.length;i++)if(!st.cards[i].done)els[i].classList.remove('open');st.lock=false;$('msg').textContent='1번째 할 일부터 뒤집기';$('msg').style.color='#fff';},ms);
+}
+function tap(i,b){
+  if(st.over||st.lock)return;var c=st.cards[i];if(c.done)return;
+  b.classList.add('open');var r=b.getBoundingClientRect(),x=r.left+r.width/2,y=r.top;
+  if(c.k===st.step){
+    c.done=true;st.step++;st.score++;b.classList.add('done');b.querySelector('.num').textContent=st.step;sGood(st.step);buzz(15);fx('✔ '+st.step,x,y,'#2ee66b');
+    $('rec').textContent='최고 '+save.best+'점 · 지금까지 안전하게 끝낸 현장 '+save.total+'곳';
+    if(st.step===st.sc.steps.length){st.lock=true;save.total++;store();sClear();buzz([30,40,30]);fx('딸깍! 안전',innerWidth/2,innerHeight/2,'#ffd84a');$('msg').style.color='#2ee66b';$('msg').textContent='안전하게 끝! 다음 현장으로';setTimeout(nextRound,1300);}
+    else{$('msg').style.color='#fff';$('msg').textContent=(st.step+1)+'번째 할 일 뒤집기';}
+  }else{
+    st.lives--;st.lock=true;sBad();buzz([60,30,60]);fx('팍!',x,y,'#ff5a2a');b.classList.add('bad');
+    $('msg').style.color='#ff8a5a';$('msg').textContent=c.k<0?'그건 하면 안 되는 일!':'순서가 틀렸어요';
+    $('lives').textContent='❤'.repeat(Math.max(0,st.lives))+'♡'.repeat(3-Math.max(0,st.lives));
+    setTimeout(function(){b.classList.remove('open','bad');if(st.lives<=0){gameOver();return;}st.lock=false;},900);
+  }
+}
+function gameOver(){
+  st.over=true;st.lock=true;var prev=save.best,nb=st.score>prev;if(nb)save.best=st.score;store();
+  $('oScore').textContent=st.score+'점 · '+(st.round-1)+'곳 안전하게 끝';
+  $('oNear').textContent='이번 현장 '+(st.sc.steps.length-st.step)+'장 남았었어요 · '+(nb&&prev>0?'최고 기록 '+(st.score-prev)+'점 넘음!':nb?'첫 기록!':'최고 기록 넘기까지 '+(prev-st.score+1)+'점');
+  $('oTip').textContent='💡 '+TIPS[Math.random()*TIPS.length|0];
+  setTimeout(function(){$('over').style.display='flex';},300);
+}
+$('peek').onclick=function(){if(st.over||st.lock||st.peeks<=0)return;st.peeks--;$('peek').textContent='👀 다시 보기 ('+st.peeks+'번)';$('peek').disabled=st.peeks<=0;showAll(1500);};
+$('again').onclick=function(){ac();newGame();};
+$('mute').onclick=function(){muted=!muted;$('mute').textContent=muted?'🔇':'🔊';};
+window.__game={get state(){return st;},save:save,newGame:newGame,
+  answer:function(){if(!st||st.over)return -1;for(var i=0;i<st.cards.length;i++)if(st.cards[i].k===st.step&&!st.cards[i].done)return i;return -1;}};
+newGame();
+})();
+</script>
+</body>
+</html>
