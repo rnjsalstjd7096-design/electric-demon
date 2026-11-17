@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>남은 물 빼기!: 콘덴서 물탱크 안전 퍼즐</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0d1620;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:10px 12px 14px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #36506a;background:#16283a;color:#fff;font-size:24px}
+.rule{margin:6px 0 4px;font-size:21px;font-weight:800;color:#ffd84a;text-align:center;line-height:1.3}
+#sw{height:64px;border-radius:16px;border:3px solid #ff6a4a;background:#5a1a12;color:#fff;font-size:24px;font-weight:900;margin:6px 0}
+#sw.off{border-color:#2ee66b;background:#123a22}
+#tanks{flex:1;display:flex;gap:10px;justify-content:center;align-items:flex-end;min-height:230px;padding:8px 0}
+.t{flex:1;max-width:96px;height:220px;position:relative;border:4px solid #9fb6cc;border-radius:14px 14px 18px 18px;background:#0a1118;overflow:hidden;padding:0}
+.t .w{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#5ec8ff,#1f7fd1);transition:height .25s}
+.t .lim{position:absolute;left:0;right:0;border-top:4px dashed #ff5a2a}
+.t .lim:after{content:'한계선';position:absolute;right:3px;top:-24px;font-size:15px;color:#ff9c7a;font-weight:800}
+.t .cv{position:absolute;inset:0;background:repeating-linear-gradient(45deg,#4a5866 0 12px,#3c4854 12px 24px);display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;color:#e8eef4;opacity:0;pointer-events:none;transition:opacity .3s}
+.t.cover .cv{opacity:1}
+.t .lb{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:18px;font-weight:900;color:#fff;text-shadow:0 0 4px #000}
+.t.ok{border-color:#2ee66b;box-shadow:0 0 14px #2ee66b}
+.t.boom{border-color:#ff3b1a;box-shadow:0 0 24px #ff3b1a}
+#touch{height:66px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900;margin-top:6px}
+.msg{min-height:56px;text-align:center;font-size:20px;font-weight:800;margin-top:6px;line-height:1.35}
+.rec{text-align:center;font-size:18px;color:#9fb0c0;padding-top:4px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:38px;font-weight:900;transition:transform .8s ease-out,opacity .8s;z-index:9;white-space:nowrap}
+#over{position:fixed;inset:0;background:rgba(4,8,12,.93);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#16283a;border:3px solid #ffd84a;border-radius:20px;padding:20px;text-align:center}
+#over h2{margin:0 0 8px;font-size:28px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#0d1620;border-radius:12px;padding:10px;margin:12px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="차단기를 내려도 콘덴서 물통에 남은 물(전기)을 눌러 확인하고 다 뺀 뒤 만지는 순서 퍼즐. 켜 둔 채 한계선을 넘기거나 덜 빼고 만지면 목숨이 줄어듦."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/cap-drain/"><meta property="og:title" content="남은 물 빼기!: 콘덴서 물탱크 안전 퍼즐"><meta property="og:description" content="차단기를 내려도 콘덴서 물통에 남은 물(전기)을 눌러 확인하고 다 뺀 뒤 만지는 순서 퍼즐. 켜 둔 채 한계선을 넘기거나 덜 빼고 만지면 목숨이 줄어듦."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="남은 물 빼기!: 콘덴서 물탱크 안전 퍼즐",D="차단기를 내려도 콘덴서 물통에 남은 물(전기)을 눌러 확인하고 다 뺀 뒤 만지는 순서 퍼즐. 켜 둔 채 한계선을 넘기거나 덜 빼고 만지면 목숨이 줄어듦.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/cap-drain/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="job">1번째 일</span><span class="sp"></span><span id="life">❤️❤️❤️</span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">차단기 내리고, 물통을 다 뺀 뒤 만지기</div>
+  <button id="sw">⚡ 켜짐 — 눌러서 내리기</button>
+  <div id="tanks"></div>
+  <button id="touch">✋ 만지기</button>
+  <div class="msg" id="msg"></div>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>오늘 작업 끝</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='cap-drain.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+var TIPS=[ // FACTS.md 근거(2026-11-18 블로그 「방전」 글)
+ '전원을 꺼도 콘덴서 안에는 전기가 남아 있을 수 있어요. 긴 케이블도 조금 머금고 있을 수 있습니다.',
+ '남은 전기는 눈으로 봐서는 알 수 없어요. 모르고 만지면 감전될 수 있습니다.',
+ '차단기 내리고 → 검전기로 확인하고 → 남은 전기를 방전. 순서대로 밟습니다.',
+ '방전은 아무 도구로나 하는 게 아니에요. 잘못하면 불꽃이 튀거나 부품이 상할 수 있습니다.'
+];
+var LIMIT=0.82;
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function sClick(){tone(380,.07,'square',.07);}
+function sDrain(){tone(520,.12,'sine',.12);tone(330,.18,'sine',.1,.08);}
+function sGood(){tone(700,.12,'triangle',.16);tone(1050,.16,'triangle',.14,.09);}
+function sClear(){[523,659,784,1046].forEach(function(f,i){tone(f,.18,'triangle',.15,i*.08);});}
+function sBad(){tone(160,.3,'sawtooth',.14);tone(110,.35,'square',.08,.05);}
+function buzz(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function fx(txt,x,y,color){var e=document.createElement('div');e.className='fx';e.textContent=txt;e.style.color=color;e.style.transform='translate('+(x-40)+'px,'+(y-20)+'px)';document.body.appendChild(e);requestAnimationFrame(function(){e.style.transform='translate('+(x-40)+'px,'+(y-90)+'px) scale(1.2)';e.style.opacity='0';});setTimeout(function(){e.parentNode&&e.parentNode.removeChild(e);},900);}
+var $=function(id){return document.getElementById(id);};
+var st;
+function newGame(){st={job:0,done:0,life:3,over:false};$('over').style.display='none';nextJob();}
+function nextJob(){
+  st.job++;var n=st.job;
+  var k=n<=2?2:n<=5?3:4; // 물통 수
+  var speed=0.10+Math.min(0.16,(n-1)*0.014); // 1초에 차는 양(한계선까지 약 8초 → 점점 빨라짐)
+  st.on=true;st.wait=0.9;st.lock=false;
+  st.t=[];
+  var idle=Math.random()*k|0; // 하나는 연결이 약해 덜 참(판마다 다름)
+  for(var i=0;i<k;i++){st.t.push({lv:0.05+Math.random()*0.1,rate:speed*(i===idle?0.35+Math.random()*0.3:0.7+Math.random()*0.6),seen:false,ok:false});}
+  render();msg('먼저 차단기부터 내려요!','#ffd84a');
+}
+function render(){
+  var box=$('tanks');box.innerHTML='';
+  st.t.forEach(function(t,i){var b=document.createElement('button');b.className='t';b.innerHTML='<div class="w"></div><div class="lim" style="bottom:'+(LIMIT*100)+'%"></div><div class="cv">?</div><div class="lb"></div>';b.onclick=function(){tapTank(i,b);};box.appendChild(b);});
+  draw();
+}
+function draw(){
+  var els=$('tanks').children;
+  st.t.forEach(function(t,i){var e=els[i];if(!e)return;e.querySelector('.w').style.height=(t.lv*100)+'%';
+    e.classList.toggle('cover',!st.on&&!t.seen);e.classList.toggle('ok',t.ok);
+    e.querySelector('.lb').textContent=st.on?'':t.ok?'다 뺌 ✓':t.seen?'눌러서 빼기':'';});
+  var sw=$('sw');sw.classList.toggle('off',!st.on);sw.textContent=st.on?'⚡ 켜짐 — 눌러서 내리기':'✅ 차단기 내림 — 물통 확인';
+  $('job').textContent=st.job+'번째 일';$('life').textContent='❤️'.repeat(st.life)+'🖤'.repeat(3-st.life);
+  $('rec').textContent='최고 '+save.best+'건 · 지금까지 안전 작업 '+save.total+'건';
+}
+function msg(t,c){$('msg').textContent=t;$('msg').style.color=c||'#fff';}
+function center(el){var r=el.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/3];}
+$('sw').onclick=function(){if(st.over||st.lock||!st.on)return;ac();st.on=false;sClick();buzz(15);var c=center($('sw'));fx('딸깍!',c[0],c[1],'#2ee66b');
+  msg('차단기를 내려도 물(전기)은 남아 있어요. 물통을 눌러 확인!','#9fe0ff');draw();};
+function tapTank(i,el){
+  if(st.over||st.lock)return;ac();var t=st.t[i];
+  if(st.on){sBad();msg('차단기가 켜져 있어요. 먼저 내려요!','#ff9c7a');return;}
+  var c=center(el);
+  if(!t.seen){t.seen=true;sClick();if(t.lv<0.02){t.lv=0;t.ok=true;sGood();fx('비었음 ✓',c[0],c[1],'#2ee66b');}else{fx('남았다!',c[0],c[1],'#5ec8ff');msg('물이 남아 있어요. 한 번 더 눌러 빼기','#9fe0ff');}draw();checkReady();return;}
+  if(t.ok)return;
+  t.lv=Math.max(0,t.lv-0.34);sDrain();fx('쏴아',c[0],c[1],'#5ec8ff');
+  if(t.lv<0.02){t.lv=0;t.ok=true;sGood();buzz(20);fx('다 뺌 ✓',c[0],c[1]-30,'#2ee66b');}
+  draw();checkReady();
+}
+function checkReady(){if(st.t.every(function(t){return t.ok;}))msg('다 뺐어요! 이제 만지기','#2ee66b');}
+$('touch').onclick=function(){
+  if(st.over||st.lock)return;ac();var c=center($('touch'));
+  if(st.on){hurt('차단기도 안 내리고 만졌어요! 찌릿!',c);return;}
+  var left=st.t.filter(function(t){return !t.ok;}).length;
+  if(left){st.t.forEach(function(t){t.seen=true;});hurt('남은 전기가 있었어요! 물통 '+left+'개 덜 뺌. 찌릿!',c);return;}
+  st.done++;save.total++;store();sClear();buzz([30,40,30]);fx('안전 작업 완료!',c[0],c[1]-40,'#2ee66b');
+  st.lock=true;msg('잘했어요! 다음 일로','#2ee66b');setTimeout(nextJob,1100);
+};
+function hurt(text,c,boomIdx){
+  st.life--;sBad();buzz([60,40,60]);fx('찌릿!',c[0],c[1]-20,'#ff5a2a');msg(text,'#ff9c7a');
+  if(boomIdx!=null){var e=$('tanks').children[boomIdx];e&&e.classList.add('boom');}
+  st.lock=true;draw();
+  if(st.life<=0){setTimeout(gameOver,800);return;}
+  setTimeout(function(){st.job--;nextJob();},1400); // 같은 일을 새로 다시
+}
+var last=0;
+function loop(ts){
+  var dt=last?Math.min(0.05,(ts-last)/1000):0;last=ts;
+  if(st&&!st.over&&!st.lock&&st.on){
+    if(st.wait>0)st.wait-=dt;else{
+      for(var i=0;i<st.t.length;i++){var t=st.t[i];t.lv+=t.rate*dt;
+        if(t.lv>=LIMIT){t.lv=Math.min(1,t.lv);var e=$('tanks').children[i];var c=center(e);draw();hurt('한계선을 넘었어요! 펑! 차단기를 더 빨리 내려요',c,i);break;}}
+      draw();}
+  }
+  requestAnimationFrame(loop);
+}
+function gameOver(){
+  st.over=true;st.lock=true;var prev=save.best,nb=st.done>prev;if(nb)save.best=st.done;store();
+  $('oScore').textContent='안전 작업 '+st.done+'건 완료';
+  $('oNear').textContent=nb&&prev>0?'최고 기록 '+(st.done-prev)+'건 넘음!':nb?'첫 기록!':'최고 기록까지 '+(prev-st.done+1)+'건만 더';
+  $('oTip').textContent='💡 '+TIPS[Math.random()*TIPS.length|0];
+  $('over').style.display='flex';
+}
+$('again').onclick=function(){ac();newGame();};
+$('mute').onclick=function(){muted=!muted;$('mute').textContent=muted?'🔇':'🔊';};
+window.__game={get state(){return st;},save:save,newGame:newGame};
+newGame();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
