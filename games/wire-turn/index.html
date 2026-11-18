@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>돌려 이어!: 전선 돌려 전등 켜기 퍼즐</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#101a14;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:10px 12px 14px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #3e5a48;background:#1a2a20;color:#fff;font-size:24px}
+.rule{margin:6px 0;font-size:20px;font-weight:800;color:#ffd84a;text-align:center;line-height:1.3}
+.bar{display:flex;justify-content:space-between;font-size:20px;font-weight:800;margin:4px 2px}
+#left.low{color:#ff7a6a}
+#grid{display:grid;gap:4px;margin:6px auto;width:min(100%,370px);aspect-ratio:1;background:#0a120d;border:3px solid #3e5a48;border-radius:14px;padding:4px}
+.c{border:0;border-radius:10px;background:#1f3327;padding:0;position:relative;display:block;width:100%;height:100%}
+.c svg{width:100%;height:100%;display:block;transition:transform .15s}
+.c.src{background:#3a3010}
+.c.lamp.on{background:#4a4210;box-shadow:0 0 16px #ffd84a}
+.c.flash{animation:fl .5s}
+@keyframes fl{0%{background:#ffd84a}100%{}}
+.msg{min-height:30px;text-align:center;font-size:20px;font-weight:800;margin-top:8px}
+.rec{text-align:center;font-size:18px;color:#a5b8aa;margin-top:auto;padding-top:6px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:36px;font-weight:900;transition:transform .8s ease-out,opacity .8s;z-index:9;white-space:nowrap}
+#over{position:fixed;inset:0;background:rgba(5,10,7,.93);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#1a2a20;border:3px solid #ffd84a;border-radius:20px;padding:20px;text-align:center}
+#over h2{margin:0 0 8px;font-size:28px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#101a14;border-radius:12px;padding:10px;margin:12px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="전선 칸을 눌러 90도씩 돌려 ⚡ 분전반에서 모든 💡 전등까지 잇는 회전 연결 퍼즐. 판마다 돌리기 횟수 한도."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/wire-turn/"><meta property="og:title" content="돌려 이어!: 전선 돌려 전등 켜기 퍼즐"><meta property="og:description" content="전선 칸을 눌러 90도씩 돌려 ⚡ 분전반에서 모든 💡 전등까지 잇는 회전 연결 퍼즐. 판마다 돌리기 횟수 한도."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="돌려 이어!: 전선 돌려 전등 켜기 퍼즐",D="전선 칸을 눌러 90도씩 돌려 ⚡ 분전반에서 모든 💡 전등까지 잇는 회전 연결 퍼즐. 판마다 돌리기 횟수 한도.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/wire-turn/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="stage">1판</span><span class="sp"></span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">칸을 돌려 분전반에서 전등까지 다 이어라</div>
+  <div class="bar"><span id="lit">💡 0/0</span><span id="left">남은 돌리기 0번</span></div>
+  <div id="grid"></div>
+  <div class="msg" id="msg">칸을 누르면 시계 방향으로 돌아요</div>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>돌리기 횟수가 다 됐어요</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='wire-turn.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+// FACTS.md 1~4
+var TIPS=[
+ '전선 색: L1 갈색 · L2 검정 · L3 회색 · 중성선 파랑 · 접지선 초록-노랑 줄무늬.',
+ '배선용 차단기는 전선을 지키고, 누전차단기는 사람을 지킨다.',
+ '누전차단기는 들어간 전류와 돌아온 전류의 차이를 본다. 차이가 나면 어딘가로 새는 것.',
+ '많이 써서 떨어지는 건 과전류 쪽, 새서 떨어지는 건 누전 쪽 일이다.'
+];
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function sTurn(){tone(380,.05,'square',.05);}
+function sLamp(){tone(784,.1,'triangle',.15);tone(1175,.14,'triangle',.13,.07);}
+function sClear(){[523,659,784,1046,1318].forEach(function(f,i){tone(f,.18,'triangle',.15,i*.08);});}
+function sBad(){tone(180,.3,'sawtooth',.1);}
+function buzz(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function fx(txt,el,color){var r=el.getBoundingClientRect();var x=r.left+r.width/2,y=r.top;var e=document.createElement('div');e.className='fx';e.textContent=txt;e.style.color=color;e.style.transform='translate('+(x-40)+'px,'+(y-10)+'px)';document.body.appendChild(e);requestAnimationFrame(function(){e.style.transform='translate('+(x-40)+'px,'+(y-80)+'px) scale(1.2)';e.style.opacity='0';});setTimeout(function(){e.remove();},900);}
+function $(id){return document.getElementById(id);}
+// 방향: 1=위 2=오른쪽 4=아래 8=왼쪽
+var DX={1:[0,-1],2:[1,0],4:[0,1],8:[-1,0]},OPP={1:4,2:8,4:1,8:2};
+function rot(m){return ((m<<1)|(m>>3))&15;}
+var st=null,busy=false;
+function cfg(s){if(s<=1)return{n:3,slack:6};if(s<=3)return{n:4,slack:6};if(s<=5)return{n:5,slack:5};return{n:5,slack:4};}
+function newGame(){st={stage:1,cleared:0};newStage();}
+function newStage(){
+  var c=cfg(st.stage),n=c.n,N=n*n;st.n=n;
+  var sol=new Array(N).fill(0),seen=new Array(N).fill(false);
+  var sx=Math.floor(Math.random()*n),sy=Math.floor(Math.random()*n);st.src=sy*n+sx;
+  // 무작위로 넓혀 가는 나무(모든 칸이 분전반과 이어짐)
+  var front=[st.src];seen[st.src]=true;
+  while(front.length){
+    var i=front[Math.floor(Math.random()*front.length)],x=i%n,y=(i/n)|0;
+    var opts=[1,2,4,8].filter(function(d){var nx=x+DX[d][0],ny=y+DX[d][1];return nx>=0&&ny>=0&&nx<n&&ny<n&&!seen[ny*n+nx];});
+    if(!opts.length){front.splice(front.indexOf(i),1);continue;}
+    var d=opts[Math.floor(Math.random()*opts.length)],j=(y+DX[d][1])*n+(x+DX[d][0]);
+    sol[i]|=d;sol[j]|=OPP[d];seen[j]=true;front.push(j);
+  }
+  st.sol=sol;st.lamp=sol.map(function(m,i){return i!==st.src&&(m===1||m===2||m===4||m===8);});
+  st.cur=sol.slice();var need=0;
+  for(var k=0;k<N;k++){if(k===st.src)continue;var r=Math.floor(Math.random()*4);for(var t=0;t<r;t++)st.cur[k]=rot(st.cur[k]);need+=minTurns(st.cur[k],sol[k]);}
+  if(need<2){return newStage();}
+  st.left=need+c.slack;st.need=need;
+  var on=flow();if(on.cnt>=st.nl){return newStage();}
+  st.prevOn=on.set;render();
+}
+function minTurns(a,b){for(var r=0;r<4;r++){if(a===b)return r;a=rot(a);}return 0;}
+function flow(){
+  var n=st.n,N=n*n,vis=new Array(N).fill(false),q=[st.src];vis[st.src]=true;
+  while(q.length){var i=q.shift(),x=i%n,y=(i/n)|0;[1,2,4,8].forEach(function(d){if(!(st.cur[i]&d))return;var nx=x+DX[d][0],ny=y+DX[d][1];if(nx<0||ny<0||nx>=n||ny>=n)return;var j=ny*n+nx;if(vis[j]||!(st.cur[j]&OPP[d]))return;vis[j]=true;q.push(j);});}
+  var cnt=0,nl=0;for(var k=0;k<N;k++)if(st.lamp[k]){nl++;if(vis[k])cnt++;}st.nl=nl;
+  return{set:vis,cnt:cnt,nl:nl};
+}
+function svg(m,lit,kind){
+  var col=lit?'#ffd84a':'#8fa395',s='<svg viewBox="0 0 100 100">';
+  var P={1:'50,50 50,0',2:'50,50 100,50',4:'50,50 50,100',8:'50,50 0,50'};
+  [1,2,4,8].forEach(function(d){if(m&d){var p=P[d].split(' ');s+='<line x1="'+p[0].split(',')[0]+'" y1="'+p[0].split(',')[1]+'" x2="'+p[1].split(',')[0]+'" y2="'+p[1].split(',')[1]+'" stroke="#000" stroke-width="22" stroke-linecap="butt"/><line x1="'+p[0].split(',')[0]+'" y1="'+p[0].split(',')[1]+'" x2="'+p[1].split(',')[0]+'" y2="'+p[1].split(',')[1]+'" stroke="'+col+'" stroke-width="14" stroke-linecap="butt"/>';}});
+  if(kind==='src')s+='<rect x="22" y="22" width="56" height="56" rx="10" fill="#ffd84a" stroke="#000" stroke-width="4"/><text x="50" y="66" text-anchor="middle" font-size="40">⚡</text>';
+  else if(kind==='lamp')s+='<circle cx="50" cy="50" r="26" fill="'+(lit?'#fff3a0':'#2c3a30')+'" stroke="'+(lit?'#ffd84a':'#8fa395')+'" stroke-width="6"/><text x="50" y="63" text-anchor="middle" font-size="34">'+(lit?'💡':'')+'</text>';
+  else s+='<circle cx="50" cy="50" r="9" fill="'+col+'"/>';
+  return s+'</svg>';
+}
+function render(){
+  var n=st.n,g=$('grid'),on=flow(),h='';g.style.gridTemplateColumns='repeat('+n+',1fr)';
+  for(var i=0;i<n*n;i++){var kind=i===st.src?'src':st.lamp[i]?'lamp':'';h+='<button class="c'+(kind?' '+kind:'')+(kind==='lamp'&&on.set[i]?' on':'')+'" data-i="'+i+'">'+svg(st.cur[i],on.set[i],kind)+'</button>';}
+  g.innerHTML=h;hud(on);return on;
+}
+$('grid').addEventListener('click',function(e){
+  if(busy)return;var b=e.target.closest('.c');if(!b)return;var i=+b.getAttribute('data-i');ac();
+  if(i===st.src){$('msg').textContent='분전반은 고정이에요. 전선 칸을 돌리세요';return;}
+  if(st.left<=0)return;
+  st.cur[i]=rot(st.cur[i]);st.left--;sTurn();
+  var prev=st.prevOn,on=render();st.prevOn=on.set;
+  var newLit=[];for(var k=0;k<on.set.length;k++)if(st.lamp[k]&&on.set[k]&&!prev[k])newLit.push(k);
+  if(newLit.length){sLamp();buzz(25);newLit.forEach(function(k){var el=document.querySelector('.c[data-i="'+k+'"]');el.classList.add('flash');fx('번쩍!',el,'#ffd84a');});}
+  if(on.cnt===on.nl){
+    busy=true;st.cleared++;save.total++;if(st.cleared>save.best)save.best=st.cleared;store();
+    sClear();buzz([30,40,60]);$('msg').textContent='전등 '+on.nl+'개 다 켜졌어요! 다음 판…';fx(st.stage+'판 완성!',$('grid'),'#5cf08a');
+    setTimeout(function(){st.stage++;newStage();busy=false;$('msg').textContent='칸을 누르면 시계 방향으로 돌아요';},1300);
+  }else if(st.left<=0){busy=true;sBad();buzz(120);setTimeout(function(){over(on);busy=false;},700);}
+  else $('msg').textContent=newLit.length?'불 들어왔다! 나머지도':'';
+});
+function over(on){
+  $('oScore').textContent=st.cleared+'판 완성';
+  var gap=save.best-st.cleared;
+  $('oNear').textContent='이번 판 전등 '+on.cnt+'/'+on.nl+'개 켜짐 · '+(gap>0?'최고 기록('+save.best+'판)까지 '+gap+'판':'최고 기록 '+save.best+'판!');
+  $('oTip').textContent='⚡ '+TIPS[Math.floor(Math.random()*TIPS.length)];
+  $('over').style.display='flex';
+}
+$('again').addEventListener('click',function(){$('over').style.display='none';newGame();});
+$('mute').addEventListener('click',function(){muted=!muted;this.textContent=muted?'🔇':'🔊';});
+function hud(on){$('stage').textContent=st.stage+'판';$('lit').textContent='💡 '+on.cnt+'/'+on.nl+' 켜짐';$('left').textContent='남은 돌리기 '+st.left+'번';$('left').classList.toggle('low',st.left<=3);
+  $('rec').textContent='최고 '+save.best+'판 · 지금까지 완성 '+save.total+'판';}
+window.__game={state:function(){return st;},goto:function(n){st.stage=n;newStage();},
+  answer:function(){var a=[];for(var i=0;i<st.cur.length;i++){var t=minTurns(st.cur[i],st.sol[i]);for(var r=0;r<t;r++)a.push(i);}return a;},save:save};
+newGame();
+})();
+</script>
+</body>
+</html>
