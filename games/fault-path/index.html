@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>땅은 피해!: 끊긴 선 잇기 길 퍼즐</title>
+<style>
+*{box-sizing:border-box;word-break:keep-all;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#17131f;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:8px 12px 10px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #4a4160;background:#221c30;color:#fff;font-size:24px}
+.rule{margin:2px 0 4px;font-size:20px;font-weight:800;color:#ffd84a;text-align:center;line-height:1.3}
+.bar{display:flex;justify-content:space-between;font-size:20px;font-weight:800;margin:0 2px 6px}
+#wire.low{color:#ff8a7a}
+#wrap{position:relative;margin:0 auto}
+#grid{display:grid;width:100%;height:100%}
+.c{position:relative;border:2px solid #17131f;border-radius:12px;background:#2c2540;color:#fff;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:24px;font-weight:900;line-height:1.05}
+.c small{font-size:16px;font-weight:900}
+.c.gnd{background:#6b4a1e;color:#ffe2b0}
+.c.oth{background:#5a1a22;color:#ffc0c0}
+.c.brk{background:#2c2540;border:3px dashed #ff9a00;color:#ffb84a}
+.c.brk.fix{border:3px solid #2ee66b;color:#2ee66b}
+.c.lamp{background:#3a3550}
+.c.lamp.lit{background:#fff3a0;color:#111;box-shadow:0 0 18px #ffd84a}
+.c.on{background:#5a4a0a}
+.c.head{outline:4px solid #ffd84a;outline-offset:-4px;background:#a8860a}
+.c.can{background:#473c66}
+.c.bad{animation:bad .5s}
+@keyframes bad{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+#svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.msg{min-height:56px;text-align:center;font-size:20px;font-weight:800;margin-top:6px;line-height:1.35}
+.msg.warn{color:#ff9a8a}
+.rec{text-align:center;font-size:18px;color:#b3a8c8;margin-top:auto;padding-top:2px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:36px;font-weight:900;transition:transform .9s ease-out,opacity .9s;z-index:9;white-space:nowrap;color:#ffd84a}
+#over{position:fixed;inset:0;background:rgba(8,6,12,.94);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#221c30;border:3px solid #ffd84a;border-radius:20px;padding:18px;text-align:center}
+#over h2{margin:0 0 6px;font-size:27px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#17131f;border-radius:12px;padding:10px;margin:10px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="땅(지락)·딴 선(단락) 칸은 피하고 끊긴 곳(단선)을 전부 이어 전구까지 선을 긋는 길 퍼즐. 전선 길이 한도."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/fault-path/"><meta property="og:title" content="땅은 피해!: 끊긴 선 잇기 길 퍼즐"><meta property="og:description" content="땅(지락)·딴 선(단락) 칸은 피하고 끊긴 곳(단선)을 전부 이어 전구까지 선을 긋는 길 퍼즐. 전선 길이 한도."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="땅은 피해!: 끊긴 선 잇기 길 퍼즐",D="땅(지락)·딴 선(단락) 칸은 피하고 끊긴 곳(단선)을 전부 이어 전구까지 선을 긋는 길 퍼즐. 전선 길이 한도.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/fault-path/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="stage">1판</span><span class="sp"></span><span id="life">❤❤❤</span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">땅·딴 선은 피하고 끊긴 곳을 다 이어 전구까지</div>
+  <div class="bar"><span id="fixn">끊긴 곳 0/0</span><span id="wire">남은 전선 0칸</span></div>
+  <div id="wrap"><div id="grid"></div><svg id="svg"></svg></div>
+  <div class="msg" id="msg">노란 칸 옆 칸을 눌러 선을 늘리세요</div>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>기회 3번을 다 썼어요</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='fault-path.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+// FACTS.md 1~5
+var TIPS=[
+ '지락(地絡) = 땅과 이어짐. 선이 땅에 닿은 것. 선끼리 붙은 건 단락이다.',
+ '단락(短絡) = 짧게 이어짐. 두 선이 직접 붙은 것으로, 합선과 같은 말이다. 끊어진 게 아니다.',
+ '단선(斷線) = 선이 끊어짐. 끊긴 곳을 다시 이어야 전기가 전구까지 간다.',
+ '단락(합선)은 두 선이 직접 붙어 순간 아주 큰 전류가 흐르는 것. 뿌레카(차단기)가 바로 떨어지는 게 정상이다.',
+ '단락의 「락(絡)」은 떨어질 락이 아니라 이을 락이다.'
+];
+// [가로, 세로, 길 걸음 수, 끊긴 곳, 함정 비율, 여유 전선]
+var LV=[[4,4,5,1,.3,3],[4,4,7,2,.4,3],[4,5,8,2,.45,2],[4,5,10,3,.5,2],[5,5,11,3,.5,1],[5,5,13,3,.55,1],[5,6,14,4,.55,1],[5,6,16,4,.6,0]];
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function rnd(n){return Math.floor(Math.random()*n);}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function fx(txt){var r=$('wrap').getBoundingClientRect();var d=document.createElement('div');d.className='fx';d.textContent=txt;d.style.transform='translate('+(r.left+r.width/2-100)+'px,'+(r.top+r.height/2)+'px)';document.body.appendChild(d);requestAnimationFrame(function(){d.style.transform='translate('+(r.left+r.width/2-100)+'px,'+(r.top+r.height/2-90)+'px)';d.style.opacity='0';});setTimeout(function(){d.remove();},1000);}
+var S={stage:1,R:4,C:4,kind:[],sol:[],path:[],wire:0,max:0,life:3,nb:0,over:false,lock:false};
+function nb(i){var R=S.R,C=S.C,r=Math.floor(i/C),c=i%C,o=[];if(r>0)o.push(i-C);if(r<R-1)o.push(i+C);if(c>0)o.push(i-1);if(c<C-1)o.push(i+1);return o;}
+// 먼저 풀리는 길을 하나 걷고, 그 길 밖 칸에만 함정(땅·딴 선)을 놓는다 → 반드시 풀림
+function gen(){
+ var lv=LV[Math.min(S.stage-1,LV.length-1)];S.C=lv[0];S.R=lv[1];
+ var N=S.R*S.C,steps=lv[2],path;
+ for(var tr=0;tr<200;tr++){
+  var st=rnd(N),seen={};seen[st]=1;path=[st];
+  while(path.length<=steps){var ns=nb(path[path.length-1]).filter(function(x){return !seen[x];});if(!ns.length)break;var x=ns[rnd(ns.length)];seen[x]=1;path.push(x);}
+  if(path.length===steps+1)break;
+ }
+ steps=path.length-1;
+ var kind=[];for(var i=0;i<N;i++)kind.push(path.indexOf(i)>=0?'':(Math.random()<lv[4]?(Math.random()<.6?'gnd':'oth'):''));
+ kind[path[0]]='src';kind[path[steps]]='lamp';
+ var mid=shuffle(path.slice(1,steps)),k=Math.min(lv[3],mid.length);
+ for(var j=0;j<k;j++)kind[mid[j]]='brk';
+ S.kind=kind;S.sol=path;S.nb=k;S.max=steps+lv[5];
+}
+var LBL={src:'⚡<small>전원</small>',lamp:'💡<small>전구</small>',gnd:'⏚<small>땅</small>',oth:'〰<small>딴 선</small>',brk:'✂<small>끊김</small>'};
+function build(){
+ gen();reset();
+ var w=Math.min(document.documentElement.clientWidth,430)-24,avail=window.innerHeight-280;
+ var cs=Math.floor(Math.min(w/S.C,avail/S.R,84));
+ $('wrap').style.width=(cs*S.C)+'px';$('wrap').style.height=(cs*S.R)+'px';
+ var gd=$('grid');gd.innerHTML='';gd.style.gridTemplateColumns='repeat('+S.C+',1fr)';
+ for(var i=0;i<S.R*S.C;i++){var b=document.createElement('button');b.dataset.i=i;b.innerHTML=LBL[S.kind[i]]||'';(function(i){b.addEventListener('click',function(){tap(i);});})(i);gd.appendChild(b);}
+ $('svg').setAttribute('viewBox','0 0 '+S.C+' '+S.R);
+ render();say('노란 칸 옆 칸을 눌러 선을 늘리세요');
+}
+function reset(){S.path=[S.sol[0]];S.wire=S.max;}
+function head(){return S.path[S.path.length-1];}
+function fixed(){var n=0;for(var i=0;i<S.path.length;i++)if(S.kind[S.path[i]]==='brk')n++;return n;}
+function say(t,warn){$('msg').textContent=t;$('msg').className='msg'+(warn?' warn':'');}
+function render(){
+ var cells=$('grid').children,h=head(),ns=nb(h),done=S.kind[h]==='lamp';
+ for(var i=0;i<cells.length;i++){var k=S.kind[i],on=S.path.indexOf(i)>=0;
+  cells[i].className='c'+(k?' '+k:'')+(on?' on':'')+(k==='brk'&&on?' fix':'')+(i===h?' head':'')+(k==='lamp'&&done?' lit':'')+(!on&&ns.indexOf(i)>=0&&k!=='gnd'&&k!=='oth'?' can':'');
+  if(k==='brk')cells[i].innerHTML=on?'🔗<small>이음</small>':LBL.brk;}
+ var pts=S.path.map(function(i){return ((i%S.C)+.5)+','+(Math.floor(i/S.C)+.5);}).join(' ');
+ $('svg').innerHTML='<polyline points="'+pts+'" fill="none" stroke="#ffd84a" stroke-width=".13" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>';
+ $('stage').textContent=S.stage+'판';
+ $('life').textContent='❤❤❤'.slice(0,S.life)+'♡♡♡'.slice(0,3-S.life);
+ $('fixn').textContent='끊긴 곳 '+fixed()+'/'+S.nb;
+ $('wire').textContent='남은 전선 '+S.wire+'칸';$('wire').className=S.wire<=2?'low':'';
+ $('rec').textContent='최고 '+save.best+'판 · 지금까지 이은 곳 '+save.total+'군데';
+}
+function fail(why,i){
+ S.life--;S.lock=true;tone(150,.4,'sawtooth',.13);vib([60,40,60]);
+ if(i!=null){var el=$('grid').children[i];el.classList.add('bad');}
+ $('life').textContent='❤❤❤'.slice(0,S.life)+'♡♡♡'.slice(0,3-S.life);
+ say(why,true);
+ setTimeout(function(){S.lock=false;if(S.life<=0){lose();return;}reset();render();say('같은 판을 처음부터 다시! 남은 기회 '+S.life+'번');},1900);
+}
+function tap(i){
+ if(S.over||S.lock)return;ac();
+ var h=head(),k=S.kind[i];
+ if(i===h)return;
+ if(nb(h).indexOf(i)<0){say('노란 칸 바로 옆 칸만 갈 수 있어요',true);return;}
+ if(S.path.indexOf(i)>=0){say('이미 선이 지나간 칸이에요. 되돌아갈 수 없어요',true);return;}
+ if(k==='gnd'){fail('지락! 선이 땅과 이어졌어요 (地絡 = 땅과 이어짐)',i);return;}
+ if(k==='oth'){fail('단락! 딴 선과 직접 붙었어요 (합선과 같은 말)',i);return;}
+ S.path.push(i);S.wire--;
+ if(k==='brk'){save.total++;store();tone(620,.1,'triangle',.18);tone(830,.16,'triangle',.18,.09);vib(30);fx('단선 이음!');}
+ else tone(400+S.path.length*14,.08,'triangle',.12);
+ if(k==='lamp'){
+  if(fixed()<S.nb){render();fail('아직 끊긴 곳(단선)이 '+(S.nb-fixed())+'군데 남아 불이 안 켜져요');return;}
+  win();return;
+ }
+ render();
+ if(S.wire<=0){fail('전선이 모자라요! 더 짧은 길로');return;}
+ var ok=nb(i).some(function(x){return S.path.indexOf(x)<0&&S.kind[x]!=='gnd'&&S.kind[x]!=='oth';});
+ if(!ok){fail('갈 곳이 막혔어요!');return;}
+ say(fixed()<S.nb?'끊긴 곳 '+(S.nb-fixed())+'군데 남음':'다 이었어요! 이제 전구로');
+}
+function win(){
+ S.lock=true;render();
+ tone(523,.12,'triangle',.2);tone(659,.12,'triangle',.2,.12);tone(784,.12,'triangle',.2,.24);tone(1047,.35,'triangle',.2,.36);vib([30,30,60]);
+ fx(S.stage+'판 불 켜짐!');say('전구에 불이 들어왔어요!');
+ if(S.stage>save.best){save.best=S.stage;}store();
+ setTimeout(function(){S.stage++;S.lock=false;build();},1300);
+}
+function lose(){
+ S.over=true;store();
+ var done=S.stage-1;
+ $('oScore').textContent=done+'판 완성 · '+S.stage+'판 끊긴 곳 '+fixed()+'/'+S.nb;
+ var gap=save.best-done;
+ $('oNear').textContent=gap>0?'최고 기록까지 '+gap+'판':'최고 기록과 같아요! 한 판만 더';
+ $('oTip').textContent='💡 '+TIPS[rnd(TIPS.length)];
+ $('over').style.display='flex';
+}
+function start(){S.stage=1;S.life=3;S.over=false;S.lock=false;$('over').style.display='none';build();}
+$('again').addEventListener('click',function(){ac();start();});
+$('mute').addEventListener('click',function(){muted=!muted;this.textContent=muted?'🔇':'🔊';});
+window.__game={state:S,save:save,start:start,tap:tap};
+start();
+})();
+</script>
+</body>
+</html>

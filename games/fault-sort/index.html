@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>붙었나? 끊겼나?: 단락·단선·지락 가르기</title>
+<style>
+*{box-sizing:border-box;word-break:keep-all;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#10151c;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:8px 12px 12px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #3d4a5c;background:#1b2430;color:#fff;font-size:24px}
+.rule{margin:4px 0 6px;font-size:21px;font-weight:800;color:#ffd84a;text-align:center;line-height:1.3}
+#card{position:relative;background:#f4f1e6;border:4px solid #3d4a5c;border-radius:16px;overflow:hidden}
+#card.ok{border-color:#2ee66b}#card.no{border-color:#ff6a5a}
+#cv{display:block;width:100%;height:auto}
+#clue{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:14px;color:#111;font-size:28px;font-weight:900;line-height:1.4;background:#f4f1e6}
+#cap{background:#1b2430;color:#fff;font-size:20px;font-weight:800;text-align:center;padding:6px;min-height:38px}
+#btns{display:flex;gap:8px;margin-top:10px}
+.b{flex:1;height:76px;border-radius:16px;border:3px solid #5b6b82;background:#1b2430;color:#fff;font-size:28px;font-weight:900}
+.b.ok{background:#14462a;border-color:#2ee66b}
+.b.no{background:#4a1c18;border-color:#ff6a5a}
+.msg{min-height:64px;text-align:center;font-size:20px;font-weight:800;margin-top:8px;line-height:1.4}
+.rec{text-align:center;font-size:18px;color:#a9b6c8;margin-top:auto;padding-top:4px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:38px;font-weight:900;transition:transform .8s ease-out,opacity .8s;z-index:9;white-space:nowrap}
+#over{position:fixed;inset:0;background:rgba(6,9,12,.94);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#1b2430;border:3px solid #ffd84a;border-radius:20px;padding:18px;text-align:center}
+#over h2{margin:0 0 6px;font-size:28px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#10151c;border-radius:12px;padding:10px;margin:10px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="전지·전구 회로 그림을 보고 두 선이 붙었는지(단락)·끊어졌는지(단선)·땅에 닿았는지(지락) 낱말을 고르는 카드 게임. 한 판 20장."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/fault-sort/"><meta property="og:title" content="붙었나? 끊겼나?: 단락·단선·지락 가르기"><meta property="og:description" content="전지·전구 회로 그림을 보고 두 선이 붙었는지(단락)·끊어졌는지(단선)·땅에 닿았는지(지락) 낱말을 고르는 카드 게임. 한 판 20장."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="붙었나? 끊겼나?: 단락·단선·지락 가르기",D="전지·전구 회로 그림을 보고 두 선이 붙었는지(단락)·끊어졌는지(단선)·땅에 닿았는지(지락) 낱말을 고르는 카드 게임. 한 판 20장.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/fault-sort/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="prog">1 / 20장</span><span class="sp"></span><span id="life">❤❤❤</span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">그림을 보고 단락·단선·지락을 골라라</div>
+  <div id="card"><canvas id="cv" width="336" height="210"></canvas><div id="clue"></div><div id="cap"></div></div>
+  <div id="btns"></div>
+  <div class="msg" id="msg">아래 세 낱말 중 하나를 누르세요</div>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2 id="oTitle">세 번 틀렸어요</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='fault-sort.save.v1',TOTAL=20;
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+// FACTS.md 1~5
+var NAME={short:'단락',open:'단선',ground:'지락'};
+var MEAN={short:'단락(短絡) = 짧게 이어짐. 두 선이 직접 붙은 것, 합선과 같은 말',open:'단선(斷線) = 선이 끊어짐. 전기가 못 지나간다',ground:'지락(地絡) = 땅과 이어짐. 선이 땅에 닿은 것'};
+var CAPT={short:'두 선이 서로 붙었다',open:'선이 끊어졌다',ground:'선이 땅에 닿았다'};
+var CLUES=[['short','「합선」과\n같은 말은?'],['short','두 선이 직접\n붙어 버렸다'],['short','한자 뜻이\n「짧게 이어짐」'],['short','전구를 건너뛰는\n지름길이 생겼다'],
+ ['open','선이 뚝\n끊어졌다'],['open','한자 뜻이\n「끊어진 줄」'],
+ ['ground','선이 땅과\n이어졌다'],['ground','한자 뜻이\n「땅과 이어짐」']];
+var TIPS=[
+ '단락의 「락(絡)」은 떨어질 락이 아니라 이을 락. 단락은 끊어진 게 아니라 「짧게 이어진」 거다. 현장 말로 쇼트, 합선.',
+ '지락(地絡)은 땅 지, 이을 락. 선이 땅과 이어진 것. 선끼리 붙은 건 단락이다.',
+ '단선(斷線)은 끊을 단, 줄 선. 선이 끊어져서 전기가 못 가는 것. 단락과 첫 글자 소리만 같고 뜻은 반대쪽이다.',
+ '단락(합선)은 두 선이 직접 붙어 순간 아주 큰 전류가 흐르는 것. 뿌레카(차단기)가 바로 떨어지는 게 정상이다.',
+ '전구를 건너뛰는 지름길 선이 생기면(단락) 전류가 그쪽으로 몰려서 전구가 꺼진다.'
+];
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function fx(txt,el,color){var r=el.getBoundingClientRect();var d=document.createElement('div');d.className='fx';d.textContent=txt;d.style.color=color||'#2ee66b';d.style.transform='translate('+(r.left+r.width/2-60)+'px,'+(r.top+10)+'px)';document.body.appendChild(d);requestAnimationFrame(function(){d.style.transform='translate('+(r.left+r.width/2-60)+'px,'+(r.top-70)+'px)';d.style.opacity='0';});setTimeout(function(){d.remove();},900);}
+function rnd(n){return Math.floor(Math.random()*n);}
+var cv=$('cv'),g=cv.getContext('2d');
+var S={n:0,score:0,life:3,cur:null,lock:false,order:[],over:false,last:''};
+
+function line(x1,y1,x2,y2,c,w){g.strokeStyle=c||'#222';g.lineWidth=w||6;g.lineCap='round';g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}
+function draw(c){
+ var W=336,H=210,T=46,B=132,GY=186;
+ g.clearRect(0,0,W,H);g.fillStyle='#f4f1e6';g.fillRect(0,0,W,H);
+ var m=c.mirror;function X(x){return m?W-x:x;}
+ // 땅
+ g.fillStyle='#8a6a3c';g.fillRect(0,GY,W,H-GY);g.fillStyle='#3a2a10';g.font='bold 18px sans-serif';g.textAlign='center';g.fillText('땅',X(300),GY+19);
+ var fxp=c.fx,gapT=(c.type==='open'&&c.top),gapB=(c.type==='open'&&!c.top);
+ // 위·아래 선
+ function wire(y,gap){if(gap){line(X(48),y,X(fxp-16),y);line(X(fxp+16),y,X(262),y);line(X(fxp-16),y,X(fxp-10),y-9,'#c33',4);line(X(fxp+16),y,X(fxp+10),y+9,'#c33',4);}else line(X(48),y,X(262),y);}
+ wire(T,gapT);wire(B,gapB);
+ // 전지
+ line(X(48),T,X(48),74);line(X(48),104,X(48),B);
+ line(X(30),74,X(66),74,'#222',6);line(X(38),84,X(58),84,'#222',9);line(X(30),94,X(66),94,'#222',6);line(X(38),104,X(58),104,'#222',9);
+ g.fillStyle='#222';g.font='bold 17px sans-serif';g.fillText('전지',X(48),T-14);
+ // 전구
+ line(X(262),T,X(262),68);line(X(262),110,X(262),B);
+ g.beginPath();g.arc(X(262),89,21,0,Math.PI*2);g.fillStyle='#c9c9c9';g.fill();g.lineWidth=5;g.strokeStyle='#222';g.stroke();
+ line(X(250),77,X(274),101,'#555',3);line(X(274),77,X(250),101,'#555',3);
+ g.fillStyle='#222';g.fillText('전구 꺼짐',X(262),T-14);
+ // 고장
+ if(c.type==='short'){line(X(fxp),T,X(fxp),B,'#e0401a',7);g.fillStyle='#ff9a00';g.font='bold 30px sans-serif';g.fillText('✸',X(fxp),T+4);g.fillText('✸',X(fxp),B+16);}
+ if(c.type==='ground'){var y0=c.top?T:B;g.strokeStyle='#e0401a';g.lineWidth=7;g.beginPath();g.moveTo(X(fxp),y0);g.quadraticCurveTo(X(fxp+26),(y0+GY)/2,X(fxp+8),GY);g.stroke();g.fillStyle='#ff9a00';g.font='bold 30px sans-serif';g.fillText('✸',X(fxp+8),GY+8);}
+ if(c.type==='open'){g.fillStyle='#c33';g.font='bold 26px sans-serif';g.fillText('✂',X(fxp),(c.top?T:B)-14);}
+}
+function newCard(){
+ var types=['short','open','ground'],t;
+ do{t=types[rnd(3)];}while(S.n>0&&t===S.last&&Math.random()<.6);
+ S.last=t;
+ var useClue=S.n>=8&&Math.random()<.4;
+ if(useClue){var list=CLUES.filter(function(x){return x[0]===t;});return {type:t,clue:list[rnd(list.length)][1]};}
+ return {type:t,top:Math.random()<.5,mirror:S.n>=3&&Math.random()<.5,fx:110+rnd(100),cap:S.n<5};
+}
+function show(){
+ var c=S.cur;$('card').className='';
+ $('prog').textContent=(S.n+1)+' / '+TOTAL+'장';
+ $('life').textContent='❤❤❤'.slice(0,S.life)+'♡♡♡'.slice(0,3-S.life);
+ if(c.clue){$('clue').style.display='flex';$('clue').innerHTML=c.clue.replace('\n','<br>');$('cap').textContent='글을 읽고 고르세요';}
+ else{$('clue').style.display='none';draw(c);$('cap').textContent=c.cap?CAPT[c.type]:'어떤 고장일까요?';}
+ var bs=document.querySelectorAll('.b');for(var i=0;i<bs.length;i++)bs[i].className='b';
+ $('rec').textContent='최고 '+save.best+'장 · 지금까지 맞힌 '+save.total+'장';
+}
+function next(){S.lock=false;if(S.life<=0||S.n>=TOTAL){end();return;}S.cur=newCard();show();$('msg').textContent='아래 세 낱말 중 하나를 누르세요';}
+function pick(k,el){
+ if(S.lock||S.over)return;S.lock=true;ac();
+ var c=S.cur,right=(k===c.type);
+ var okBtn=document.querySelector('.b[data-k="'+c.type+'"]');
+ if(right){S.score++;save.total++;if(S.score>save.best)save.best=S.score;store();
+  el.classList.add('ok');$('card').className='ok';tone(660,.12,'triangle',.18);tone(880,.18,'triangle',.18,.1);vib(30);fx('딱 맞음!',el,'#2ee66b');
+  $('msg').innerHTML='⭕ '+MEAN[c.type];}
+ else{S.life--;el.classList.add('no');okBtn.classList.add('ok');$('card').className='no';tone(160,.3,'sawtooth',.12);vib([40,40,40]);
+  $('life').textContent='❤❤❤'.slice(0,S.life)+'♡♡♡'.slice(0,3-S.life);
+  $('msg').innerHTML='❌ 이건 '+NAME[c.type]+'! '+MEAN[c.type];}
+ S.n++;S.timer=setTimeout(next,right?1500:2600);
+}
+function end(){
+ S.over=true;var full=S.score>=TOTAL;
+ if(full){tone(523,.15,'triangle',.2);tone(659,.15,'triangle',.2,.15);tone(784,.15,'triangle',.2,.3);tone(1047,.4,'triangle',.2,.45);}
+ $('oTitle').textContent=full?'20장 만점!':(S.life<=0?'세 번 틀렸어요':'20장 끝!');
+ $('oScore').textContent=TOTAL+'장 중 '+S.score+'장 맞힘';
+ var gap=save.best-S.score;
+ $('oNear').textContent=full?'단락·단선·지락, 이제 안 헷갈려요':(gap>0?'최고 기록까지 '+gap+'장 · 만점까지 '+(TOTAL-S.score)+'장':'최고 기록! 만점까지 '+(TOTAL-S.score)+'장');
+ $('oTip').textContent='💡 '+TIPS[rnd(TIPS.length)];
+ $('over').style.display='flex';
+}
+function start(){
+ clearTimeout(S.timer);S.n=0;S.score=0;S.life=3;S.over=false;S.lock=false;S.last='';
+ $('over').style.display='none';
+ S.cur=newCard();show();$('msg').textContent='아래 세 낱말 중 하나를 누르세요';
+}
+['short','open','ground'].forEach(function(k){var b=document.createElement('button');b.className='b';b.dataset.k=k;b.textContent=NAME[k];b.addEventListener('click',function(){pick(k,b);});$('btns').appendChild(b);});
+$('again').addEventListener('click',function(){ac();start();});
+$('mute').addEventListener('click',function(){muted=!muted;this.textContent=muted?'🔇':'🔊';});
+window.__game={state:S,save:save,start:start,answer:function(){return S.cur&&S.cur.type;}};
+start();
+})();
+</script>
+</body>
+</html>
