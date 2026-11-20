@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14161b">
+<title>몇 A야?: 가전 이름표 나누기 퀴즈</title>
+<meta name="description" content="가전 이름표의 W를 220으로 나눠 몇 A인지 고르고, 멀티탭에 같이 꽂아도 되는지 가르는 퀴즈. 숫자는 모두 예시.">
+<style>
+html,body{margin:0;height:100%;background:#14161b;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#fff;font-size:20px}
+#app{position:relative;margin:0 auto;max-width:480px;height:100%;display:flex;flex-direction:column;padding:8px 12px 10px;box-sizing:border-box}
+#top{display:flex;align-items:center;justify-content:space-between;padding-left:44px;padding-right:56px;min-height:48px}
+#top b{font-size:20px;white-space:nowrap}#stat{white-space:nowrap;font-size:20px;font-weight:800;color:#ffd23f}
+#sub{font-size:20px;line-height:1.35;color:#e8ebf2;text-align:center;margin:4px 0 8px;word-break:keep-all}
+#board{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center}
+.btn{flex:1;border:0;border-radius:14px;font-size:20px;font-weight:800;min-height:56px;font-family:inherit;cursor:pointer;touch-action:manipulation;background:#3b4252;color:#fff;box-shadow:0 4px 0 #1f232c}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #1f232c}.btn.main{background:#ffd23f;color:#2b2000;box-shadow:0 4px 0 #a98400}
+#mute{position:absolute;top:8px;right:10px;width:48px;height:48px;border:0;border-radius:24px;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;z-index:5}
+#end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,11,16,.78);z-index:4;padding:16px;box-sizing:border-box}
+#end.on{display:flex}
+#card{width:100%;max-width:360px;background:#2b2f3a;border:3px solid #4a505f;border-radius:18px;padding:18px;box-sizing:border-box;text-align:center;animation:pop .22s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#endTitle{font-size:24px;font-weight:800;margin:0 0 6px}#endScore{font-size:52px;font-weight:900;line-height:1.1;color:#ffd23f}
+#endSub{font-size:20px;color:#e8ebf2;margin:4px 0}#endBest{font-size:20px;font-weight:700;color:#9fe1ff;margin:0 0 10px}
+#fact{font-size:20px;line-height:1.45;background:#1d2029;border-radius:12px;padding:10px 12px;margin:0 0 12px;text-align:left;word-break:keep-all}
+.shake{animation:sk .3s}@keyframes sk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.sp{position:absolute;font-size:28px;animation:fl .8s ease-out forwards}@keyframes fl{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-70px) scale(1.6)}}
+#bar{width:100%;text-align:center;min-height:56px;font-size:20px;font-weight:700;color:#9fe1ff;margin-top:6px;line-height:1.3;word-break:keep-all}
+
+#grid{flex:none;position:relative;width:min(100%,372px,calc(100vh - 370px));aspect-ratio:1;background:#2b2f3a;border-radius:16px;padding:8px;box-sizing:border-box;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;touch-action:none;margin-top:4px}
+#q{width:100%;max-width:400px;background:#2b2f3a;border:3px solid #4a505f;border-radius:18px;padding:14px;box-sizing:border-box;text-align:center;margin-top:6px}
+.ap{font-size:24px;font-weight:800;margin:4px 0}.ap .w{color:#ffd23f;font-size:34px;font-weight:900;display:block}
+.tag{font-size:18px;color:#aeb4c2}
+.tap{font-size:22px;font-weight:800;color:#9fe1ff;margin:6px 0}
+.plus{font-size:28px;font-weight:900;color:#ffd23f}
+#ch{width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px;margin-top:12px}
+#ch .btn{flex:none;min-height:64px;font-size:26px}
+#ch .btn.ok{background:#2ed16b;color:#002b10}#ch .btn.no{background:#ff5a5a}
+.row2{display:flex;gap:8px;justify-content:center}.row2>div{flex:1;background:#1d2029;border-radius:12px;padding:8px 4px}
+</style>
+<meta name="description" content="가전 이름표의 W를 220으로 나눠 몇 A인지 셋 중 고르고, 멀티탭에 둘을 같이 꽂아도 되는지 가르는 퀴즈. 숫자는 모두 예시. 전구 3개."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/amp-label/"><meta property="og:title" content="몇 A야?: 가전 이름표 나누기 퀴즈"><meta property="og:description" content="가전 이름표의 W를 220으로 나눠 몇 A인지 셋 중 고르고, 멀티탭에 둘을 같이 꽂아도 되는지 가르는 퀴즈. 숫자는 모두 예시. 전구 3개."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="몇 A야?: 가전 이름표 나누기 퀴즈",D="가전 이름표의 W를 220으로 나눠 몇 A인지 셋 중 고르고, 멀티탭에 둘을 같이 꽂아도 되는지 가르는 퀴즈. 숫자는 모두 예시. 전구 3개.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/amp-label/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div id="top"><b id="lv"></b><span id="stat"></span></div>
+  <div id="sub"></div>
+  <div id="board"></div>
+  <div id="bar"></div>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  <div id="fx"></div>
+  <div id="end"><div id="card">
+    <div id="endTitle"></div><div id="endScore"></div><div id="endSub"></div><div id="endBest"></div>
+    <div id="fact"></div>
+    <button class="btn main" id="again" style="width:100%">한 번 더</button>
+  </div></div>
+</div>
+<script>
+"use strict";
+const KEY='amp-label.save.v1';
+const $=id=>document.getElementById(id);
+let save={best:0,plays:0,fi:0};
+try{const r=localStorage.getItem(KEY);if(r)save=Object.assign(save,JSON.parse(r));}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+let muted=false,AC=null;
+try{muted=localStorage.getItem(KEY+'.mute')==='1';}catch(e){}
+function actx(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;AC=new C();}if(AC.state==='suspended')AC.resume();}catch(e){}return AC;}
+function tone(f,d,t,v,when){if(muted)return;const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain();o.type=t||'sine';o.frequency.value=f;const s=a.currentTime+(when||0);g.gain.setValueAtTime(v||.12,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d);}catch(e){}}
+const sfx={tap(){tone(520,.07,'triangle',.1)},ok(){tone(660,.1,'triangle',.14);tone(880,.14,'triangle',.14,.09)},bad(){tone(180,.25,'sawtooth',.12)},
+ done(){[523,659,784,1047].forEach((f,i)=>tone(f,.16,'triangle',.14,i*.08))},lose(){[330,262,196].forEach((f,i)=>tone(f,.28,'sawtooth',.1,i*.16))}};
+function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function burst(x,y,ch){const fx=$('fx'),r=fx.getBoundingClientRect();for(let i=0;i<5;i++){const s=document.createElement('div');s.className='sp';s.textContent=ch||'✨';s.style.left=(x-r.left-14+(Math.random()*60-30))+'px';s.style.top=(y-r.top-14+(Math.random()*30-15))+'px';fx.appendChild(s);setTimeout(()=>s.remove(),850);}}
+function burstEl(el,ch){if(!el)return burst(innerWidth/2,innerHeight/3,ch);const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,ch);}
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a}
+$('mute').textContent=muted?'🔇':'🔊';
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊';try{localStorage.setItem(KEY+'.mute',muted?'1':'0');}catch(e){}if(!muted)sfx.tap();};
+function showEnd(title,score,sub,best,isNew,fact){$('endTitle').textContent=title;$('endScore').textContent=score;$('endSub').textContent=sub;const b=$('endBest');b.textContent=best;b.style.color=isNew?'#ffd23f':'#9fe1ff';$('fact').innerHTML=fact;$('end').classList.add('on');}
+function hideEnd(){$('end').classList.remove('on');}
+function endGame(t,n,unit,extra,facts){over=true;save.plays++;const nb=n>save.best;const prev=save.best;if(nb)save.best=n;const f=facts[save.fi++%facts.length];persist();sfx.lose();
+ const gap=nb?0:save.best-n;
+ showEnd(t,n+unit,extra+(nb?'':' · 최고 기록까지 '+(gap+1)+unit+' (아깝다!)'),nb?'신기록! 이전 최고 '+prev+unit:'최고 '+save.best+unit,nb,'<b>'+f[0]+'</b> — '+f[1]);}
+// 화면 사실은 FACTS.md만: 전력(W)=전압(V)×전류(A) → A ≒ W÷220. 가전·멀티탭 숫자는 모두 예시(실제 값은 제품 이름표).
+save.tot=save.tot||0;
+const AP=[[1,'📺','텔레비전'],[1,'💻','컴퓨터'],[2,'🧺','세탁기'],[2,'🥤','믹서기'],[3,'🧹','진공청소기'],[4,'🍞','토스터'],[4,'☕','커피메이커'],
+ [5,'🍚','전기밥솥'],[5,'📦','전자레인지'],[6,'👔','다리미'],[6,'🍗','에어프라이어'],[7,'💨','헤어드라이어'],[8,'🫖','전기포트'],[8,'🍳','인덕션'],[9,'🔥','전기히터'],[9,'🌬️','온풍기']];
+const FACTS=[['W를 220으로 나누면 대충 A','집에서 쓰는 전기는 220V. 전력(W) = 전압(V) × 전류(A)라서 A ≒ W ÷ 220이다.'],
+ ['멀티탭에도 이름표가 있다','멀티탭 뒷면 이름표의 최대 W(A)를 보고, 꽂은 가전 W를 다 더해 그 숫자를 넘기지 말자.'],
+ ['뿌레카(차단기)도 A로 정해져 있다','20A 차단기면 220V × 20A = 4,400W쯤까지다(계산 값). 넘치게 쓰면 차단기가 떨어진다.'],
+ ['화면 숫자는 예시','게임 속 가전 W는 예시다. 진짜 값은 우리 집 제품 이름표에서 확인하자.']];
+let score,life,qn,cur,over,lock;
+const GOAL=[0];
+function pick(maxA){const c=AP.filter(a=>a[0]<=maxA);return c[rnd(c.length)]}
+function render(){
+ $('lv').textContent='맞힘 '+score;$('stat').textContent='💡'.repeat(life)+'⚫'.repeat(3-life);
+ const b=$('board');b.innerHTML='';const q=document.createElement('div');q.id='q';b.appendChild(q);
+ const ch=document.createElement('div');ch.id='ch';b.appendChild(ch);
+ if(cur.kind==='a'){
+  $('sub').textContent='이름표 W를 220으로 나누면 몇 A?';
+  q.innerHTML='<div class="ap">'+cur.ap[1]+' '+cur.ap[2]+'<span class="w">'+cur.ap[0]*220+'W</span></div><div class="tag">이름표 숫자(예시) · 220V</div>';
+  cur.opts.forEach(o=>{const t=document.createElement('button');t.className='btn';t.textContent=o+'A';t.onclick=()=>answer(o===cur.ap[0],t,cur.ap[0]*220+' ÷ 220 = '+cur.ap[0]+'A');ch.appendChild(t);});
+ }else{
+  $('sub').textContent='둘 다 이 멀티탭에 꽂아도 될까?';
+  const [x,y]=cur.pair;
+  q.innerHTML='<div class="tap">🔌 멀티탭 이름표(예시) 최대 '+cur.lim+'A ('+cur.lim*220+'W)</div><div class="row2"><div><div class="ap">'+x[1]+' '+x[2]+'<span class="w">'+x[0]*220+'W</span></div></div><div class="plus" style="align-self:center">+</div><div><div class="ap">'+y[1]+' '+y[2]+'<span class="w">'+y[0]*220+'W</span></div></div></div>';
+  const s=x[0]+y[0],ok=s<cur.lim;
+  const why=x[0]+'A + '+y[0]+'A = '+s+'A '+(ok?'< ':'> ')+cur.lim+'A';
+  [['같이 꽂아도 됨 👍',ok],['넘침 ⚠️',!ok]].forEach(([l,r])=>{const t=document.createElement('button');t.className='btn';t.textContent=l;t.onclick=()=>answer(r,t,why);ch.appendChild(t);});
+ }
+}
+function next(){
+ qn++;const lvl=Math.min(9,3+Math.floor(score/2));
+ if(qn%4===0&&score>=2){let x=pick(lvl),y=pick(lvl);let s=x[0]+y[0];let lim=[10,15,16][rnd(3)];
+  if(s===lim)lim=s+1;if(Math.abs(s-lim)>6)lim=s+(rnd(2)?2:-2);if(lim<4)lim=s+3;cur={kind:'t',pair:[x,y],lim};}
+ else{const ap=pick(lvl);const a=ap[0];const spread=score<4?3:score<10?2:1;const set=new Set([a]);
+  while(set.size<3){const o=a+(rnd(2)?1:-1)*(1+rnd(spread));if(o>=1&&o<=12)set.add(o);if(set.size<3&&rnd(4)===0)set.add(Math.round(a*220/100)===a?a+2:Math.round(a*220/100));}
+  cur={kind:'a',ap,opts:shuffle([...set])};}
+ lock=false;render();
+}
+function answer(ok,el,why){if(lock||over)return;lock=true;actx();
+ if(ok){score++;save.tot++;el.classList.add('ok');sfx.ok();vib(30);burstEl(el,score%5===0?'🌟':'⚡');$('bar').textContent='딱! '+why;
+  if(score%5===0){sfx.done();$('bar').textContent=score+'개 연속 이름표 해독! '+why;}
+  setTimeout(next,700);}
+ else{life--;el.classList.add('no');el.classList.add('shake');sfx.bad();vib([60,40,60]);$('bar').textContent='아깝다! '+why;
+  $('stat').textContent='💡'.repeat(life)+'⚫'.repeat(3-life);
+  if(life<=0){setTimeout(()=>endGame('전구가 다 꺼졌다',score,'개',' 맞힘',FACTS),900);persistTot();}
+  else setTimeout(next,1500);}
+}
+function persistTot(){persist();}
+function start(){score=0;life=3;qn=0;over=false;hideEnd();$('bar').textContent='지금까지 푼 이름표 '+save.tot+'장';next();}
+const _end=endGame;endGame=function(t,n,u,e,f){_end(t,n,u,'맞힘 '+n+'개 · 누적 '+save.tot+'장',f);};
+$('again').onclick=()=>{sfx.tap();start();};
+window.__game={sel(right){if(lock)return null;let k;if(cur.kind==='a'){k=right?cur.opts.indexOf(cur.ap[0]):cur.opts.findIndex(o=>o!==cur.ap[0])}else{const ok=cur.pair[0][0]+cur.pair[1][0]<cur.lim;k=(ok===right)?0:1}return '#ch .btn:nth-child('+(k+1)+')'},get state(){return {score,life,qn,cur,over}},answerRight(){const b=[...document.querySelectorAll('#ch .btn')];if(cur.kind==='a'){b[cur.opts.indexOf(cur.ap[0])].click()}else{const ok=cur.pair[0][0]+cur.pair[1][0]<cur.lim;b[ok?0:1].click()}},answerWrong(){const b=[...document.querySelectorAll('#ch .btn')];if(cur.kind==='a'){b[cur.opts.findIndex(o=>o!==cur.ap[0])].click()}else{const ok=cur.pair[0][0]+cur.pair[1][0]<cur.lim;b[ok?1:0].click()}}};
+start();
+</script>
+</body>
+</html>
