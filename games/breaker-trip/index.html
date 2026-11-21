@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>차단기 왜 떨어졌지? v0.1</title>
+<title>차단기 왜 떨어졌지? v0.2</title>
 <style>
 :root{--bg:#10151f;--card:#1b2333;--ink:#f4f6fb;--sub:#aab4c8;--y:#ffd23f;--r:#ff5d5d;--g:#4ade80;--b:#5aa9ff}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -25,8 +25,16 @@ button.go{background:var(--y);color:#111;text-align:center;border-color:var(--y)
 a{color:var(--b);font-size:20px}
 .flash{animation:fl .5s}@keyframes fl{0%{box-shadow:0 0 0 0 var(--y)}100%{box-shadow:0 0 0 24px transparent}}
 .sp{flex:1}
+.lg{border-radius:14px;padding:12px;background:var(--card);border:2px solid #2d3a55;font-size:19px;line-height:1.5}
+.lg b{color:var(--y)}
+.sheet{background:#fff;color:#111;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.sheet h2{margin:0;font-size:26px}
+.sheet .lg{background:#f3f4f7;border-color:#d5d9e2;color:#111}
+.sheet .lg b{color:#b45309}
+.warn{font-size:18px;font-weight:700;color:#b91c1c}
+.row{display:flex;gap:10px}.row button{flex:1;text-align:center}
 #mute{position:fixed;right:10px;top:10px;min-height:44px;font-size:18px;padding:6px 12px;text-align:center}
-</style><meta name="description" content="질문 2개만 누르면 차단기가 왜 떨어졌는지(과부하·누전 의심)와 누구를 불러야 하는지 알려 주는 판별 페이지."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/breaker-trip/"><meta property="og:title" content="차단기 왜 떨어졌지?"><meta property="og:description" content="질문 2개만 누르면 차단기가 왜 떨어졌는지(과부하·누전 의심)와 누구를 불러야 하는지 알려 주는 판별 페이지."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="차단기 왜 떨어졌지?",D="질문 2개만 누르면 차단기가 왜 떨어졌는지(과부하·누전 의심)와 누구를 불러야 하는지 알려 주는 판별 페이지.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/breaker-trip/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head><body>
+</style><meta name="description" content="질문 2개만 누르면 차단기가 왜 떨어졌는지(과부하·누전 의심)와 누구를 불러야 하는지 알려 주는 판별 페이지. 떨어진 날을 버튼 3번으로 기록해 업체에 보여 줄 한 장으로 모을 수도 있다."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/breaker-trip/"><meta property="og:title" content="차단기 왜 떨어졌지?"><meta property="og:description" content="질문 2개만 누르면 차단기가 왜 떨어졌는지(과부하·누전 의심)와 누구를 불러야 하는지 알려 주는 판별 페이지. 떨어진 날을 버튼 3번으로 기록해 업체에 보여 줄 한 장으로 모을 수도 있다."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="차단기 왜 떨어졌지?",D="질문 2개만 누르면 차단기가 왜 떨어졌는지(과부하·누전 의심)와 누구를 불러야 하는지 알려 주는 판별 페이지. 떨어진 날을 버튼 3번으로 기록해 업체에 보여 줄 한 장으로 모을 수도 있다.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/breaker-trip/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head><body>
 <button id="mute" aria-label="소리">🔊</button>
 <div id="app"></div>
 <script>
@@ -70,18 +78,44 @@ var app=document.getElementById('app'),step=0,path=[];
 function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
 function dots(n){return '<div class="dots">'+[0,1].map(function(i){return '<i class="'+(i<n?'on':'')+'"></i>'}).join('')+'</div>'}
 function home(){step=0;path=[];
- app.innerHTML='<div class="big">🔌💥</div><h1>차단기 왜 떨어졌지?</h1><p class="sub">질문 2개만 누르면 누구를 불러야 하는지 알려 드려요. 수리 방법은 알려 주지 않아요.</p><div class="sp"></div><button class="go" id="st">시작하기</button><p class="sub" style="font-size:18px">지금까지 '+(save.n||0)+'번 확인했어요</p>';
- document.getElementById('st').onclick=function(){beep(660,.12);ask(Q1,1)};}
+ app.innerHTML='<div class="big">🔌💥</div><h1>차단기 왜 떨어졌지?</h1><p class="sub">질문 2개만 누르면 누구를 불러야 하는지 알려 드려요. 수리 방법은 알려 주지 않아요.</p><div class="sp"></div><button class="go" id="st">시작하기</button><p class="sub" style="font-size:18px">지금까지 '+(save.n||0)+'번 확인했어요</p>'+(logs().length?'<button id="seelog">📝 떨어진 날 기록 보기 ('+logs().length+'번)</button>':'');
+ document.getElementById('st').onclick=function(){beep(660,.12);ask(Q1,1)};
+ var sl=document.getElementById('seelog');if(sl)sl.onclick=function(){beep(660,.12);sheet()};}
+// 「차단기 떨어진 날」 기록(v0.2): 떨어질 때마다 3번 눌러 쌓고 업체에 보여 줄 한 장으로 모음. 원인 판정은 하지 않는다.
+// 저장은 같은 키에 log 칸만 더함(옛 저장 {n}은 그대로 읽힘).
+var LQ=[
+ {k:'무엇을 쓰는 중이었나요?',o:['히터·전기장판 같은 난방 기기','전자레인지·밥솥 같은 주방 기기','세탁기·건조기·드라이어','에어컨','아무것도 안 썼어요 / 모르겠어요']},
+ {k:'물기·비·샤워가 있었나요?',o:['비가 왔어요','샤워나 물 쓰는 중이었어요','물기 없었어요','모르겠어요']},
+ {k:'바로 올리니 다시 떨어졌나요?',o:['네, 바로 다시 떨어졌어요','아니요, 올리니 그대로예요','안 올려 봤어요']}
+];
+function logs(){if(!Array.isArray(save.log))save.log=[];return save.log}
+function pad(n){return (n<10?'0':'')+n}
+function stamp(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())}
+function logAsk(i,ans){
+ if(i>=LQ.length){logs().push({d:stamp(),a:ans});if(logs().length>200)logs().splice(0,logs().length-200);persist();beep(880,.25);vib();sheet(true);return}
+ var q=LQ[i];
+ app.innerHTML='<div class="bar"><span>📝 기록 '+(i+1)+' / 3</span></div><div class="q">'+q.k+'</div>'+q.o.map(function(t,j){return '<button data-j="'+j+'">'+t+'</button>'}).join('')+'<div class="sp"></div><button id="lback" style="text-align:center">그만두기</button>';
+ [].forEach.call(app.querySelectorAll('button[data-j]'),function(b){b.onclick=function(){beep(520,.1);vib();logAsk(i+1,ans.concat([q.o[+b.dataset.j]]))}});
+ document.getElementById('lback').onclick=home;
+}
+function sheet(fresh){var L=logs();
+ var rows=L.slice().reverse().map(function(e,i){return '<div class="lg"><b>'+(L.length-i)+'번째 · '+e.d+'</b><br>쓰던 것: '+e.a[0]+'<br>물기: '+e.a[1]+'<br>다시 올리면: '+e.a[2]+'</div>'}).join('');
+ app.innerHTML=(fresh?'<p class="flash" style="font-weight:700;color:var(--g);padding-right:64px">✅ 기록했어요. 다음에 또 떨어지면 다시 눌러 주세요.</p>':'')+'<div class="sheet" id="sheet"><h2>차단기 떨어진 날 기록</h2><p style="font-size:18px">모두 '+L.length+'번 · 업체(전기 기사)에게 이 화면을 보여 주세요.</p>'+(rows||'<p>아직 기록이 없어요.</p>')+'<p class="warn">참고용, 원인 단정 아님. 원인은 현장에서 전기 기사가 확인합니다.</p></div><div class="sp"></div><button class="go" id="more">📝 또 떨어졌어요 — 기록 더하기</button><div class="row"><button id="lhome">처음으로</button><button id="lclear">기록 지우기</button></div>';
+ document.getElementById('more').onclick=function(){beep(660,.12);logAsk(0,[])};
+ document.getElementById('lhome').onclick=home;
+ document.getElementById('lclear').onclick=function(){var ok=true;try{ok=window.confirm('기록 '+L.length+'개를 모두 지울까요?')}catch(e){}if(ok){save.log=[];persist();sheet()}};
+ window.__game.view='sheet';}
 function ask(q,n){
  var opts=(n===1)?q.o:shuf(q.o);
  app.innerHTML='<div class="bar"><span>질문 '+n+' / 2</span>'+dots(n-1)+'</div><div class="q">'+q.q+'</div>'+opts.map(function(o,i){return '<button data-i="'+i+'">'+o.t+'</button>'}).join('')+'<div class="sp"></div>';
  [].forEach.call(app.querySelectorAll('button[data-i]'),function(b){b.onclick=function(){var o=opts[+b.dataset.i];path.push(o.t);beep(520,.1);vib();if(o.next)ask(QS[o.next],2);else result(o.r)}});
 }
 function result(k){var r=RES[k];save.n=(save.n||0)+1;persist();beep(k==='call'?330:880,.25,k==='call'?'square':'sine');vib();
- app.innerHTML='<div class="bar"><span>질문 2 / 2 끝</span>'+dots(2)+'</div><div class="res flash"><div class="tag">'+r.ic+' '+r.tag+'</div><h2>'+r.h+'</h2><p>'+r.t+'</p><div class="who"><b>누구를 부르나:</b><br>'+r.w+'</div></div><p class="sub" style="font-size:18px">이 결과는 참고용이에요. 정확한 원인은 현장에서 전기 기사가 확인해야 합니다.</p><p>▶ <a href="https://youtu.be/PBfB9x2vjpg" target="_blank" rel="noopener">차단기 쇼츠 보기</a><br>▶ <a href="https://blog.naver.com/mms7096" target="_blank" rel="noopener">전기기사단 블로그</a></p><div class="sp"></div><button class="go" id="again">다른 경우도 해 보기</button>';
+ app.innerHTML='<div class="bar"><span>질문 2 / 2 끝</span>'+dots(2)+'</div><div class="res flash"><div class="tag">'+r.ic+' '+r.tag+'</div><h2>'+r.h+'</h2><p>'+r.t+'</p><div class="who"><b>누구를 부르나:</b><br>'+r.w+'</div></div><p class="sub" style="font-size:18px">이 결과는 참고용이에요. 정확한 원인은 현장에서 전기 기사가 확인해야 합니다.</p><p>▶ <a href="https://youtu.be/PBfB9x2vjpg" target="_blank" rel="noopener">차단기 쇼츠 보기</a><br>▶ <a href="https://blog.naver.com/mms7096" target="_blank" rel="noopener">전기기사단 블로그</a></p><div class="sp"></div><button class="go" id="again">다른 경우도 해 보기</button><button id="tolog">📝 차단기 떨어진 날 기록하기</button>';
  document.getElementById('again').onclick=home;
+ document.getElementById('tolog').onclick=function(){beep(660,.12);logAsk(0,[])};
  window.__game.last=k;}
-window.__game={last:null,home:home,ask:function(){ask(Q1,1)},result:result,path:function(){return path}};
+window.__game={last:null,home:home,ask:function(){ask(Q1,1)},result:result,path:function(){return path},logs:logs,logAsk:function(){logAsk(0,[])},sheet:sheet};
 home();
 })();
 </script></body></html>
