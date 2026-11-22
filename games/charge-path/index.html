@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>어디서 바꿔?: 충전기 거쳐 잇기 퍼즐</title>
+<style>
+*{box-sizing:border-box;word-break:keep-all;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#111a24;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:8px 12px 10px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #3a4f66;background:#18263a;color:#fff;font-size:24px}
+.rule{margin:2px 0 4px;font-size:20px;font-weight:800;color:#ffd84a;text-align:center;line-height:1.3}
+.goal{display:flex;align-items:center;justify-content:center;gap:8px;font-size:21px;font-weight:800;margin-bottom:6px;min-height:34px}
+.goal b{color:#7fe3ff}
+#wrap{position:relative;margin:0 auto;touch-action:none}
+#grid{display:grid;width:100%;height:100%}
+.c{position:relative;border:2px solid #111a24;border-radius:12px;background:#22324a;color:#fff;font-size:28px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.c small{font-size:13px;font-weight:800;margin-top:2px}
+.c.wall{background:#111a24;border:2px dashed #3a4f66}
+.c.on{background:#4a3f0a}
+.c.head{background:#a8860a;outline:4px solid #ffd84a;outline-offset:-4px}
+.c.can{background:#2f4a6a}
+.c.conv{background:#1d5a4a}
+.c.conv.on{background:#2f8a5a}
+.c.dev{background:#5a2a4a}
+#svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.msg{min-height:56px;text-align:center;font-size:20px;font-weight:800;margin-top:6px;line-height:1.35}
+.msg.warn{color:#ff9a8a}
+.rec{text-align:center;font-size:18px;color:#a3b4c8;margin-top:auto;padding-top:2px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:36px;font-weight:900;transition:transform .9s ease-out,opacity .9s;z-index:9;white-space:nowrap;color:#ffd84a}
+#over{position:fixed;inset:0;background:rgba(5,8,12,.94);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#18263a;border:3px solid #ffd84a;border-radius:20px;padding:18px;text-align:center}
+#over h2{margin:0 0 6px;font-size:27px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#111a24;border-radius:12px;padding:10px;margin:10px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="콘센트에서 기기까지 전선을 잇는데 휴대폰·노트북(배터리)은 충전기 칸을 꼭 지나고, 전기포트·다리미(열선)는 바로 잇는 길 퍼즐. 하트 3개."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/charge-path/"><meta property="og:title" content="어디서 바꿔?: 충전기 거쳐 잇기 퍼즐"><meta property="og:description" content="콘센트에서 기기까지 전선을 잇는데 휴대폰·노트북(배터리)은 충전기 칸을 꼭 지나고, 전기포트·다리미(열선)는 바로 잇는 길 퍼즐. 하트 3개."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="어디서 바꿔?: 충전기 거쳐 잇기 퍼즐",D="콘센트에서 기기까지 전선을 잇는데 휴대폰·노트북(배터리)은 충전기 칸을 꼭 지나고, 전기포트·다리미(열선)는 바로 잇는 길 퍼즐. 하트 3개.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/charge-path/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="stage">1판</span><span class="sp"></span><span id="hp">❤❤❤</span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">배터리 기기는 충전기 거쳐, 열 기기는 바로 이어라</div>
+  <div class="goal" id="goal"></div>
+  <div id="wrap"><div id="grid"></div><svg id="svg"></svg></div>
+  <div class="msg" id="msg"></div>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>전기가 안 들어갔어요</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='charge-path.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+// FACTS.md 1~4
+var TIPS=[
+ '콘센트 전기는 교류다. 방향이 쉬지 않고 바뀐다. 휴대폰·노트북 충전기는 이 교류를 직류로 바꿔 준다.',
+ '배터리는 한쪽 방향 전기(직류)로 채운다. 그래서 휴대폰을 콘센트에 바로 꽂지 않고 충전기를 거친다.',
+ '전기포트 열선은 콘센트 교류 그대로 뜨거워진다. 열은 교류든 직류든 흐르기만 하면 난다.',
+ '충전기 이름표에 입력은 AC(교류), 출력은 DC(직류)라고 적혀 있다. 교류 넣고 직류 낸다는 뜻이다.'
+];
+var DEV=[{n:'휴대폰',e:'📱',dc:1},{n:'노트북',e:'💻',dc:1},{n:'전기포트',e:'🫖',dc:0},{n:'다리미',e:'♨️',dc:0}];
+var R=6,C=5;
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function rnd(n){return Math.floor(Math.random()*n);}
+function fx(txt){var r=$('wrap').getBoundingClientRect();var d=document.createElement('div');d.className='fx';d.textContent=txt;d.style.transform='translate('+(r.left+r.width/2-100)+'px,'+(r.top+r.height/2)+'px)';document.body.appendChild(d);requestAnimationFrame(function(){d.style.transform='translate('+(r.left+r.width/2-100)+'px,'+(r.top+r.height/2-90)+'px)';d.style.opacity='0';});setTimeout(function(){d.remove();},1000);}
+var S={stage:1,hp:3,wall:{},conv:{},st:0,dv:0,dev:DEV[0],path:[],budget:0,over:false,lock:false,lastDev:-1};
+function nb(i){var r=Math.floor(i/C),c=i%C,o=[];if(r>0)o.push(i-C);if(r<R-1)o.push(i+C);if(c>0)o.push(i-1);if(c<C-1)o.push(i+1);return o;}
+// 규칙에 맞는 가장 짧은 길 칸 수(되돌아가지 않는 길). 없으면 -1
+function shortest(g){
+ var best=-1,seen={};seen[g.st]=1;
+ function md(i){return Math.abs(Math.floor(i/C)-Math.floor(g.dv/C))+Math.abs(i%C-g.dv%C);}
+ function dfs(i,len,pc){
+  if(best>=0&&len+md(i)>=best)return;
+  if(len>16)return;
+  var ns=nb(i);
+  for(var q=0;q<ns.length;q++){var x=ns[q];if(seen[x]||g.wall[x])continue;
+   if(x===g.dv){var ok=g.dev.dc?pc:!pc;if(ok&&(best<0||len+1<best))best=len+1;continue;}
+   var c2=pc||!!g.conv[x];if(!g.dev.dc&&g.conv[x])continue;
+   seen[x]=1;dfs(x,len+1,c2);seen[x]=0;}
+ }
+ dfs(g.st,0,false);return best;
+}
+function gen(){
+ var nW=Math.min(2+Math.floor(S.stage/2),8),nC=S.stage>=4?2:1;
+ var di;do{di=rnd(DEV.length);}while(di===S.lastDev&&S.stage>1);
+ if(S.stage===1)di=rnd(2);// 첫 판은 충전 기기(충전기를 거치는 맛부터)
+ S.lastDev=di;
+ for(var tr=0;tr<200;tr++){
+  var g={wall:{},conv:{},dev:DEV[di]};
+  g.st=(R-1)*C+rnd(C);g.dv=rnd(C);
+  var cells=[];for(var i=C;i<(R-1)*C;i++)cells.push(i);
+  for(var k=0;k<nC;k++){var p=cells.splice(rnd(cells.length),1)[0];g.conv[p]=1;}
+  for(k=0;k<nW;k++){p=cells.splice(rnd(cells.length),1)[0];g.wall[p]=1;}
+  var sh=shortest(g);if(sh<0)continue;
+  // 열 기기 판은 충전기가 곧은 길을 막고 있을 때 고르는 맛이 난다 → 충전기 없이 더 짧으면 다시
+  if(!g.dev.dc){var g2={wall:g.wall,conv:{},dev:{dc:0},st:g.st,dv:g.dv};var s2=shortest(g2);if(s2===sh&&tr<120)continue;}
+  else{var g3={wall:g.wall,conv:g.conv,dev:{dc:0},st:g.st,dv:g.dv};var s3=shortest(g3);if(s3>=0&&s3>=sh&&tr<120)continue;}
+  g.sh=sh;return g;
+ }
+ return null;
+}
+function build(){
+ var g=null;while(!g)g=gen();
+ S.wall=g.wall;S.conv=g.conv;S.st=g.st;S.dv=g.dv;S.dev=g.dev;S.path=[g.st];
+ var slack=S.stage<=3?3:S.stage<=6?2:1;S.budget=g.sh+slack;
+ var w=Math.min(document.documentElement.clientWidth,430)-24;
+ var avail=window.innerHeight-280;var cs=Math.floor(Math.min(w/C,avail/R,80));
+ $('wrap').style.width=(cs*C)+'px';$('wrap').style.height=(cs*R)+'px';
+ var gd=$('grid');gd.innerHTML='';gd.style.gridTemplateColumns='repeat('+C+',1fr)';gd.style.gridTemplateRows='repeat('+R+',1fr)';
+ for(var i=0;i<R*C;i++){var b=document.createElement('button');b.dataset.i=i;
+  b.innerHTML=S.wall[i]?'':i===S.st?'🔌<small>콘센트</small>':i===S.dv?S.dev.e+'<small>'+S.dev.n+'</small>':S.conv[i]?'🔁<small>충전기</small>':'';
+  gd.appendChild(b);}
+ $('svg').setAttribute('viewBox','0 0 '+C+' '+R);
+ $('goal').innerHTML='오늘 손님: '+S.dev.e+' <b>'+S.dev.n+'</b>';
+ render();say('🔌 옆 칸을 눌러 '+S.dev.n+'까지 전선을 이으세요');
+}
+function say(t,warn){$('msg').textContent=t;$('msg').className='msg'+(warn?' warn':'');}
+function head(){return S.path[S.path.length-1];}
+function used(){return S.path.length-1;}
+function render(){
+ var cells=$('grid').children,h=head(),can=nb(h);
+ for(var i=0;i<cells.length;i++){var on=S.path.indexOf(i)>=0;
+  cells[i].className='c'+(S.wall[i]?' wall':'')+(S.conv[i]?' conv':'')+(i===S.dv?' dev':'')+(on?' on':'')+(i===h?' head':'')+(!on&&!S.wall[i]&&can.indexOf(i)>=0?' can':'');}
+ var pts=S.path.map(function(i){return ((i%C)+.5)+','+(Math.floor(i/C)+.5);}).join(' ');
+ var dc=S.path.some(function(i){return S.conv[i];});
+ $('svg').innerHTML='<polyline points="'+pts+'" fill="none" stroke="'+(dc?'#7fe3ff':'#ffd84a')+'" stroke-width=".14" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>';
+ $('stage').textContent=S.stage+'판 · 전선 '+used()+'/'+S.budget+'칸';
+ $('hp').textContent='❤'.repeat(S.hp)+'🤍'.repeat(3-S.hp);
+ $('rec').textContent='최고 '+save.best+'판 · 지금까지 켠 기기 '+save.total+'대';
+}
+function tap(i){
+ if(S.over||S.lock||S.wall[i])return;ac();
+ var idx=S.path.indexOf(i);
+ if(idx>=0){if(i===head())return;S.path.length=idx+1;tone(300,.12,'sine',.1);render();say('거기까지 전선을 걷었어요');return;}
+ if(nb(head()).indexOf(i)<0){say('노란 칸 바로 옆 칸만 이을 수 있어요',true);return;}
+ if(used()>=S.budget){miss('전선이 모자라요! 더 짧은 길을 찾으세요');return;}
+ S.path.push(i);
+ if(S.conv[i]){tone(660,.1,'square',.1);tone(880,.12,'square',.1,.08);say('충전기 통과! 이제부터 직류(=)예요');}
+ else tone(420+S.path.length*15,.08,'triangle',.12);
+ if(i===S.dv){arrive();return;}
+ render();
+ if(!S.conv[i])say('전선 '+(S.budget-used())+'칸 남았어요');
+}
+function arrive(){
+ var dc=S.path.some(function(i){return S.conv[i];});
+ if(S.dev.dc&&!dc){miss(S.dev.n+'은 배터리라 직류가 필요해요. 충전기를 거쳐야 해요');return;}
+ if(!S.dev.dc&&dc){miss(S.dev.n+' 열선은 교류 그대로 데워요. 충전기는 필요 없어요');return;}
+ win();
+}
+function miss(t){
+ S.hp--;tone(150,.35,'sawtooth',.12);vib([60,40,60]);
+ if(S.hp<=0){render();lose(t);return;}
+ S.path=[S.st];render();say(t+' (❤ 하나 잃음)',true);
+}
+function win(){
+ S.lock=true;save.total++;render();
+ tone(523,.12,'triangle',.2);tone(659,.12,'triangle',.2,.12);tone(784,.12,'triangle',.2,.24);tone(1047,.35,'triangle',.2,.36);vib([30,30,60]);
+ fx(S.dev.e+' 켜졌다!');say(S.dev.dc?'충전기가 교류를 직류로 바꿔 충전 시작!':'교류 그대로 열선이 뜨거워져요!');
+ if(S.stage>save.best)save.best=S.stage;store();
+ setTimeout(function(){S.stage++;S.lock=false;build();},1400);
+}
+function lose(t){
+ S.over=true;store();
+ var done=S.stage-1;
+ $('oScore').textContent=done+'판 연결 · '+t;
+ var gap=save.best-done;
+ $('oNear').textContent=gap>0?'최고 기록까지 '+gap+'판 남았어요':'최고 기록과 같아요! 한 판만 더';
+ $('oTip').textContent='💡 '+TIPS[rnd(TIPS.length)];
+ $('over').style.display='flex';
+}
+function start(){S.stage=1;S.hp=3;S.over=false;S.lock=false;S.lastDev=-1;$('over').style.display='none';build();}
+function cellAt(e){var el=document.elementFromPoint(e.clientX,e.clientY);return el&&el.closest?el.closest('.c'):null;}
+var down=false;
+$('wrap').addEventListener('pointerdown',function(e){down=true;var c=cellAt(e);if(c)tap(+c.dataset.i);e.preventDefault();});
+$('wrap').addEventListener('pointermove',function(e){if(!down||S.over||S.lock)return;var c=cellAt(e);if(!c)return;var i=+c.dataset.i;if(S.path.indexOf(i)<0&&!S.wall[i]&&nb(head()).indexOf(i)>=0)tap(i);});
+window.addEventListener('pointerup',function(){down=false;});
+$('again').addEventListener('click',function(){ac();start();});
+$('mute').addEventListener('click',function(){muted=!muted;this.textContent=muted?'🔇':'🔊';});
+window.__game={state:S,save:save,start:start,tap:tap,shortest:shortest};
+start();
+})();
+</script>
+</body>
+</html>
