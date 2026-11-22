@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>몇 칸 켜?: 숫자 램프 칸 채우기 퍼즐</title>
+<style>
+*{box-sizing:border-box;word-break:keep-all;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#16140f;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:8px 10px 10px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #5a5040;background:#24201a;color:#fff;font-size:24px}
+.rule{margin:2px 0 8px;font-size:20px;font-weight:800;color:#ffd84a;text-align:center;line-height:1.3}
+#board{margin:0 auto;display:grid;gap:3px}
+.k{display:flex;align-items:flex-end;justify-content:center;font-size:18px;font-weight:900;color:#ffe9a8;line-height:1.05;text-align:center;border-radius:8px;background:#201c15;padding:2px}
+.k.row{align-items:center;justify-content:flex-end;padding-right:6px;font-size:20px;letter-spacing:2px}
+.k.col{flex-direction:column;justify-content:flex-end}
+.k.done{color:#6a6458;background:transparent}
+.c{border:0;border-radius:10px;background:#3a352b;font-size:26px;padding:0;display:flex;align-items:center;justify-content:center;color:#fff}
+.c.lit{background:#ffd84a;box-shadow:0 0 14px #ffd84a}
+.c.no{background:#1e1b15;color:#7a6e5a}
+.c.bad{background:#7a2a20;color:#fff}
+.c.pop{animation:pop .3s}
+@keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.msg{min-height:56px;text-align:center;font-size:20px;font-weight:800;margin-top:8px;line-height:1.35}
+.msg.warn{color:#ff9a8a}
+.rec{text-align:center;font-size:18px;color:#b8ab92;margin-top:auto;padding-top:2px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:36px;font-weight:900;transition:transform .9s ease-out,opacity .9s;z-index:9;white-space:nowrap;color:#ffd84a}
+#over{position:fixed;inset:0;background:rgba(8,7,5,.94);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#24201a;border:3px solid #ffd84a;border-radius:20px;padding:18px;text-align:center}
+#over h2{margin:0 0 6px;font-size:27px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#16140f;border-radius:12px;padding:10px;margin:10px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="줄·칸 끝 숫자만큼 붙어 있는 램프 칸을 눌러 켜는 숫자 단서 칸 채우기 퍼즐. 빈칸을 누르면 하트 하나, 하트 3개."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/lamp-logic/"><meta property="og:title" content="몇 칸 켜?: 숫자 램프 칸 채우기 퍼즐"><meta property="og:description" content="줄·칸 끝 숫자만큼 붙어 있는 램프 칸을 눌러 켜는 숫자 단서 칸 채우기 퍼즐. 빈칸을 누르면 하트 하나, 하트 3개."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="몇 칸 켜?: 숫자 램프 칸 채우기 퍼즐",D="줄·칸 끝 숫자만큼 붙어 있는 램프 칸을 눌러 켜는 숫자 단서 칸 채우기 퍼즐. 빈칸을 누르면 하트 하나, 하트 3개.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/lamp-logic/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="stage">1판</span><span class="sp"></span><span id="hp">❤❤❤</span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">줄 끝 숫자만큼 이어진 램프를 켜라</div>
+  <div id="board"></div>
+  <div class="msg" id="msg"></div>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>뿌레카가 떨어졌어요</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='lamp-logic.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+// FACTS.md 1~4
+var TIPS=[
+ '집의 전등·콘센트는 나란히(병렬) 잇는다. 하나를 꺼도 나머지는 그대로다.',
+ '전구를 한 줄로(직렬) 이으면 하나만 끊겨도 전부 꺼진다. 옛날 줄 전구 한 알이 빠지면 줄 전체가 꺼지던 이유다.',
+ '1887년 경복궁 건청궁에 조선 첫 전등이 켜졌다. 자주 꺼졌다 켜져 「건달불」이라 불렸다고 전한다.',
+ '검전기는 전기가 살아 있는지 불빛·소리로 알려 준다. 만지기 전엔 검전부터.'
+];
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function rnd(n){return Math.floor(Math.random()*n);}
+function fx(txt){var d=document.createElement('div');d.className='fx';d.textContent=txt;var x=window.innerWidth/2-100,y=window.innerHeight/2-40;d.style.transform='translate('+x+'px,'+y+'px)';document.body.appendChild(d);requestAnimationFrame(function(){d.style.transform='translate('+x+'px,'+(y-90)+'px)';d.style.opacity='0';});setTimeout(function(){d.remove();},1000);}
+var S={stage:1,hp:3,N:4,sol:[],st:[],over:false,lock:false};
+// 한 줄 단서
+function clue(line){var o=[],n=0;for(var i=0;i<line.length;i++){if(line[i])n++;else if(n){o.push(n);n=0;}}if(n)o.push(n);return o.length?o:[0];}
+// 한 줄에 가능한 모든 배치(2^N 중 단서와 같은 것)
+function lineOpts(cl,N){var out=[];for(var m=0;m<(1<<N);m++){var a=[];for(var i=0;i<N;i++)a.push((m>>i)&1);if(clue(a).join()===cl.join())out.push(a);}return out;}
+// 줄마다 따져서 다 풀리면(추측 없이) 답이 하나뿐인 판
+function solvable(rc,cc,N){
+ var g=[];for(var i=0;i<N*N;i++)g.push(-1);
+ var ro=rc.map(function(c){return lineOpts(c,N);}),co=cc.map(function(c){return lineOpts(c,N);});
+ var ch=true;
+ function pass(opts,get,set){for(var L=0;L<N;L++){var cur=[];for(var i=0;i<N;i++)cur.push(get(L,i));
+   opts[L]=opts[L].filter(function(a){for(var i=0;i<N;i++)if(cur[i]>=0&&cur[i]!==a[i])return false;return true;});
+   if(!opts[L].length)return false;
+   for(i=0;i<N;i++){if(cur[i]>=0)continue;var v=opts[L][0][i],same=opts[L].every(function(a){return a[i]===v;});if(same){set(L,i,v);ch=true;}}}return true;}
+ while(ch){ch=false;
+  if(!pass(ro,function(r,i){return g[r*N+i];},function(r,i,v){g[r*N+i]=v;}))return false;
+  if(!pass(co,function(c,i){return g[i*N+c];},function(c,i,v){g[i*N+c]=v;}))return false;}
+ return g.every(function(v){return v>=0;});
+}
+function gen(N,dens){
+ for(var tr=0;tr<400;tr++){
+  var sol=[];for(var i=0;i<N*N;i++)sol.push(Math.random()<dens?1:0);
+  var cnt=sol.reduce(function(a,b){return a+b;},0);if(cnt<N)continue;
+  var rc=[],cc=[];for(var r=0;r<N;r++){rc.push(clue(sol.slice(r*N,r*N+N)));var col=[];for(var k=0;k<N;k++)col.push(sol[k*N+r]);cc.push(clue(col));}
+  if(solvable(rc,cc,N))return {sol:sol,rc:rc,cc:cc};
+ }
+ return null;
+}
+function build(){
+ S.N=S.stage<=2?4:S.stage<=5?5:6;
+ var dens=S.stage<=2?.62:S.stage<=5?.58:.55;
+ var g=null;while(!g)g=gen(S.N,dens);
+ S.sol=g.sol;S.rc=g.rc;S.cc=g.cc;S.st=S.sol.map(function(){return 0;});// 0 모름 1 켬 2 끔(빈칸)
+ var N=S.N,w=Math.min(document.documentElement.clientWidth,430)-20;
+ var avail=window.innerHeight-260;
+ var kw=Math.round(Math.min(w,avail)*(N<=4?.26:.24));
+ var cs=Math.floor(Math.min((w-kw-3*N)/N,(avail-kw-3*N)/N,78));
+ var bd=$('board');bd.innerHTML='';
+ bd.style.gridTemplateColumns=kw+'px repeat('+N+','+cs+'px)';bd.style.gridTemplateRows=kw+'px repeat('+N+','+cs+'px)';
+ bd.appendChild(document.createElement('div'));
+ for(var c=0;c<N;c++){var k=document.createElement('div');k.className='k col';k.id='kc'+c;k.innerHTML=S.cc[c].join('<br>');bd.appendChild(k);}
+ for(var r=0;r<N;r++){var kr=document.createElement('div');kr.className='k row';kr.id='kr'+r;kr.textContent=S.rc[r].join(' ');bd.appendChild(kr);
+  for(c=0;c<N;c++){var b=document.createElement('button');b.className='c';b.dataset.i=r*N+c;bd.appendChild(b);}}
+ render();say(S.stage===1?'숫자는 켜야 할 램프가 몇 개씩 붙어 있는지예요. 칸을 눌러 켜세요':'칸을 눌러 램프를 켜세요');
+}
+function say(t,warn){$('msg').textContent=t;$('msg').className='msg'+(warn?' warn':'');}
+function left(){var n=0;for(var i=0;i<S.sol.length;i++)if(S.sol[i]&&S.st[i]!==1)n++;return n;}
+function lamps(){return S.sol.reduce(function(a,b){return a+b;},0);}
+function render(){
+ var cells=document.querySelectorAll('#board .c');
+ for(var i=0;i<cells.length;i++){var v=S.st[i],el=cells[i];
+  var cls='c'+(v===1?' lit':v===2?' no':v===3?' bad':'');if(el.className.indexOf('pop')>=0&&v===1)cls+=' pop';el.className=cls;el.textContent=v===1?'💡':v>=2?'✕':'';}
+ $('stage').textContent=S.stage+'판 · 램프 '+(lamps()-left())+'/'+lamps();
+ $('hp').textContent='❤'.repeat(S.hp)+'🤍'.repeat(3-S.hp);
+ $('rec').textContent='최고 '+save.best+'판 · 지금까지 켠 램프 '+save.total+'개';
+}
+function lineDone(idxs){return idxs.every(function(i){return !S.sol[i]||S.st[i]===1;});}
+function closeLines(){
+ var N=S.N,got=0;
+ for(var r=0;r<N;r++){var ids=[];for(var c=0;c<N;c++)ids.push(r*N+c);var el=$('kr'+r);
+  if(lineDone(ids)){if(el.className.indexOf('done')<0){el.className+=' done';got++;}ids.forEach(function(i){if(!S.sol[i]&&!S.st[i])S.st[i]=2;});}}
+ for(c=0;c<N;c++){ids=[];for(r=0;r<N;r++)ids.push(r*N+c);el=$('kc'+c);
+  if(lineDone(ids)){if(el.className.indexOf('done')<0){el.className+=' done';got++;}ids.forEach(function(i){if(!S.sol[i]&&!S.st[i])S.st[i]=2;});}}
+ return got;
+}
+function tap(i){
+ if(S.over||S.lock||S.st[i])return;ac();
+ var el=document.querySelectorAll('#board .c')[i];
+ if(S.sol[i]){
+  S.st[i]=1;save.total++;el.className='c pop';
+  tone(520+(lamps()-left())*25,.1,'triangle',.14);
+  var got=closeLines();
+  if(got){tone(784,.12,'triangle',.16,.1);tone(988,.18,'triangle',.16,.2);vib(25);say('한 줄 끝! 나머지 칸은 저절로 ✕');}
+  else say('켜졌다! 램프 '+left()+'개 남았어요');
+  render();
+  if(!left())win();
+ }else{
+  S.st[i]=3;S.hp--;tone(150,.35,'sawtooth',.12);vib([60,40,60]);
+  render();
+  if(S.hp<=0){lose();return;}
+  say('여긴 빈칸이에요! 숫자를 다시 세 보세요 (❤ 하나 잃음)',true);
+ }
+}
+function win(){
+ S.lock=true;store();
+ tone(523,.12,'triangle',.2);tone(659,.12,'triangle',.2,.12);tone(784,.12,'triangle',.2,.24);tone(1047,.35,'triangle',.2,.36);vib([30,30,60]);
+ fx(S.stage+'판 불 다 켰다!');say('램프가 전부 켜졌어요!');
+ if(S.stage>save.best)save.best=S.stage;store();
+ setTimeout(function(){S.stage++;if(S.hp<3)S.hp++;S.lock=false;build();},1400);
+}
+function lose(){
+ S.over=true;store();
+ var done=S.stage-1,l=left();
+ $('oScore').textContent=done+'판 완성 · '+S.stage+'판에서 램프 '+l+'개 남김';
+ var gap=save.best-done;
+ $('oNear').textContent=gap>0?'최고 기록까지 '+gap+'판 남았어요':'최고 기록과 같아요! 한 판만 더';
+ $('oTip').textContent='💡 '+TIPS[rnd(TIPS.length)];
+ $('over').style.display='flex';
+}
+function start(){S.stage=1;S.hp=3;S.over=false;S.lock=false;$('over').style.display='none';build();}
+$('board').addEventListener('click',function(e){var c=e.target.closest?e.target.closest('.c'):null;if(c)tap(+c.dataset.i);});
+$('again').addEventListener('click',function(){ac();start();});
+$('mute').addEventListener('click',function(){muted=!muted;this.textContent=muted?'🔇':'🔊';});
+window.__game={state:S,save:save,start:start,tap:tap};
+start();
+})();
+</script>
+</body>
+</html>
