@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>하나 풀려도 깜깜!: 직렬 전구 줄 조이기 퍼즐</title>
+<style>
+*{box-sizing:border-box;word-break:keep-all;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#14121a;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:8px 10px 10px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #463c56;background:#1e1a28;color:#fff;font-size:24px}
+.rule{margin:2px 0 6px;font-size:20px;font-weight:800;color:#ffd84a;text-align:center;line-height:1.3}
+.moves{text-align:center;font-size:21px;font-weight:800;margin-bottom:6px}
+.moves b{color:#7be0ff}
+#rows{display:flex;flex-direction:column;gap:7px}
+.row{display:flex;align-items:center;gap:4px;padding:6px 4px;border-radius:16px;background:#1e1a28;border:3px solid #2c2638}
+.row.lit{background:#3a3012;border-color:#ffd84a;box-shadow:0 0 14px rgba(255,216,74,.5)}
+.row.flash{animation:fl .5s}
+@keyframes fl{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+.m{flex:0 0 46px;height:46px;border-radius:50%;background:#fff;color:#111;font-size:17px;font-weight:900;display:flex;align-items:center;justify-content:center;border:3px solid #2c7be0}
+.row:not(.lit) .m{background:#3a3546;color:#cbbfe0;border-color:#5a5070}
+.b{flex:1;min-width:0;height:58px;border-radius:12px;border:3px solid #4a4258;background:#2a2436;font-size:30px;padding:0;color:#fff;display:flex;align-items:center;justify-content:center}
+.b span{display:inline-block;filter:grayscale(1) brightness(.75)}
+.row.lit .b span{filter:none}
+.b.loose{border-color:#ff7a6a;background:#3a1e22}
+.b.loose span{transform:rotate(35deg) translateY(-6px);opacity:.6}
+.b.pop{animation:pop .25s}
+@keyframes pop{0%{transform:scale(.85)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+.msg{min-height:50px;text-align:center;font-size:20px;font-weight:800;margin-top:6px;line-height:1.35}
+.rec{text-align:center;font-size:18px;color:#a89cbc;margin-top:auto;padding-top:4px}
+.ex{font-size:15px;color:#8a809a;text-align:center;margin-top:4px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:36px;font-weight:900;transition:transform .9s ease-out,opacity .9s;z-index:9;white-space:nowrap;color:#ffd84a}
+#over{position:fixed;inset:0;background:rgba(8,6,10,.94);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#1e1a28;border:3px solid #ffd84a;border-radius:20px;padding:18px;text-align:center}
+#over h2{margin:0 0 6px;font-size:27px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#14121a;border-radius:12px;padding:10px;margin:10px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="줄마다 직렬로 이은 전구를 누르면 양옆까지 조임↔풀림이 바뀌는 퍼즐. 줄 안 전구가 다 조여져야 그 줄에 불이 들어오고 양 끝 전류계가 같은 숫자. 숫자는 예시."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/string-tight/"><meta property="og:title" content="하나 풀려도 깜깜!: 직렬 전구 줄 조이기 퍼즐"><meta property="og:description" content="줄마다 직렬로 이은 전구를 누르면 양옆까지 조임↔풀림이 바뀌는 퍼즐. 줄 안 전구가 다 조여져야 그 줄에 불이 들어오고 양 끝 전류계가 같은 숫자. 숫자는 예시."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="하나 풀려도 깜깜!: 직렬 전구 줄 조이기 퍼즐",D="줄마다 직렬로 이은 전구를 누르면 양옆까지 조임↔풀림이 바뀌는 퍼즐. 줄 안 전구가 다 조여져야 그 줄에 불이 들어오고 양 끝 전류계가 같은 숫자. 숫자는 예시.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/string-tight/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="stage">1판</span><span class="sp"></span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">누르면 양옆까지 조였다 풀렸다, 줄마다 다 조여 불 켜라</div>
+  <div class="moves" id="moves"></div>
+  <div id="rows"></div>
+  <div class="ex">줄 양 끝 동그라미는 전류계 · 숫자는 게임 속 예시 값</div>
+  <div class="msg" id="msg"></div>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>뿌레카가 떨어졌어요</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='string-tight.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+// FACTS.md 1~4
+var TIPS=[
+ '전구를 한 줄로(직렬) 이으면 하나만 풀려도 줄 전체가 꺼져요. 한 군데 끊기면 줄 전체 전류가 0이니까요.',
+ '한 줄로 이어진 길은 빠져나갈 곳이 없어서, 줄 앞에서 재나 끝에서 재나 전류가 같아요.',
+ '느슨한 접속부는 저항이 커져 열이 나요. 전기 화재의 흔한 원인이라 조임 점검이 중요해요.',
+ '집의 전등·콘센트는 나란히(병렬) 이어요. 하나를 꺼도 나머지는 그대로예요.'
+];
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function rnd(n){return Math.floor(Math.random()*n);}
+function fx(txt){var d=document.createElement('div');d.className='fx';d.textContent=txt;var x=window.innerWidth/2-120,y=window.innerHeight/2-40;d.style.transform='translate('+x+'px,'+y+'px)';document.body.appendChild(d);requestAnimationFrame(function(){d.style.transform='translate('+x+'px,'+(y-90)+'px)';d.style.opacity='0';});setTimeout(function(){d.parentNode.removeChild(d);},1000);}
+var S={stage:1,R:2,C:4,loose:[],amp:[],left:0,over:false,lock:false,k:0,taps:[]};
+function flip(r,c){for(var d=-1;d<=1;d++){var cc=c+d;if(cc>=0&&cc<S.C)S.loose[r][cc]^=1;}}
+function rowLit(r){return S.loose[r].every(function(v){return !v;});}
+function litCount(){var n=0;for(var r=0;r<S.R;r++)if(rowLit(r))n++;return n;}
+function build(){
+ var st=S.stage;
+ S.R=st===1?2:st===2?3:4;
+ S.C=st<=4?4:5;
+ S.k=st===1?1:st===2?2:st<=4?3:Math.min(4+Math.floor((st-5)/2),8);
+ do{
+  S.loose=[];S.amp=[];for(var r=0;r<S.R;r++){var row=[];for(var c=0;c<S.C;c++)row.push(0);S.loose.push(row);S.amp.push(1+rnd(3));}
+  S.taps=[];
+  while(S.taps.length<S.k){var t=[rnd(S.R),rnd(S.C)];if(!S.taps.some(function(x){return x[0]===t[0]&&x[1]===t[1];}))S.taps.push(t);}
+  S.taps.forEach(function(t){flip(t[0],t[1]);});
+ }while(litCount()===S.R);
+ S.left=S.k+(st<=2?2:3);
+ var box=$('rows');box.innerHTML='';
+ for(r=0;r<S.R;r++){
+  var d=document.createElement('div');d.className='row';d.id='r'+r;
+  var m1=document.createElement('div');m1.className='m';d.appendChild(m1);
+  for(c=0;c<S.C;c++){var b=document.createElement('button');b.className='b';b.dataset.r=r;b.dataset.c=c;b.innerHTML='<span>💡</span>';d.appendChild(b);}
+  var m2=document.createElement('div');m2.className='m';d.appendChild(m2);
+  box.appendChild(d);
+ }
+ render();
+ say(st===1?'빨간 칸이 풀린 전구예요. 눌러 보세요 — 양옆도 같이 바뀌어요':'줄마다 전구를 다 조이면 그 줄에 불이 들어와요');
+}
+function say(t){$('msg').textContent=t;}
+function render(){
+ for(var r=0;r<S.R;r++){
+  var d=$('r'+r),lit=rowLit(r);
+  d.className='row'+(lit?' lit':'');
+  var ms=d.querySelectorAll('.m');ms[0].textContent=ms[1].textContent=(lit?S.amp[r]:0)+'A';
+  var bs=d.querySelectorAll('.b');for(var c=0;c<S.C;c++)bs[c].className='b'+(S.loose[r][c]?' loose':'');
+ }
+ $('stage').textContent=S.stage+'판 · 켜진 줄 '+litCount()+'/'+S.R;
+ $('moves').innerHTML='남은 손 수 <b>'+S.left+'</b>번';
+ $('rec').textContent='최고 '+save.best+'판 · 지금까지 켠 줄 '+save.total+'개';
+}
+function tap(r,c){
+ if(S.over||S.lock)return;ac();
+ var was=rowLit(r);
+ flip(r,c);S.left--;
+ render();
+ var b=$('r'+r).querySelectorAll('.b')[c];void b.offsetWidth;b.className+=' pop';
+ var now=rowLit(r);
+ if(now&&!was){
+  save.total++;store();
+  var d=$('r'+r);void d.offsetWidth;d.className+=' flash';
+  tone(660,.1,'triangle',.18);tone(880,.16,'triangle',.18,.1);vib(30);
+  say('줄 켜짐! 앞에서 재도 끝에서 재도 '+S.amp[r]+'A');
+ }else if(was&&!now){tone(220,.15,'sawtooth',.1);say('아이고, 하나 풀려서 줄 전체가 0A!');}
+ else{tone(330,.07,'square',.07);say(rowLit(r)?'':'아직 풀린 전구가 있어 이 줄은 0A');}
+ if(litCount()===S.R){win();return;}
+ if(S.left<=0)lose();
+}
+function win(){
+ S.lock=true;
+ tone(523,.12,'triangle',.2);tone(659,.12,'triangle',.2,.12);tone(784,.12,'triangle',.2,.24);tone(1047,.35,'triangle',.2,.36);vib([30,30,60]);
+ fx(S.stage+'판 전 줄 점등!');say('모든 줄에 불이 들어왔어요!');
+ if(S.stage>save.best)save.best=S.stage;store();
+ setTimeout(function(){S.stage++;S.lock=false;build();},1300);
+}
+function lose(){
+ S.over=true;store();vib([60,40,60]);tone(150,.4,'sawtooth',.12);
+ var done=S.stage-1,dark=S.R-litCount();
+ $('oScore').textContent=done+'판 완성 · '+S.stage+'판에서 꺼진 줄 '+dark+'개 남김';
+ var gap=save.best-done;
+ $('oNear').textContent=gap>0?'최고 기록까지 '+gap+'판 남았어요':'최고 기록과 같아요! 한 판만 더';
+ $('oTip').textContent='💡 '+TIPS[rnd(TIPS.length)];
+ $('over').style.display='flex';
+}
+function start(){S.stage=1;S.over=false;S.lock=false;$('over').style.display='none';build();}
+$('rows').addEventListener('click',function(e){var b=e.target.closest?e.target.closest('.b'):null;if(b)tap(+b.dataset.r,+b.dataset.c);});
+$('again').addEventListener('click',function(){ac();start();});
+$('mute').addEventListener('click',function(){muted=!muted;this.textContent=muted?'🔇':'🔊';});
+window.__game={state:S,save:save,start:start,tap:tap};
+start();
+})();
+</script>
+</body>
+</html>
