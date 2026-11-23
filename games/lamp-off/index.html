@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>딸깍 다 꺼!: 십자 작업등 끄기 퍼즐</title>
+<style>
+*{box-sizing:border-box;word-break:keep-all;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#101418;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:8px 10px 10px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #3c4650;background:#1a2028;color:#fff;font-size:24px}
+.rule{margin:2px 0 8px;font-size:20px;font-weight:800;color:#ffd84a;text-align:center;line-height:1.3}
+.moves{text-align:center;font-size:21px;font-weight:800;margin-bottom:6px}
+.moves b{color:#7be0ff}
+#board{margin:0 auto;display:grid;gap:6px}
+.c{border:3px solid #2a323c;border-radius:14px;background:#1a2028;font-size:30px;padding:0;display:flex;align-items:center;justify-content:center;color:#fff}
+.c.on{background:#ffd84a;border-color:#fff3b0;box-shadow:0 0 16px #ffd84a}
+.c.hit{animation:pop .25s}
+@keyframes pop{0%{transform:scale(.85)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+.msg{min-height:56px;text-align:center;font-size:20px;font-weight:800;margin-top:10px;line-height:1.35}
+.msg.warn{color:#ff9a8a}
+#reset{display:block;margin:4px auto 0;height:56px;padding:0 22px;border-radius:14px;border:2px solid #3c4650;background:#1a2028;color:#fff;font-size:20px;font-weight:800}
+.rec{text-align:center;font-size:18px;color:#9aa6b2;margin-top:auto;padding-top:4px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:36px;font-weight:900;transition:transform .9s ease-out,opacity .9s;z-index:9;white-space:nowrap;color:#7be0ff}
+#over{position:fixed;inset:0;background:rgba(6,8,10,.94);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#1a2028;border:3px solid #ffd84a;border-radius:20px;padding:18px;text-align:center}
+#over h2{margin:0 0 6px;font-size:27px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#101418;border-radius:12px;padding:10px;margin:10px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="칸을 누르면 그 칸과 위·아래·양옆 작업등이 켜짐↔꺼짐으로 바뀌는 불 끄기 퍼즐. 남은 손 수 안에 등을 다 끄면 다음 판."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/lamp-off/"><meta property="og:title" content="딸깍 다 꺼!: 십자 작업등 끄기 퍼즐"><meta property="og:description" content="칸을 누르면 그 칸과 위·아래·양옆 작업등이 켜짐↔꺼짐으로 바뀌는 불 끄기 퍼즐. 남은 손 수 안에 등을 다 끄면 다음 판."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="딸깍 다 꺼!: 십자 작업등 끄기 퍼즐",D="칸을 누르면 그 칸과 위·아래·양옆 작업등이 켜짐↔꺼짐으로 바뀌는 불 끄기 퍼즐. 남은 손 수 안에 등을 다 끄면 다음 판.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/lamp-off/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="stage">1판</span><span class="sp"></span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">누르면 십자로 바뀐다, 작업등을 다 꺼라</div>
+  <div class="moves" id="moves"></div>
+  <div id="board"></div>
+  <div class="msg" id="msg"></div>
+  <button id="reset">↺ 이 판 처음부터 (손 수 그대로)</button>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>퇴근 못 했어요</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='lamp-off.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+// FACTS.md 1~4
+var TIPS=[
+ '작업 전엔 뿌레카(차단기)부터 내리고, 검전기로 전기가 죽었는지 확인부터.',
+ '검전기는 전기가 살아 있는지 불빛·소리로 알려 줘요. 만지기 전엔 검전부터.',
+ '집의 전등·콘센트는 나란히(병렬) 이어요. 하나를 꺼도 나머지는 그대로예요.',
+ '느슨한 접속부는 저항이 커져 열이 나요. 전기 화재의 흔한 원인이라 단자 조임 점검이 중요해요.'
+];
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function rnd(n){return Math.floor(Math.random()*n);}
+function fx(txt){var d=document.createElement('div');d.className='fx';d.textContent=txt;var x=window.innerWidth/2-110,y=window.innerHeight/2-40;d.style.transform='translate('+x+'px,'+y+'px)';document.body.appendChild(d);requestAnimationFrame(function(){d.style.transform='translate('+x+'px,'+(y-90)+'px)';d.style.opacity='0';});setTimeout(function(){d.hidden=true;d.parentNode.removeChild(d);},1000);}
+var S={stage:1,N:3,on:[],start:[],left:0,used:0,over:false,lock:false,k:0};
+function flip(arr,N,i){var r=Math.floor(i/N),c=i%N;[[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){var rr=r+d[0],cc=c+d[1];if(rr>=0&&rr<N&&cc>=0&&cc<N)arr[rr*N+cc]^=1;});}
+function count(){return S.on.reduce(function(a,b){return a+b;},0);}
+function build(){
+ var st=S.stage;
+ S.N=st<=2?3:st<=6?4:5;
+ S.k=st===1?1:st===2?2:st<=4?3:st<=6?4:Math.min(5+Math.floor((st-7)/2),9);
+ var N=S.N,arr,taps;
+ do{arr=[];for(var i=0;i<N*N;i++)arr.push(0);taps=[];
+  while(taps.length<S.k){var t=rnd(N*N);if(taps.indexOf(t)<0)taps.push(t);}
+  taps.forEach(function(t){flip(arr,N,t);});
+ }while(arr.every(function(v){return !v;}));
+ S.on=arr.slice();S.start=arr.slice();S.taps=taps;
+ S.left=S.k+(st<=2?2:3);S.used=0;
+ var w=Math.min(document.documentElement.clientWidth,430)-20,avail=window.innerHeight-330;
+ var cs=Math.floor(Math.min((w-6*(N-1))/N,(avail-6*(N-1))/N,96));
+ var bd=$('board');bd.innerHTML='';
+ bd.style.gridTemplateColumns='repeat('+N+','+cs+'px)';bd.style.gridTemplateRows='repeat('+N+','+cs+'px)';
+ for(i=0;i<N*N;i++){var b=document.createElement('button');b.className='c';b.dataset.i=i;bd.appendChild(b);}
+ render();
+ say(st===1?'불 켜진 칸을 눌러 보세요. 위·아래·옆도 같이 바뀌어요':'불 켜진 작업등을 다 끄면 다음 판');
+}
+function say(t,warn){$('msg').textContent=t;$('msg').className='msg'+(warn?' warn':'');}
+function render(){
+ var cells=document.querySelectorAll('#board .c');
+ for(var i=0;i<cells.length;i++){cells[i].className='c'+(S.on[i]?' on':'');cells[i].textContent=S.on[i]?'💡':'';}
+ $('stage').textContent=S.stage+'판 · 켜진 등 '+count()+'개';
+ $('moves').innerHTML='남은 손 수 <b>'+S.left+'</b>번';
+ $('rec').textContent='최고 '+save.best+'판 · 지금까지 끈 판 '+save.total+'개';
+}
+function tap(i){
+ if(S.over||S.lock)return;ac();
+ var before=count();
+ flip(S.on,S.N,i);S.left--;S.used++;
+ var after=count();
+ render();
+ var cl=document.querySelectorAll('#board .c')[i];void cl.offsetWidth;cl.className+=' hit';
+ if(after===0){win();return;}
+ if(after<before){tone(440+(9-after)*40,.1,'triangle',.15);say('좋아요! '+after+'개 남았어요');}
+ else{tone(300,.08,'square',.08);say('켜진 등이 '+after+'개예요');}
+ if(S.left<=0)lose();
+}
+function win(){
+ S.lock=true;save.total++;
+ tone(523,.12,'triangle',.2);tone(659,.12,'triangle',.2,.12);tone(784,.12,'triangle',.2,.24);tone(1047,.35,'triangle',.2,.36);vib([30,30,60]);
+ fx(S.stage+'판 소등 완료!');say('깜깜! 다 껐어요');
+ if(S.stage>save.best)save.best=S.stage;store();
+ setTimeout(function(){S.stage++;S.lock=false;build();},1300);
+}
+function lose(){
+ S.over=true;store();vib([60,40,60]);tone(150,.4,'sawtooth',.12);
+ var done=S.stage-1;
+ $('oScore').textContent=done+'판 소등 · '+S.stage+'판에서 등 '+count()+'개 남김';
+ var gap=save.best-done;
+ $('oNear').textContent=gap>0?'최고 기록까지 '+gap+'판 남았어요':'최고 기록과 같아요! 한 판만 더';
+ $('oTip').textContent='💡 '+TIPS[rnd(TIPS.length)];
+ $('over').style.display='flex';
+}
+function resetStage(){if(S.over||S.lock)return;S.on=S.start.slice();render();say('처음 모양으로 돌렸어요. 손 수는 그대로예요');}
+function start(){S.stage=1;S.over=false;S.lock=false;$('over').style.display='none';build();}
+$('board').addEventListener('click',function(e){var c=e.target.closest?e.target.closest('.c'):null;if(c)tap(+c.dataset.i);});
+$('reset').addEventListener('click',resetStage);
+$('again').addEventListener('click',function(){ac();start();});
+$('mute').addEventListener('click',function(){muted=!muted;this.textContent=muted?'🔇':'🔊';});
+window.__game={state:S,save:save,start:start,tap:tap};
+start();
+})();
+</script>
+</body>
+</html>
