@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>어디서 재도 똑같아!: 전구 길 전류 고르기</title>
+<style>
+*{box-sizing:border-box;word-break:keep-all;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#12161c;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:8px 10px 10px;user-select:none}
+.top{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #3c4a5a;background:#1c2430;color:#fff;font-size:24px}
+.rule{margin:2px 0 4px;font-size:20px;font-weight:800;color:#ffd84a;text-align:center;line-height:1.3}
+.q{font-size:21px;font-weight:800;text-align:center;line-height:1.35;min-height:30px}
+#pic{width:100%;max-height:50vh;display:block;margin:2px auto}
+.ex{font-size:15px;color:#8a98a8;text-align:center}
+#opts{display:flex;gap:8px;margin-top:6px}
+#opts button{flex:1;height:68px;border-radius:16px;border:3px solid #3c4a5a;background:#1c2430;color:#fff;font-size:30px;font-weight:900}
+#opts button.ok{background:#2f8a3a;border-color:#7be08a}
+#opts button.no{background:#7a2a20;border-color:#ff8a7a}
+.msg{min-height:54px;text-align:center;font-size:19px;font-weight:700;margin-top:8px;line-height:1.35}
+.msg.warn{color:#ff9a8a}
+.rec{text-align:center;font-size:18px;color:#9aa8b8;margin-top:auto;padding-top:2px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:38px;font-weight:900;transition:transform .9s ease-out,opacity .9s;z-index:9;white-space:nowrap;color:#ffd84a}
+#over{position:fixed;inset:0;background:rgba(6,8,10,.94);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#1c2430;border:3px solid #ffd84a;border-radius:20px;padding:18px;text-align:center}
+#over h2{margin:0 0 6px;font-size:27px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#12161c;border-radius:12px;padding:10px;margin:10px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+svg text{font-family:inherit;font-weight:900}
+.wire{stroke:#7d8a99;stroke-width:6;fill:none;stroke-linecap:round}
+.wire.on{stroke:#ffd84a;filter:drop-shadow(0 0 4px #ffd84a)}
+</style>
+<meta name="description" content="전지·전구 길 그림에 꽂힌 전류계 숫자를 보고 ❓ 자리의 전류를 셋 중에서 고르는 퍼즐. 한 줄 길은 어디서 재도 같고, 갈래는 나뉘었다 합쳐짐. 하트 3개, 숫자는 모두 예시."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/same-amp/"><meta property="og:title" content="어디서 재도 똑같아!: 전구 길 전류 고르기"><meta property="og:description" content="전지·전구 길 그림에 꽂힌 전류계 숫자를 보고 ❓ 자리의 전류를 셋 중에서 고르는 퍼즐. 한 줄 길은 어디서 재도 같고, 갈래는 나뉘었다 합쳐짐. 하트 3개, 숫자는 모두 예시."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="어디서 재도 똑같아!: 전구 길 전류 고르기",D="전지·전구 길 그림에 꽂힌 전류계 숫자를 보고 ❓ 자리의 전류를 셋 중에서 고르는 퍼즐. 한 줄 길은 어디서 재도 같고, 갈래는 나뉘었다 합쳐짐. 하트 3개, 숫자는 모두 예시.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/same-amp/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="stage">0문제</span><span class="sp"></span><span id="hp">❤❤❤</span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">❓ 자리의 전류는 몇 A? 셋 중에 골라라</div>
+  <div class="q" id="q"></div>
+  <svg id="pic" viewBox="0 0 340 260"></svg>
+  <div class="ex">숫자는 게임 속 예시 값이에요</div>
+  <div id="opts"></div>
+  <div class="msg" id="msg"></div>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>뿌레카가 떨어졌어요</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='same-amp.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+// FACTS.md 1~5
+var TIPS=[
+ '한 줄로 이어진 길(직렬)은 빠져나갈 곳이 없어서, 어디에 전류계를 꽂아도 같은 숫자가 나와요.',
+ '길이 갈라지면(병렬) 갈래마다 나눠 흐르고, 다시 합치면 갈라지기 전과 같은 양이 돼요.',
+ '똑같은 전구 두 개를 나란히 이으면 전류가 반씩 나뉘어 흘러요.',
+ '전구를 한 줄로 이으면 하나만 끊겨도 전부 꺼져요. 한 군데 끊기면 줄 전체 전류가 0이니까요.',
+ '집의 전등·콘센트는 나란히(병렬) 이어요. 하나를 꺼도 나머지는 그대로예요.'
+];
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function rnd(n){return Math.floor(Math.random()*n);}
+function pick(a){return a[rnd(a.length)];}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function fx(txt,col){var d=document.createElement('div');d.className='fx';d.textContent=txt;if(col)d.style.color=col;var x=window.innerWidth/2-90,y=window.innerHeight*0.68;d.style.transform='translate('+x+'px,'+y+'px)';document.body.appendChild(d);requestAnimationFrame(function(){d.style.transform='translate('+x+'px,'+(y-90)+'px)';d.style.opacity='0';});setTimeout(function(){d.remove();},1000);}
+var S={score:0,hp:3,over:false,lock:false,Q:null,streak:0};
+
+// ---- 그림 ----
+// 모양: 왼쪽 세로에 전지, 위·아래 레일, 오른쪽에 갈래(1~3개)
+var NS='http://www.w3.org/2000/svg';
+function el(tag,at,txt){var e=document.createElementNS(NS,tag);for(var k in at)e.setAttribute(k,at[k]);if(txt!=null)e.textContent=txt;return e;}
+function draw(Q){
+ var svg=$('pic');svg.innerHTML='';
+ var xs=Q.branchX; // 갈래 x 좌표
+ var right=xs[xs.length-1];
+ // 레일
+ svg.appendChild(el('path',{'class':'wire',d:'M40 40 H'+right+' M40 220 H'+right+' M40 40 V105 M40 155 V220'}));
+ xs.forEach(function(x){svg.appendChild(el('path',{'class':'wire',d:'M'+x+' 40 V220'}));});
+ // 전지
+ svg.appendChild(el('line',{x1:20,y1:110,x2:60,y2:110,stroke:'#fff','stroke-width':6}));
+ svg.appendChild(el('line',{x1:30,y1:125,x2:50,y2:125,stroke:'#fff','stroke-width':6}));
+ svg.appendChild(el('line',{x1:20,y1:138,x2:60,y2:138,stroke:'#fff','stroke-width':6}));
+ svg.appendChild(el('line',{x1:30,y1:151,x2:50,y2:151,stroke:'#fff','stroke-width':6}));
+ svg.appendChild(el('text',{x:66,y:137,fill:'#ffd84a','font-size':18},'전지'));
+ // 전구
+ Q.bulbs.forEach(function(b){
+  var g=el('g',{});
+  g.appendChild(el('circle',{cx:b[0],cy:b[1],r:17,fill:Q.lit?'#ffd84a':'#3a4350',stroke:'#fff','stroke-width':3,style:Q.lit?'filter:drop-shadow(0 0 8px #ffd84a)':''}));
+  g.appendChild(el('path',{d:'M'+(b[0]-8)+' '+(b[1]+6)+' L'+(b[0]-3)+' '+(b[1]-6)+' L'+(b[0]+3)+' '+(b[1]+6)+' L'+(b[0]+8)+' '+(b[1]-6),stroke:Q.lit?'#a05a00':'#9aa','stroke-width':2.5,fill:'none'}));
+  svg.appendChild(g);
+  if(b[2])svg.appendChild(el('text',{x:b[0],y:b[1]+38,fill:'#cfe','font-size':14,'text-anchor':'middle'},b[2]));
+ });
+ // 전류계
+ Q.meters.forEach(function(m){
+  var ask=m.v==null;
+  svg.appendChild(el('circle',{cx:m.x,cy:m.y,r:24,fill:ask?'#ffd84a':'#fff',stroke:ask?'#fff':'#2c7be0','stroke-width':4}));
+  svg.appendChild(el('text',{x:m.x,y:m.y+8,fill:'#111','font-size':ask?26:21,'text-anchor':'middle'},ask?(Q.shown!=null?Q.shown+'A':'?'):m.v+'A'));
+ });
+}
+// 자리 이름표: 위 레일 왼쪽(T) · 아래 레일 왼쪽(B) · 갈래 i 위(bi) · 갈래 i 아래(ci)
+function spot(Q,id){
+ if(id==='T')return {x:110,y:40};
+ if(id==='B')return {x:110,y:220};
+ var i=+id.slice(1),x=Q.branchX[i];
+ return id[0]==='b'?{x:x,y:88}:{x:x,y:178};
+}
+function makeQ(){
+ var lv=S.score<3?0:S.score<6?1:2;
+ var kinds=lv===0?['ser']:lv===1?['ser','sum2','part2','same']:['ser','sum2','part2','same','half','sum3'];
+ var k=pick(kinds),Q={kind:k,lit:false};
+ if(k==='ser'){
+  Q.branchX=[300];
+  var bs=[[170,40],[300,130],[170,220],[230,40],[230,220]];shuffle(bs);
+  var nb=2+rnd(2);Q.bulbs=bs.slice(0,nb);
+  var I=1+rnd(6);
+  var spots=shuffle(['T','B','b0','c0']);
+  Q.meters=[{id:spots[0],v:I},{id:spots[1],v:null}];
+  Q.ans=I;Q.wrong=[I*2,I+nb>I*2?I+nb:I+1+rnd(3),Math.max(1,I*nb)];
+  Q.text='전구 '+nb+'개를 한 줄로 이은 길';
+  Q.why='한 줄 길은 빠져나갈 곳이 없어요. 어디서 재도 '+I+'A!';
+ }else if(k==='sum2'||k==='part2'||k==='same'||k==='half'){
+  Q.branchX=[200,300];
+  Q.bulbs=[[200,130],[300,130]];
+  var a=1+rnd(4),b=1+rnd(4);
+  if(k==='half'){b=a;Q.bulbs=[[200,130,'같은 전구'],[300,130,'같은 전구']];}
+  if(k==='sum2'){Q.meters=[{id:'b0',v:a},{id:'b1',v:b},{id:pick(['T','B']),v:null}];Q.ans=a+b;Q.wrong=[a,b,Math.abs(a-b)||a+b+1,a*b];
+   Q.text='두 갈래로 나뉜 길 — 합치면?';Q.why='갈래 '+a+'A + '+b+'A가 다시 합쳐져 '+(a+b)+'A예요';}
+  else if(k==='part2'){Q.meters=[{id:pick(['T','B']),v:a+b},{id:'b0',v:a},{id:pick(['b1','c1']),v:null}];Q.ans=b;Q.wrong=[a+b,a,a+b+a];
+   Q.text='두 갈래로 나뉜 길 — 나머지 갈래는?';Q.why='전체 '+(a+b)+'A에서 '+a+'A가 한쪽으로 갔으니 나머지는 '+b+'A예요';}
+  else if(k==='same'){Q.meters=[{id:'b0',v:a},{id:'c0',v:null},{id:pick(['T','B']),v:a+b}];Q.ans=a;Q.wrong=[a+b,b===a?a*2:b,a+1];
+   Q.text='같은 갈래의 위와 아래';Q.why='한 갈래 안은 한 줄 길이라 위아래 같은 '+a+'A예요';}
+  else{Q.meters=[{id:pick(['T','B']),v:a*2},{id:pick(['b0','b1','c0','c1']),v:null}];Q.ans=a;Q.wrong=[a*2,a*4,a+1];
+   Q.text='똑같은 전구 두 개를 나란히';Q.why='똑같은 전구 두 갈래라 '+(a*2)+'A가 반씩, '+a+'A예요';}
+ }else{ // sum3
+  Q.branchX=[160,230,300];
+  Q.bulbs=[[160,130],[230,130],[300,130]];
+  var v=[1+rnd(3),1+rnd(3),1+rnd(3)],t=v[0]+v[1]+v[2];
+  Q.meters=[{id:'b0',v:v[0]},{id:'b1',v:v[1]},{id:'b2',v:v[2]},{id:pick(['T','B']),v:null}];
+  Q.ans=t;Q.wrong=[v[0]+v[1],v[2],t+2];
+  Q.text='세 갈래로 나뉜 길 — 합치면?';Q.why=v.join('A + ')+'A = '+t+'A예요';
+ }
+ Q.meters.forEach(function(m){var p=spot(Q,m.id);m.x=p.x;m.y=p.y;});
+ // 고르기 세 개(서로 다르고 0보다 큼)
+ var opts=[Q.ans];Q.wrong.forEach(function(w){if(w>0&&opts.indexOf(w)<0&&opts.length<3)opts.push(w);});
+ var n=1;while(opts.length<3){var c=Q.ans+n;if(c>0&&opts.indexOf(c)<0)opts.push(c);n=n>0?-n:-n+1;}
+ Q.opts=shuffle(opts);
+ return Q;
+}
+function render(){
+ $('stage').textContent=S.score+'문제 맞힘';
+ $('hp').textContent='❤'.repeat(S.hp)+'🤍'.repeat(3-S.hp);
+ $('rec').textContent='최고 '+save.best+'문제 · 지금까지 맞힌 문제 '+save.total+'개';
+}
+function say(t,warn){$('msg').textContent=t;$('msg').className='msg'+(warn?' warn':'');}
+function next(){
+ S.Q=makeQ();S.lock=false;draw(S.Q);
+ $('q').textContent=S.Q.text;
+ var box=$('opts');box.innerHTML='';
+ S.Q.opts.forEach(function(v){var b=document.createElement('button');b.textContent=v+'A';b.dataset.v=v;box.appendChild(b);});
+ say(S.score===0?'파란 전류계 숫자를 보고 노란 ❓ 자리를 맞혀 보세요':'');render();
+}
+function choose(v,btn){
+ if(S.over||S.lock)return;ac();S.lock=true;
+ var Q=S.Q;
+ if(v===Q.ans){
+  S.score++;S.streak++;save.total++;btn.className='ok';
+  Q.lit=true;Q.shown=Q.ans;draw(Q);
+  var ws=document.querySelectorAll('#pic .wire');for(var i=0;i<ws.length;i++)ws[i].setAttribute('class','wire on');
+  tone(660,.1,'triangle',.18);tone(880,.12,'triangle',.18,.1);if(S.streak%5===0)tone(1175,.25,'triangle',.18,.22);
+  vib(30);
+  var bonus='';if(S.streak%5===0&&S.hp<3){S.hp++;bonus=' (5연속! ❤ 하나 돌려받음)';}
+  fx(S.streak%5===0?S.streak+'연속!':'딩동! '+Q.ans+'A');
+  say('맞아요! '+Q.why+bonus);
+  if(S.score>save.best)save.best=S.score;store();render();
+  setTimeout(next,1700);
+ }else{
+  S.hp--;S.streak=0;btn.className='no';
+  var bs=document.querySelectorAll('#opts button');for(var j=0;j<bs.length;j++)if(+bs[j].dataset.v===Q.ans)bs[j].className='ok';
+  tone(150,.35,'sawtooth',.12);vib([60,40,60]);
+  say('아깝다! 정답 '+Q.ans+'A — '+Q.why,true);render();
+  if(S.hp<=0){setTimeout(lose,1500);return;}
+  setTimeout(next,2300);
+ }
+}
+function lose(){
+ S.over=true;store();
+ $('oScore').textContent=S.score+'문제 맞힘';
+ var gap=save.best-S.score;
+ $('oNear').textContent=gap>0?'최고 기록까지 '+gap+'문제 남았어요':'최고 기록이에요! 한 판만 더';
+ $('oTip').textContent='💡 '+TIPS[rnd(TIPS.length)];
+ $('over').style.display='flex';
+}
+function start(){S.score=0;S.hp=3;S.streak=0;S.over=false;$('over').style.display='none';next();}
+$('opts').addEventListener('click',function(e){var b=e.target.closest?e.target.closest('button'):null;if(b)choose(+b.dataset.v,b);});
+$('again').addEventListener('click',function(){ac();start();});
+$('mute').addEventListener('click',function(){muted=!muted;this.textContent=muted?'🔇':'🔊';});
+window.__game={state:S,save:save,start:start,choose:function(v){var bs=document.querySelectorAll('#opts button');for(var i=0;i<bs.length;i++)if(+bs[i].dataset.v===v)return choose(v,bs[i]);}};
+start();
+})();
+</script>
+</body>
+</html>
