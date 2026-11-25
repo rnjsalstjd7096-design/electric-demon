@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14161b">
+<title>불 켜기 교실: 전기기사단 아카데미</title>
+<meta name="description" content="끊어진 전선 자리에 맞는 재료를 골라 이어 전등을 켜는 입문 회로 퍼즐. 1스테이지 스위치로 전등 켜기.">
+<style>
+html,body{margin:0;height:100%;background:#14161b;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#fff;font-size:20px}
+#app{position:relative;margin:0 auto;max-width:480px;height:100%;display:flex;flex-direction:column;padding:8px 12px 10px;box-sizing:border-box}
+#top{display:flex;align-items:center;justify-content:space-between;padding-left:44px;padding-right:56px;min-height:48px}
+#top b{font-size:20px;white-space:nowrap}#stat{white-space:nowrap;font-size:20px;font-weight:800;color:#ffd23f}
+#sub{font-size:22px;font-weight:700;line-height:1.35;color:#e8ebf2;text-align:center;margin:4px 0 6px;word-break:keep-all;min-height:60px}
+#board{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+#board svg{width:100%;max-width:400px;height:100%;max-height:420px;touch-action:manipulation}
+.btn{flex:1;border:0;border-radius:14px;font-size:22px;font-weight:800;min-height:60px;font-family:inherit;cursor:pointer;touch-action:manipulation;background:#3b4252;color:#fff;box-shadow:0 4px 0 #1f232c}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #1f232c}.btn.main{background:#ffd23f;color:#2b2000;box-shadow:0 4px 0 #a98400}
+#mute{position:absolute;top:8px;right:10px;width:48px;height:48px;border:0;border-radius:24px;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;z-index:5}
+#picks{display:flex;gap:10px;width:100%;min-height:100px;margin-top:6px}
+#picks .btn{min-height:100px;font-size:21px;line-height:1.2;padding:4px}
+#picks .btn span{display:block;font-size:34px}
+#bar{width:100%;text-align:center;min-height:52px;font-size:19px;font-weight:700;color:#9fe1ff;margin-top:6px;line-height:1.3;word-break:keep-all}
+#prog{width:100%;height:14px;background:#2b2f3a;border-radius:7px;overflow:hidden;margin-top:6px}#pf{height:100%;background:#ffd23f;width:0;transition:width .3s}
+#end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,11,16,.8);z-index:4;padding:16px;box-sizing:border-box}
+#end.on{display:flex}
+#card{width:100%;max-width:370px;background:#2b2f3a;border:3px solid #4a505f;border-radius:18px;padding:18px;box-sizing:border-box;text-align:center;animation:pop .22s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#endTitle{font-size:26px;font-weight:900;margin:0 0 6px}#endScore{font-size:44px;font-weight:900;line-height:1.1;color:#ffd23f}
+#endSub{font-size:20px;color:#e8ebf2;margin:6px 0}#stages{font-size:19px;text-align:left;margin:8px 0;line-height:1.5}
+#fact{font-size:19px;line-height:1.45;background:#1d2029;border-radius:12px;padding:10px 12px;margin:0 0 12px;text-align:left;word-break:keep-all}
+#warn{font-size:16px;color:#aeb4c2;margin-top:10px;word-break:keep-all}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.sp{position:absolute;font-size:30px;animation:fl .8s ease-out forwards}@keyframes fl{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-70px) scale(1.6)}}
+.shake{animation:sk .3s}@keyframes sk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.gap{cursor:pointer}.gap circle.ring{animation:gl 1s ease-in-out infinite}@keyframes gl{0%,100%{stroke-opacity:1}50%{stroke-opacity:.25}}
+.gap.sel circle.ring{stroke:#ffd23f;stroke-width:6}
+#sw{cursor:pointer}
+</style>
+<meta name="description" content="끊어진 전선 자리에 구리 전선·고무줄·나무 중 전기가 통하는 재료를 골라 전등을 켜는 입문 회로 퍼즐. 1스테이지 스위치로 전등 켜기(5문제)."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/academy/"><meta property="og:title" content="불 켜기 교실: 전기기사단 아카데미"><meta property="og:description" content="끊어진 전선 자리에 구리 전선·고무줄·나무 중 전기가 통하는 재료를 골라 전등을 켜는 입문 회로 퍼즐. 1스테이지 스위치로 전등 켜기(5문제)."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;top:max(8px,env(safe-area-inset-top));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="불 켜기 교실: 전기기사단 아카데미",D="끊어진 전선 자리에 구리 전선·고무줄·나무 중 전기가 통하는 재료를 골라 전등을 켜는 입문 회로 퍼즐. 1스테이지 스위치로 전등 켜기(5문제).",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/academy/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div id="top"><b id="lv"></b><span id="stat"></span></div>
+  <div id="sub"></div>
+  <div id="board"></div>
+  <div id="picks"></div>
+  <div id="bar"></div>
+  <div id="prog"><div id="pf"></div></div>
+  <button id="mute" aria-label="소리 켜기/끄기">🔊</button>
+  <div id="fx"></div>
+  <div id="end"><div id="card">
+    <div id="endTitle"></div><div id="endScore"></div><div id="endSub"></div>
+    <div id="stages"></div>
+    <div id="fact"></div>
+    <button class="btn main" id="again" style="width:100%">한 번 더</button>
+    <div id="warn">게임 속 회로는 공부용 그림입니다. 실제 전기설비는 차단기를 내리고 자격 있는 사람이 다룹니다.</div>
+  </div></div>
+</div>
+<script>
+"use strict";
+const KEY='academy.save.v1';
+const $=id=>document.getElementById(id);
+let save={cleared:{},bestErr:null,plays:0};
+try{const r=localStorage.getItem(KEY);if(r)save=Object.assign(save,JSON.parse(r));}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+let muted=false,AC=null;
+try{muted=localStorage.getItem(KEY+'.mute')==='1';}catch(e){}
+$('mute').textContent=muted?'🔇':'🔊';
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊';try{localStorage.setItem(KEY+'.mute',muted?'1':'0');}catch(e){}};
+function tone(f,d,type,vol,when){if(muted)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime+(when||0),o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(vol||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d);}catch(e){}}
+const sGood=()=>{tone(660,.12,'triangle');tone(990,.18,'triangle',.15,.1);};
+const sBad=()=>{tone(150,.25,'sawtooth',.12);};
+const sClick=()=>{tone(400,.05,'square',.1);};
+const sWin=()=>{[523,659,784,1047].forEach((f,i)=>tone(f,.25,'triangle',.16,i*.12));};
+const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}};
+function burst(ch,x,y,n){const fx=$('fx'),r=fx.getBoundingClientRect();for(let i=0;i<(n||6);i++){const s=document.createElement('div');s.className='sp';s.textContent=ch;s.style.left=(x-r.left+(Math.random()*80-40))+'px';s.style.top=(y-r.top+(Math.random()*40-20))+'px';fx.appendChild(s);setTimeout(()=>s.remove(),850);}}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* 재료: 전기가 통하는 것(도체) 1개 + 안 통하는 것(절연체) 중 2개 → 판마다 섞음 */
+const GOOD=[{ic:'🟠',n:'구리 전선'}];
+const BADS=[{ic:'🎈',n:'고무줄',why:'고무는 전기가 안 통해요. 그래서 전선 껍질이 고무·비닐이에요.'},
+ {ic:'🪵',n:'마른 나무',why:'마른 나무는 전기가 거의 안 통해요.'},
+ {ic:'🥛',n:'유리 막대',why:'유리는 전기가 안 통해요.'},
+ {ic:'🧵',n:'실',why:'마른 실은 전기가 안 통해요.'},
+ {ic:'🧩',n:'플라스틱',why:'플라스틱은 전기가 안 통해요. 스위치 손잡이가 플라스틱인 이유예요.'}];
+
+/* 회로 고리 위의 빈칸 자리(그림 좌표). 전지 왼쪽, 전등 위, 스위치 오른쪽 */
+const SLOTS=[{x:120,y:60},{x:280,y:60},{x:60,y:150},{x:60,y:290},{x:160,y:340},{x:260,y:340}];
+/* 1스테이지 5문제: 빈칸 수, 스위치 있는지 */
+const STEPS=[{gaps:1,sw:false,say:'끊어진 곳(?)을 누르고, 전기가 통하는 재료를 고르세요'},
+ {gaps:2,sw:false,say:'끊어진 곳이 두 군데! 둘 다 이어야 불이 켜져요'},
+ {gaps:0,sw:true,say:'이번엔 스위치! 스위치를 눌러 전등을 켜 보세요'},
+ {gaps:2,sw:true,say:'전선을 다 잇고, 마지막에 스위치를 켜세요'},
+ {gaps:3,sw:true,say:'마지막 문제! 세 곳을 잇고 스위치를 켜세요'}];
+const FACT_STEP=['전기는 전지에서 나와 한 바퀴 돌아 다시 전지로 들어가요. 고리가 한 곳만 끊겨도 안 흘러요.',
+ '끊긴 곳이 하나라도 남으면 불이 안 켜져요. 고리는 전부 이어져야 해요.',
+ '스위치는 고리를 끊었다 이었다 하는 문이에요. 켜면 이어지고, 끄면 끊겨요.',
+ '전선이 다 이어져 있어도 스위치가 꺼져 있으면(끊겨 있으면) 전등은 안 켜져요.',
+ '스위치 하나로 고리를 끊고 이을 수 있어서, 전선을 뽑지 않고도 불을 켜고 끌 수 있어요.'];
+const FIELD='현장에서는: 전등을 갈 때 스위치만 믿지 않고, 그 회로 차단기를 내린 뒤 검전기로 전기가 없는지 확인하고 작업해요.';
+const MAXERR=3;
+
+let st=null;
+function newRun(){st={step:0,err:0,gaps:[],filled:{},swOn:false,sel:null,picks:[],lit:false,done:false,phase:'play'};save.plays=(save.plays||0)+1;persist();loadStep();}
+function loadStep(){
+  const S=STEPS[st.step];
+  st.gaps=shuffle([0,1,2,3,4,5]).slice(0,S.gaps).sort((a,b)=>a-b);
+  st.filled={};st.swOn=false;st.lit=false;st.sel=null;st.picks=[];st.hasSw=S.sw;st.swOffLesson=(st.step===2);st.swCycle=0;
+  $('sub').textContent=S.say;$('bar').textContent='';$('picks').innerHTML='';
+  if(st.gaps.length)selectGap(st.gaps[0]);
+  draw();hud();
+}
+function hud(){$('lv').textContent='1스테이지 · '+(st.step+1)+'/5';$('stat').textContent='❤'.repeat(MAXERR-st.err)+'♡'.repeat(st.err);$('pf').style.width=(st.step/STEPS.length*100)+'%';}
+function closed(){return st.gaps.every(g=>st.filled[g])&&(!st.hasSw||st.swOn);}
+function selectGap(g){
+  if(st.filled[g])return;
+  st.sel=g;
+  const opts=shuffle([GOOD[0],...shuffle(BADS.slice()).slice(0,2)]);
+  st.picks=opts;
+  $('picks').innerHTML='';
+  opts.forEach((o,i)=>{const b=document.createElement('button');b.className='btn';b.innerHTML='<span>'+o.ic+'</span>'+o.n;b.onclick=e=>pick(i,e);$('picks').appendChild(b);});
+  draw();
+}
+function pick(i,e){
+  if(st.phase!=='play'||st.sel==null)return;
+  const o=st.picks[i],ev=e||{clientX:innerWidth/2,clientY:innerHeight/2};
+  if(o===GOOD[0]){
+    st.filled[st.sel]=true;sGood();buzz(20);burst('⚡',ev.clientX,ev.clientY,5);
+    const next=st.gaps.find(g=>!st.filled[g]);
+    st.sel=null;$('picks').innerHTML='';
+    if(next!=null){selectGap(next);$('bar').textContent='이어졌어요! 남은 곳도 이어 주세요';}
+    else if(st.hasSw&&!st.swOn){$('bar').textContent='전선은 다 이어졌어요. 이제 스위치를 누르세요 👉';draw();}
+    else stepWin();
+  }else{
+    st.err++;sBad();buzz([40,40,40]);
+    const btn=$('picks').children[i];if(btn){btn.classList.remove('shake');void btn.offsetWidth;btn.classList.add('shake');btn.disabled=true;btn.style.opacity=.35;}
+    $('bar').textContent='✗ '+o.n+' — '+o.why;hud();
+    if(st.err>=MAXERR)setTimeout(()=>end(false),700);
+  }
+}
+function tapSwitch(e){
+  if(st.phase!=='play'||!st.hasSw)return;
+  sClick();
+  st.swOn=!st.swOn;
+  const allWires=st.gaps.every(g=>st.filled[g]);
+  if(st.swOn&&!allWires){$('bar').textContent='스위치를 켜도 끊긴 곳(?)이 남아 있으면 안 켜져요';draw();return;}
+  if(st.swOffLesson&&allWires){
+    if(st.swOn){st.lit=true;st.swCycle++;sGood();const ev=e||{clientX:innerWidth/2,clientY:innerHeight/3};burst('💡',ev.clientX,ev.clientY,4);
+      $('bar').textContent=st.swCycle>=1?'켜졌어요! 이번엔 스위치를 다시 눌러 꺼 보세요':'';draw();return;}
+    else{st.lit=false;draw();$('bar').textContent='꺼졌어요! 스위치가 고리를 끊은 거예요';setTimeout(stepWin,500);return;}
+  }
+  draw();
+  if(closed())stepWin();
+}
+function stepWin(){
+  if(st.phase!=='play')return;
+  st.phase='wait';st.lit=true;draw();sWin();buzz(60);
+  const r=$('board').getBoundingClientRect();burst('💡',r.left+r.width/2,r.top+r.height*.2,8);
+  $('bar').textContent='💡 '+FACT_STEP[st.step];$('picks').innerHTML='';
+  const b=document.createElement('button');b.className='btn main';b.textContent=st.step<4?'다음 문제 ▶':'스테이지 끝 ▶';
+  b.onclick=()=>{sClick();st.step++;if(st.step>=STEPS.length)end(true);else{st.phase='play';loadStep();}};
+  $('picks').appendChild(b);
+  $('pf').style.width=((st.step+1)/STEPS.length*100)+'%';
+}
+function end(win){
+  st.phase='end';
+  if(win){save.cleared['1']=true;if(save.bestErr==null||st.err<save.bestErr)save.bestErr=st.err;persist();}
+  $('endTitle').textContent=win?'1스테이지 완료!':'아깝다!';
+  $('endScore').textContent=win?'💡 '+(MAXERR-st.err)+'/3 ❤':(st.step)+'/5 문제';
+  $('endSub').textContent=win?(st.err===0?'한 번도 안 틀렸어요!':'틀린 재료 '+st.err+'번'):('완료까지 '+(5-st.step)+'문제 남았어요');
+  const names=['스위치로 전등 켜기','직렬과 병렬','릴레이로 전등 켜기','센서와 모터','타이머로 모터 멈추기'];
+  $('stages').innerHTML=names.map((n,i)=>(i===0?(save.cleared['1']?'✅ ':'▶ '):'🔒 ')+(i+1)+'. '+n+(i>0?' (준비 중)':'')).join('<br>');
+  $('fact').textContent=FIELD;
+  $('end').classList.add('on');
+}
+$('again').onclick=()=>{sClick();$('end').classList.remove('on');newRun();};
+
+/* 그림 */
+function draw(){
+  const on=st.lit&&closed();
+  const wc=on?'#ffd23f':'#c9ced8';
+  let s='<svg viewBox="0 0 340 400" xmlns="http://www.w3.org/2000/svg">';
+  // 전선 고리(빈칸 부분은 아래에서 덮음)
+  s+='<rect x="60" y="60" width="220" height="280" rx="18" fill="none" stroke="'+wc+'" stroke-width="10"/>';
+  // 전등(위 가운데)
+  s+='<g>'+(on?'<circle cx="200" cy="60" r="44" fill="#ffd23f" opacity=".35"/>':'')+'<circle cx="200" cy="52" r="26" fill="'+(on?'#fff3a0':'#3b4252')+'" stroke="#e8ebf2" stroke-width="4"/><rect x="188" y="74" width="24" height="16" fill="#8a8f9c"/><text x="200" y="118" font-size="20" fill="#e8ebf2" text-anchor="middle" font-weight="700">전등</text></g>';
+  // 전지(왼쪽 가운데)
+  s+='<g><rect x="36" y="196" width="48" height="54" rx="6" fill="#2b2f3a" stroke="#e8ebf2" stroke-width="3"/><rect x="50" y="188" width="20" height="8" fill="#e8ebf2"/><text x="60" y="230" font-size="22" fill="#ffd23f" text-anchor="middle" font-weight="900">+</text><text x="104" y="230" font-size="20" fill="#e8ebf2" font-weight="700">전지</text></g>';
+  // 스위치(오른쪽 가운데)
+  if(st.hasSw){
+    s+='<g id="sw"><rect x="250" y="160" width="60" height="120" fill="#14161b"/><circle cx="280" cy="170" r="7" fill="#e8ebf2"/><circle cx="280" cy="270" r="7" fill="#e8ebf2"/>';
+    s+=st.swOn?'<line x1="280" y1="270" x2="280" y2="170" stroke="'+wc+'" stroke-width="10" stroke-linecap="round"/>':'<line x1="280" y1="270" x2="318" y2="190" stroke="#ff7a59" stroke-width="10" stroke-linecap="round"/>';
+    s+='<rect x="236" y="150" width="96" height="140" fill="transparent"/><text x="232" y="300" font-size="18" fill="#e8ebf2" text-anchor="end" font-weight="700">스위치 '+(st.swOn?'켬':'끔')+'</text>';
+    if(!st.swOn&&st.gaps.every(g=>st.filled[g])&&st.phase==='play')s+='<circle cx="290" cy="220" r="40" fill="none" stroke="#ffd23f" stroke-width="4" class="ring" style="animation:gl 1s infinite"/>';
+    s+='</g>';
+  }
+  // 빈칸
+  st.gaps.forEach(g=>{const p=SLOTS[g];
+    if(st.filled[g]){s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="12" fill="#e07b39"/>';return;}
+    s+='<g class="gap'+(st.sel===g?' sel':'')+'" data-g="'+g+'"><rect x="'+(p.x-26)+'" y="'+(p.y-26)+'" width="52" height="52" fill="#14161b"/><circle class="ring" cx="'+p.x+'" cy="'+p.y+'" r="24" fill="#2b2f3a" stroke="#ff7a59" stroke-width="4"/><text x="'+p.x+'" y="'+(p.y+9)+'" font-size="26" font-weight="900" fill="#fff" text-anchor="middle">?</text><rect x="'+(p.x-34)+'" y="'+(p.y-34)+'" width="68" height="68" fill="transparent"/></g>';
+  });
+  s+='</svg>';
+  $('board').innerHTML=s;
+  $('board').querySelectorAll('.gap').forEach(el=>el.onclick=()=>{if(st.phase==='play'){sClick();selectGap(+el.dataset.g);}});
+  const sw=$('board').querySelector('#sw');if(sw)sw.onclick=e=>tapSwitch(e);
+}
+
+window.__game={get state(){return st;},save:()=>save,pick:i=>pick(i),good:()=>st.picks.indexOf(GOOD[0]),tapSwitch:()=>tapSwitch(),gap:g=>selectGap(g),next:()=>{const b=$('picks').querySelector('.main');if(b)b.click();}};
+newRun();
+</script>
+</body>
+</html>
