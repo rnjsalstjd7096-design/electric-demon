@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>빈 차단기로!: 가전 전선 잇기 퍼즐</title>
+<style>
+*{box-sizing:border-box;word-break:keep-all;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#1a1612;color:#fff;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overscroll-behavior:none;touch-action:none}
+#app{max-width:430px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:8px 10px 10px;user-select:none}
+.top{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800}
+.top .sp{flex:1}
+#mute{width:56px;height:56px;border-radius:14px;border:2px solid #5a4a38;background:#2a2018;color:#fff;font-size:24px}
+.rule{margin:2px 0 4px;font-size:20px;font-weight:800;color:#ffd84a;text-align:center;line-height:1.3}
+.info{text-align:center;font-size:21px;font-weight:800;margin-bottom:6px}
+.info b{color:#ffd84a}
+#cv{display:block;margin:0 auto;touch-action:none;border-radius:14px}
+.msg{min-height:52px;text-align:center;font-size:20px;font-weight:800;margin-top:8px;line-height:1.35}
+.msg.warn{color:#ff9a8a}.msg.good{color:#ffd84a}
+#clear{display:block;margin:0 auto;height:56px;padding:0 22px;border-radius:14px;border:2px solid #5a4a38;background:#2a2018;color:#fff;font-size:20px;font-weight:800}
+.rec{text-align:center;font-size:18px;color:#a8bcb0;margin-top:auto;padding-top:4px}
+.fx{position:fixed;left:0;top:0;pointer-events:none;font-size:34px;font-weight:900;transition:transform .9s ease-out,opacity .9s;z-index:9;white-space:nowrap;color:#ffd84a}
+#over{position:fixed;inset:0;background:rgba(5,10,8,.94);display:none;align-items:center;justify-content:center;z-index:20}
+#over .box{width:min(400px,92vw);background:#2a2018;border:3px solid #ffd84a;border-radius:20px;padding:18px;text-align:center}
+#over h2{margin:0 0 6px;font-size:27px}
+#over .big{font-size:24px;font-weight:800;margin:6px 0}
+#over .near{font-size:20px;color:#ffd84a;margin:6px 0}
+#over .tip{font-size:19px;line-height:1.45;background:#1a1612;border-radius:12px;padding:10px;margin:10px 0;text-align:left}
+#again{width:100%;height:64px;border-radius:16px;border:0;background:#ffd84a;color:#111;font-size:26px;font-weight:900}
+</style>
+<meta name="description" content="가전 그림에서 아무 빈 차단기까지 끌어서 선을 잇는 퍼즐. 선은 겹치면 안 되고, 찬 차단기(두 가닥)나 고장 차단기로 가면 하트 -1."><meta property="og:type" content="website"><meta property="og:url" content="https://rnjsalstjd7096-design.github.io/electric-demon/games/breaker-wire/"><meta property="og:title" content="빈 차단기로!: 가전 전선 잇기 퍼즐"><meta property="og:description" content="가전 그림에서 아무 빈 차단기까지 끌어서 선을 잇는 퍼즐. 선은 겹치면 안 되고, 찬 차단기(두 가닥)나 고장 차단기로 가면 하트 -1."><meta property="og:image" content="https://rnjsalstjd7096-design.github.io/electric-demon/icon-512.png"><style>#eddm{position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483646;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(10,19,32,.72);color:#f2c66d;font:17px/32px system-ui,sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.8;-webkit-tap-highlight-color:transparent}#eddms{position:fixed;inset:0;z-index:2147483647;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);font:15px/1.4 system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}#eddms.on{display:flex}#eddms>div{width:min(100%,430px);background:#152238;color:#eaf1fb;border-radius:16px 16px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom));box-sizing:border-box}#eddms b{display:block;margin:0 0 10px;font-size:16px}#eddms a,#eddms button{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid #2c415b;background:#0a1320;color:#eaf1fb;font:inherit;text-align:left;text-decoration:none;cursor:pointer}#eddms .cafe{background:#03c75a;border-color:#03c75a;color:#fff;font-weight:700}#eddms small{display:block;color:#a5b7ca;font-size:12px}</style><script>addEventListener("DOMContentLoaded",function(){var T="빈 차단기로!: 가전 전선 잇기 퍼즐",D="가전 그림에서 아무 빈 차단기까지 끌어서 선을 잇는 퍼즐. 선은 겹치면 안 되고, 찬 차단기(두 가닥)나 고장 차단기로 가면 하트 -1.",U="https://rnjsalstjd7096-design.github.io/electric-demon/games/breaker-wire/";var b=document.createElement("button");b.id="eddm";b.type="button";b.setAttribute("aria-label","공유·카페·다른 게임");b.textContent="⚡";var s=document.createElement("div");s.id="eddms";s.innerHTML="<div><b>⚡ "+T+"</b><button type=button data-k=share>📤 친구에게 공유하기<small>카톡·단톡방에 이 게임 보내기</small></button><a class=cafe href=https://cafe.naver.com/eleccommander target=_blank rel=noopener>☕ 전기인 모임 (네이버 카페)<small style=color:#e6ffe9>점수 자랑 · 전기 질문 · 새 게임 소식</small></a><a href=../>🎮 다른 전기 미니게임</a><button type=button data-k=x>닫기</button></div>";function stop(e){e.stopPropagation()}["pointerdown","pointerup","mousedown","mouseup","touchstart","touchend","click","keydown"].forEach(function(t){b.addEventListener(t,stop);s.addEventListener(t,stop)});b.onclick=function(){s.classList.add("on")};s.onclick=function(e){var k=e.target.closest("[data-k]");if(e.target===s||(k&&k.dataset.k==="x"))s.classList.remove("on");else if(k&&k.dataset.k==="share"){if(navigator.share)navigator.share({title:T,text:D,url:U}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText("⚡ "+T+"\n"+U).then(function(){k.firstChild.textContent="✅ 주소 복사됨 — 카톡에 붙여 넣기"},function(){prompt("주소를 복사하세요",U)});else prompt("주소를 복사하세요",U)}};document.body.appendChild(s);document.body.appendChild(b)})</script></head>
+<body>
+<div id="app">
+  <div class="top"><span id="stage">1판</span><span id="hearts" style="font-size:22px">❤️❤️❤️</span><span class="sp"></span><button id="mute" aria-label="소리">🔊</button></div>
+  <div class="rule">가전마다 빈 차단기 하나로, 선은 안 겹치게</div>
+  <div class="info" id="info"></div>
+  <canvas id="cv"></canvas>
+  <div class="msg" id="msg">가전 그림에서 손가락을 끌어 아무 빈 차단기(⚡)까지</div>
+  <button id="clear">↺ 이 판 선 모두 지우기 (공짜)</button>
+  <div class="rec" id="rec"></div>
+</div>
+<div id="over"><div class="box">
+  <h2>확인 필요 — 업체에!</h2>
+  <div class="big" id="oScore"></div>
+  <div class="near" id="oNear"></div>
+  <div class="tip" id="oTip"></div>
+  <button id="again">한 번 더</button>
+</div></div>
+<script>
+(function(){
+'use strict';
+var KEY='breaker-wire.save.v1';
+var save={best:0,total:0};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==='object'){save.best=o.best|0;save.total=o.total|0;}}}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+// FACTS.md 1~4
+var TIPS=[
+ '뿌레카(차단기)는 자기가 맡은 전선을 지키는 문지기예요. 문지기 하나에 구역 하나.',
+ '한 단자에 전선 두 가닥을 억지로 끼우면 접촉이 헐거워지기 쉽고, 헐거운 곳은 열이 날 수 있어요.',
+ '차단기가 고장 나면 그 회로 기기는 쓰지 말고 업체를 부르는 게 제일 안전해요. 분전반 안은 직접 만지지 마세요.',
+ '두 회로가 한 차단기에 섞이면 전선이 더 많은 전기를 받아도 차단기가 안 떨어질 수 있어요. 그래서 위험해요.'
+];
+var ICON=['💡','❄️','🧺','🍚','📺','🧊','🔥','🚿','🖥️','🔌'];
+var AC=null,muted=false;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,delay){if(muted)return;var a=ac();if(!a)return;var t=a.currentTime+(delay||0);var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02);}
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function rnd(n){return Math.floor(Math.random()*n);}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function fx(txt,col){var d=document.createElement('div');d.className='fx';d.textContent=txt;if(col)d.style.color=col;var x=window.innerWidth/2-120,y=window.innerHeight/2-60;d.style.transform='translate('+x+'px,'+y+'px)';document.body.appendChild(d);requestAnimationFrame(function(){d.style.transform='translate('+x+'px,'+(y-90)+'px)';d.style.opacity='0';});setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},1000);}
+// 판 만들기: 지그재그 한붓 길을 무작위로 비틀고 토막 냄. 토막 한쪽 끝 = 가전, 다른 끝 = 차단기(정답이 늘 있음).
+// 고장 차단기: 토막 하나를 통째로 비우고 그 한쪽 끝에 ✖를 둠(남은 짝의 정답은 그대로).
+function genBoard(n,k){
+  var path=[];for(var y=0;y<n;y++)for(var x=0;x<n;x++)path.push(y*n+(y%2?n-1-x:x));
+  function nb(c){var x=c%n,y=(c/n)|0,r=[];if(x>0)r.push(c-1);if(x<n-1)r.push(c+1);if(y>0)r.push(c-n);if(y<n-1)r.push(c+n);return r;}
+  for(var it=0;it<n*n*40;it++){
+    if(Math.random()<.5)path.reverse();
+    var end=path[path.length-1],cand=nb(end).filter(function(c){return c!==path[path.length-2];});
+    var c=cand[rnd(cand.length)],i=path.indexOf(c);
+    var tail=path.splice(i+1);tail.reverse();path=path.concat(tail);
+  }
+  var L=n*n,lens=[],left=L;
+  for(var p=0;p<k;p++){var rest=k-p-1,mx=left-3*rest,len=p===k-1?left:3+rnd(Math.max(1,Math.min(mx,Math.ceil(L/k)*2-3)-3+1));len=Math.min(len,mx);lens.push(len);left-=len;}
+  var segs=[],at=0;lens.forEach(function(l){segs.push(path.slice(at,at+l));at+=l;});
+  for(var s=0;s<segs.length;s++){var a=segs[s][0],b=segs[s][segs[s].length-1];if(nb(a).indexOf(b)>=0)return null;}
+  return segs;
+}
+var cv=$('cv'),ctx=cv.getContext('2d'),S={},CS=60,DPR=1;
+function newRun(){S={stage:1,hearts:3,tipI:rnd(TIPS.length)};newStage();}
+function newStage(){
+  var st=S.stage,n=st<2?4:st<4?5:st<7?6:7,k=st<2?3:st<4?4:st<7?5:6;
+  var broken=st<2?0:st<5?1:2;
+  var segs=null;for(var t=0;t<300&&!segs;t++)segs=genBoard(n,k+broken);
+  S.n=n;S.kind={};S.icon={};S.sol=[];
+  var ic=shuffle(ICON.slice());
+  segs.forEach(function(sg,i){
+    var flip=Math.random()<.5,a=flip?sg[sg.length-1]:sg[0],b=flip?sg[0]:sg[sg.length-1];
+    if(i<broken){S.kind[b]='X';return;}
+    S.kind[a]='A';S.icon[a]=ic[i%ic.length];S.kind[b]='B';S.sol.push(flip?sg.slice().reverse():sg.slice());
+  });
+  S.paths=[];S.drag=-1;S.won=false;S.need=S.sol.length;
+  layout();draw();info();
+  $('msg').className='msg';$('msg').textContent=st===1?'가전 그림에서 손가락을 끌어 아무 빈 차단기(⚡)까지':broken?'회색 ✖ 차단기는 고장 — 거기로 잇지 마세요':'선이 겹치지 않게 잘 나눠 이으세요';
+}
+function layout(){
+  var w=Math.min(410,window.innerWidth-20),h=window.innerHeight-316;var size=Math.max(240,Math.min(w,h));
+  CS=Math.floor(size/S.n);DPR=window.devicePixelRatio||1;
+  cv.style.width=cv.style.height=CS*S.n+'px';cv.width=cv.height=CS*S.n*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+function owner(){var o=new Array(S.n*S.n).fill(-1);S.paths.forEach(function(p,i){p.forEach(function(c){o[c]=i;});});return o;}
+function other(k){return k==='A'?'B':k==='B'?'A':null;}
+function complete(p){if(p.length<2)return false;var a=S.kind[p[0]],b=S.kind[p[p.length-1]];return (a==='A'&&b==='B')||(a==='B'&&b==='A');}
+function connected(){var c=0;S.paths.forEach(function(p){if(complete(p))c++;});return c;}
+function info(){
+  $('stage').textContent=S.stage+'판';
+  $('hearts').textContent='❤️'.repeat(Math.max(0,S.hearts))+'🖤'.repeat(3-Math.max(0,S.hearts));
+  $('info').innerHTML='연결 <b>'+connected()+'/'+S.need+'</b> · 빈 차단기 <b>'+freeB()+'</b>';
+  $('rec').textContent='최고 '+save.best+'판 · 지금까지 끝낸 판 '+save.total+'개';
+}
+function freeB(){var o=owner(),c=0;for(var e in S.kind)if(S.kind[e]==='B'&&o[+e]<0)c++;return c;}
+function cx(c){return (c%S.n+.5)*CS;}function cy(c){return (((c/S.n)|0)+.5)*CS;}
+function draw(){
+  var n=S.n,W=CS*n;ctx.clearRect(0,0,W,W);
+  ctx.fillStyle='#d8dcd8';ctx.fillRect(0,0,W,W);
+  ctx.strokeStyle='#b8beb8';ctx.lineWidth=2;
+  for(var i=0;i<=n;i++){ctx.beginPath();ctx.moveTo(i*CS,0);ctx.lineTo(i*CS,W);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*CS);ctx.lineTo(W,i*CS);ctx.stroke();}
+  S.paths.forEach(function(p){
+    if(!p.length)return;var ok=complete(p);
+    ctx.strokeStyle=ok?'#1e9e4a':'#c0392b';ctx.lineWidth=CS*.26;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();
+    p.forEach(function(c,j){if(j)ctx.lineTo(cx(c),cy(c));else ctx.moveTo(cx(c),cy(c));});ctx.stroke();
+  });
+  var o=owner();
+  for(var e in S.kind){var c=+e,k=S.kind[e],x=cx(c),y=cy(c),r=CS*.4;
+    if(k==='A'){ctx.fillStyle=o[c]>=0&&complete(S.paths[o[c]])?'#bff0c8':'#fff';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='#333';ctx.stroke();
+      ctx.font=Math.round(CS*.46)+'px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(S.icon[c],x,y+2);}
+    else{ctx.fillStyle=k==='X'?'#6b6f73':(o[c]>=0?'#1e9e4a':'#2a2a2a');ctx.fillRect(x-r,y-r,r*2,r*2);ctx.lineWidth=3;ctx.strokeStyle=k==='X'?'#b33':'#000';ctx.strokeRect(x-r,y-r,r*2,r*2);
+      ctx.fillStyle=k==='X'?'#ffb0a0':'#ffd84a';ctx.font='900 '+Math.round(CS*.42)+'px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(k==='X'?'✖':'⚡',x,y+1);}
+  }
+}
+function cellAt(ev){var r=cv.getBoundingClientRect();var x=Math.floor((ev.clientX-r.left)/CS),y=Math.floor((ev.clientY-r.top)/CS);if(x<0||y<0||x>=S.n||y>=S.n)return -1;return y*S.n+x;}
+function adj(a,b){var n=S.n;return (Math.abs(a-b)===1&&((a/n)|0)===((b/n)|0))||Math.abs(a-b)===n;}
+function down(ev){
+  if(S.won||S.hearts<=0)return;ac();
+  var c=cellAt(ev);if(c<0)return;var o=owner();
+  if(S.kind[c]==='A'||S.kind[c]==='B'){
+    if(o[c]>=0){S.paths.splice(o[c],1);} // 다시 긋기: 그 선 지움
+    S.paths.push([c]);S.drag=S.paths.length-1;tone(440,.06,'square',.08);
+  }else if(S.kind[c]==='X'){bad('✖ 고장 차단기예요. 여기선 시작 못 해요');return;}
+  else if(o[c]>=0&&!complete(S.paths[o[c]])){var p=S.paths[o[c]];S.paths[o[c]]=p.slice(0,p.indexOf(c)+1);S.drag=o[c];}
+  else{$('msg').className='msg';$('msg').textContent='가전 그림이나 ⚡ 차단기에서 시작하세요';return;}
+  try{cv.setPointerCapture(ev.pointerId);}catch(e){}
+  draw();info();
+}
+function stepTo(t){
+  var i=S.drag,p=S.paths[i],last=p[p.length-1];
+  if(t===last)return true;
+  if(p.length>=2&&t===p[p.length-2]){p.pop();return true;}
+  if(complete(p))return false;
+  var k=p.indexOf(t);if(k>=0){S.paths[i]=p.slice(0,k+1);return true;}
+  var o=owner(),kt=S.kind[t],start=S.kind[p[0]];
+  if(kt==='X'){bad('✖ 고장 난 차단기! 확인 필요 — 업체에');S.drag=-1;return false;}
+  if(kt){
+    if(kt!==other(start))return false; // 가전→가전, 차단기→차단기는 못 감
+    if(o[t]>=0){bad(kt==='B'?'⚠ 한 단자에 두 가닥! 확인 필요 — 업체에':'이 가전은 벌써 이어졌어요');S.drag=-1;return false;}
+    p.push(t);return true;
+  }
+  if(o[t]>=0)return false; // 다른 선과 겹치기 불가
+  p.push(t);tone(520+p.length*20,.04,'sine',.05);return true;
+}
+function move(ev){
+  if(S.drag<0)return;var t=cellAt(ev);if(t<0)return;
+  var guard=0;
+  while(guard++<20&&S.drag>=0){
+    var p=S.paths[S.drag],last=p[p.length-1];if(t===last)break;
+    var nc;
+    if(adj(last,t)||p.indexOf(t)>=0)nc=t;
+    else{var n=S.n,lx=last%n,ly=(last/n)|0,tx=t%n,ty=(t/n)|0;
+      if(Math.abs(tx-lx)>=Math.abs(ty-ly))nc=last+(tx>lx?1:-1);else nc=last+(ty>ly?n:-n);}
+    var before=p.length;
+    if(!stepTo(nc))break;
+    if(S.drag<0)break;
+    var q=S.paths[S.drag];if(q.length===before&&q[q.length-1]===last)break;
+  }
+  draw();info();
+}
+function up(){
+  if(S.drag<0){draw();info();return;}var i=S.drag;S.drag=-1;
+  var p=S.paths[i];
+  if(complete(p)){tone(660,.1,'square',.12);tone(880,.15,'sine',.12,.07);vib(30);fx('딸깍! 연결');}
+  else if(p.length<2)S.paths.splice(i,1);
+  draw();info();check();
+}
+function bad(t){
+  S.hearts--;$('msg').className='msg warn';$('msg').textContent=t;tone(160,.35,'sawtooth',.18);vib(200);
+  // 잘못 그은 선은 지움
+  if(S.drag>=0){S.paths.splice(S.drag,1);S.drag=-1;}
+  draw();info();
+  if(S.hearts<=0)setTimeout(gameOver,500);
+}
+function check(){
+  var c=connected();
+  if(c===S.need){
+    S.won=true;save.total++;if(S.stage>save.best)save.best=S.stage;store();
+    [523,659,784,1046,1318].forEach(function(fq,k){tone(fq,.18,'triangle',.14,k*.08);});vib([40,40,90]);
+    fx(S.stage+'판 끝! 차단기마다 한 가닥');$('msg').className='msg good';$('msg').textContent='모든 가전이 자기 차단기에! 다음 판으로…';
+    setTimeout(function(){S.stage++;newStage();},1100);return;
+  }
+  $('msg').className='msg';$('msg').textContent='남은 가전 '+(S.need-c)+'개 · 선이 막히면 다른 차단기로 돌려 보세요';
+}
+function gameOver(){
+  var cleared=S.stage-1;
+  $('oScore').textContent=cleared+'판 끝냄 · 이 판 연결 '+connected()+'/'+S.need;
+  var gap=save.best-cleared;
+  $('oNear').textContent=gap>0?'최고 기록('+save.best+'판)까지 '+gap+'판!':'최고 기록 '+save.best+'판과 같거나 넘었어요!';
+  $('oTip').textContent='💡 '+TIPS[S.tipI%TIPS.length];S.tipI++;
+  $('over').style.display='flex';
+}
+cv.addEventListener('pointerdown',down);cv.addEventListener('pointermove',move);
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+$('clear').addEventListener('click',function(){if(S.won||S.hearts<=0)return;S.paths=[];draw();info();$('msg').className='msg';$('msg').textContent='모두 지웠어요';});
+$('again').addEventListener('click',function(){$('over').style.display='none';newRun();});
+$('mute').addEventListener('click',function(){muted=!muted;$('mute').textContent=muted?'🔇':'🔊';});
+window.addEventListener('resize',function(){layout();draw();});
+window.__game={state:function(){return S;},save:function(){return save;},cs:function(){return CS;}};
+newRun();
+})();
+</script>
+</body>
+</html>
