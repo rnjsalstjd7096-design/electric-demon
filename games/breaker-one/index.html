@@ -44,10 +44,10 @@ html,body{margin:0;height:100%;background:#14181c;color:#fff;font-family:system-
 <body>
 <div id="app">
   <div class="top"><span id="stage">1판</span><span id="hearts">❤️❤️❤️</span><span class="sp"></span><button id="mute" aria-label="소리">🔊</button></div>
-  <div class="rule">차단기 하나에 회로 하나, 빈자리 없으면 업체</div>
+  <div class="rule">차단기 하나에 회로 하나 · 고장은 업체에</div>
   <div id="panel"></div>
   <div class="hand"><div class="card" id="card"></div><div class="next" id="next"></div></div>
-  <button id="call">📞 빈자리 없음 — 업체 부르기</button>
+  <button id="call">📞 고장 차단기 — 업체 부르기</button>
   <div class="msg" id="msg">노란 회로 카드를 빈 차단기에 꽂으세요 (차단기를 누르기)</div>
   <div class="rec" id="rec"></div>
 </div>
@@ -98,7 +98,7 @@ function newStage(){
   S.tripAt=st>=4?1+rnd(Math.max(1,S.queue.length-2)):-1; // 몇 번째 꽂은 뒤 한 차단기가 고장
   S.done=0;S.need=S.queue.length;
   $('msg').className='msg';
-  $('msg').textContent=st===1?'노란 회로 카드를 빈 차단기에 꽂으세요 (차단기를 누르기)':st+'판 — 회색 차단기는 고장, 쓰면 안 돼요';
+  $('msg').textContent=st===1?'노란 회로 카드를 빈 차단기에 꽂으세요 (차단기를 누르기)':st+'판 — 회색 고장 차단기는 업체 몫, 쓰면 안 돼요';
   render();
 }
 function render(){
@@ -140,7 +140,7 @@ function tapBk(i,el){
     setTimeout(function(){
       S.bk[t].c=null;S.bk[t].dead=true;S.queue.unshift(back);S.need++;
       tone(220,.25,'triangle',.16);
-      $('msg').className='msg warn';$('msg').textContent='뚝! '+(t+1)+'번 차단기 고장 — '+back+' 다시 꽂을 곳은?';
+      $('msg').className='msg warn';$('msg').textContent='뚝! '+(t+1)+'번 고장 — 고치는 건 업체 몫! (게임에선) '+back+' 빈자리로';
       render();
     },600);
     return;
@@ -149,7 +149,7 @@ function tapBk(i,el){
 }
 function callTech(){
   if(S.hearts<=0||!S.queue.length)return;
-  if(emptyIdx()>=0){bad('빈 차단기가 아직 있어요. 거기에 꽂으면 돼요',$('call'));return;}
+  if(emptyIdx()>=0){bad('게임 규칙: 빈자리부터 써요 (실제 고장은 회로를 옮기지 말고 업체에)',$('call'));return;}
   var deads=[];S.bk.forEach(function(x,j){if(x.dead)deads.push(j);});
   if(!deads.length){bad('고친 차단기가 없어요',$('call'));return;}
   var t=deads[rnd(deads.length)];S.bk[t].dead=false;
